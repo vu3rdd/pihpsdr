@@ -1510,9 +1510,9 @@ void vfo_set_frequency(int v,long long f) {
     if (vfo[v].ctun) {
       vfo[v].ctun=FALSE;
       vfo[v].offset=0;
-      vfo[v].ctun_frequency=vfo[v].frequency);
+      vfo[v].ctun_frequency=vfo[v].frequency;
     }
   }
   radio_band_changed();
-  g_idle_add(vfo_update, NULL);
+  g_idle_add(ext_vfo_update, NULL);
 }
