@@ -1245,13 +1245,12 @@ void ozy_send_buffer() {
   int txmode=get_tx_mode();
   int txvfo=get_tx_vfo();
   int i;
+  BAND *rxband=band_get_band(vfo[VFO_A].band);
+  BAND *txband=band_get_band(vfo[txvfo].band);
   int power;
   int num_hpsdr_receivers=how_many_receivers();
   int rx1channel = first_receiver_channel();
   int rx2channel = second_receiver_channel();
-
-  BAND *rxband=band_get_band(vfo[VFO_A].band);
-  BAND *txband=band_get_band(vfo[txvfo].band);
 
   output_buffer[SYNC0]=SYNC;
   output_buffer[SYNC1]=SYNC;

@@ -471,7 +471,7 @@ void new_protocol_init(int pixels) {
       g_print("%s: MAX_DDC exceeds allowed range\n", __FUNCTION__);
       exit(-1);
     }
-    g_print("%s: MIC_SAMPLES=%d\n", __FUNCTION__, MIC_SAMPLES);
+    g_print("new_protocol_init: MIC_SAMPLES=%d\n",MIC_SAMPLES);
 
     memset(rxcase      , 0, sizeof(rxcase));
     memset(rxid        , 0, sizeof(rxid));
@@ -711,7 +711,7 @@ static void new_protocol_general() {
 //g_print("new_protocol_general: %s:%d\n",inet_ntoa(base_addr.sin_addr),ntohs(base_addr.sin_port));
 
     if((rc=sendto(data_socket,general_buffer,sizeof(general_buffer),0,(struct sockaddr*)&base_addr,base_addr_length))<0) {
-        g_print("sendto socket failed for general: rc=%d errno=%d\n",rc,errno);
+        g_print("sendto socket failed for general\n");
         exit(1);
     }
 
@@ -1302,8 +1302,8 @@ static void new_protocol_transmit_specific() {
 //g_print("new_protocol_transmit_specific: %s:%d\n",inet_ntoa(transmitter_addr.sin_addr),ntohs(transmitter_addr.sin_port));
 
     if((rc=sendto(data_socket,transmit_specific_buffer,sizeof(transmit_specific_buffer),0,(struct sockaddr*)&transmitter_addr,transmitter_addr_length))<0) {
-        g_print("sendto socket failed for tx specific: rc=%d errno=%d\n",rc,errno);
-	exit(1);
+        g_print("sendto socket failed for tx specific: %d\n",rc);
+        exit(1);
     }
 
     if(rc!=sizeof(transmit_specific_buffer)) {
@@ -1402,7 +1402,7 @@ static void new_protocol_receive_specific() {
 //g_print("new_protocol_receive_specific: %s:%d enable=%02X\n",inet_ntoa(receiver_addr.sin_addr),ntohs(receiver_addr.sin_port),receive_specific_buffer[7]);
 
     if((rc=sendto(data_socket,receive_specific_buffer,sizeof(receive_specific_buffer),0,(struct sockaddr*)&receiver_addr,receiver_addr_length))<0) {
-      g_print("sendto socket failed for receive specific: rc=%d errno=%d\n",rc,errno);
+      g_print("sendto socket failed for receive_specific: %d\n",rc);
       exit(1);
     }
  
@@ -1422,7 +1422,7 @@ static void new_protocol_start() {
     if( ! new_protocol_timer_thread_id )
     {
         g_print("g_thread_new failed on new_protocol_timer_thread\n");
-	exit( -1 );
+        exit( -1 );
     }
     g_print( "new_protocol_timer_thread: id=%p\n",new_protocol_timer_thread_id);
 
@@ -1980,20 +1980,6 @@ static void process_mic_data(int bytes) {
   }
 }
 
-//
-// Note that new_protocol_cw_audio_samples() is called by the TX thread, while
-// new_protocol_audio_samples() is called by the RX thread.
-//
-//
-// To avoid race conditions, we need a mutex covering these functions.
-// In 99% if the cases, the check on isTransmitting() controls that only one
-// of the functions becomes active, but at the moment of a RX/TX transition
-// this may fail.
-//
-// So "blocking" can only occur very rarely, such that the lock/unlock
-// should cost only few CPU cycles. 
-//
-
 void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sample) {
   int rc;
   int txmode=get_tx_mode();
@@ -2002,6 +1988,7 @@ void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sam
     //
     // Only process samples if transmitting in CW
     //
+
     pthread_mutex_lock(&audio_buffer_mutex);
     // insert the samples
     audiobuffer[audioindex++]=left_audio_sample>>8;
@@ -2010,6 +1997,7 @@ void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sam
     audiobuffer[audioindex++]=right_audio_sample;
 
     if(audioindex>=sizeof(audiobuffer)) {
+
       // insert the sequence
       audiobuffer[0]=audiosequence>>24;
       audiobuffer[1]=audiosequence>>16;
@@ -2017,9 +2005,10 @@ void new_protocol_cw_audio_samples(short left_audio_sample,short right_audio_sam
       audiobuffer[3]=audiosequence;
 
       // send the buffer
+
       rc=sendto(data_socket,audiobuffer,sizeof(audiobuffer),0,(struct sockaddr*)&audio_addr,audio_addr_length);
       if(rc!=sizeof(audiobuffer)) {
-        g_print("sendto socket failed for %ld bytes of audio: rc=%d errno=%d\n",(long)sizeof(audiobuffer),rc,errno);
+        g_print("sendto socket failed for %ld bytes of audio: %d\n",(long)sizeof(audiobuffer),rc);
       }
       audioindex=4;
       audiosequence++;
@@ -2056,7 +2045,7 @@ void new_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
 
     rc=sendto(data_socket,audiobuffer,sizeof(audiobuffer),0,(struct sockaddr*)&audio_addr,audio_addr_length);
     if(rc!=sizeof(audiobuffer)) {
-      g_print("sendto socket failed for %ld bytes of audio: rc=%d errno=%d\n",(long)sizeof(audiobuffer),rc,errno);
+      g_print("sendto socket failed for %ld bytes of audio: %d\n",(long)sizeof(audiobuffer),rc);
     }
     audioindex=4;
     audiosequence++;
@@ -2069,7 +2058,6 @@ void new_protocol_flush_iq_samples() {
 // this is called at the end of a TX phase:
 // zero out "rest" of TX IQ buffer and send it
 //
-  int rc;
   while (iqindex < sizeof(iqbuffer)) {
     iqbuffer[iqindex++]=0;
   }
@@ -2080,9 +2068,8 @@ void new_protocol_flush_iq_samples() {
   iqbuffer[3]=tx_iq_sequence;
 
   // send the buffer
-  rc=sendto(data_socket,iqbuffer,sizeof(iqbuffer),0,(struct sockaddr*)&iq_addr,iq_addr_length);
-  if(rc<0) {
-    g_print("sendto socket failed for iq-flush, rc=%d errno=%d\n",rc,errno);
+  if(sendto(data_socket,iqbuffer,sizeof(iqbuffer),0,(struct sockaddr*)&iq_addr,iq_addr_length)<0) {
+    g_print("sendto socket failed for iq\n");
     exit(1);
   }
   iqindex=4;
@@ -2090,8 +2077,6 @@ void new_protocol_flush_iq_samples() {
 }
 
 void new_protocol_iq_samples(int isample,int qsample) {
-  int rc;
-
   iqbuffer[iqindex++]=isample>>16;
   iqbuffer[iqindex++]=isample>>8;
   iqbuffer[iqindex++]=isample;
@@ -2106,9 +2091,8 @@ void new_protocol_iq_samples(int isample,int qsample) {
     iqbuffer[3]=tx_iq_sequence;
 
     // send the buffer
-    rc=sendto(data_socket,iqbuffer,sizeof(iqbuffer),0,(struct sockaddr*)&iq_addr,iq_addr_length);
-    if(rc<0) {
-      g_print("sendto socket failed for iq, rc=%d errno=%d\n",rc,errno);
+    if(sendto(data_socket,iqbuffer,sizeof(iqbuffer),0,(struct sockaddr*)&iq_addr,iq_addr_length)<0) {
+      g_print("sendto socket failed for iq\n");
       exit(1);
     }
     iqindex=4;
