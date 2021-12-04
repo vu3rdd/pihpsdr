@@ -40,7 +40,7 @@ AUDIO_DEVICE input_devices[MAX_AUDIO_DEVICES];
 int n_output_devices;
 AUDIO_DEVICE output_devices[MAX_AUDIO_DEVICES];
 
-static GMutex audio_mutex;
+GMutex audio_mutex;
 int n_input_devices=0;
 int n_output_devices=0;
 

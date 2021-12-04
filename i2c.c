@@ -20,9 +20,6 @@
 #include "toolbar.h"
 #include "vfo.h"
 #include "ext.h"
-#ifdef LOCALCW
-#include "iambic.h"
-#endif
 
 char *i2c_device="/dev/i2c-1";
 unsigned int i2c_address_1=0X20;
@@ -104,7 +101,7 @@ void i2c_interrupt() {
         if(i2c_sw[i] & flags) {
           // The input line associated with switch #i has triggered an interrupt
           flags &= ~i2c_sw[i];       // clear *this* bit in flags
-          do_switch_action(switches[i].switch_function, (ints & i2c_sw[i]) ? PRESSED : RELEASED);
+          schedule_action(switches[i].switch_function, (ints & i2c_sw[i]) ? PRESSED : RELEASED, 0);
 	}
       }
   }

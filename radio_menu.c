@@ -241,6 +241,9 @@ void setDuplex() {
 
 static void PA_enable_cb(GtkWidget *widget, gpointer data) {
   pa_enabled=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  if (protocol == NEW_PROTOCOL) {
+    schedule_general();
+  }
 }
 
 static void duplex_cb(GtkWidget *widget, gpointer data) {
@@ -291,8 +294,7 @@ void load_filters(void) {
     case APOLLO:
     case CHARLY25:
         // This is most likely not necessary here, but can do no harm
-        set_alex_rx_antenna();
-        set_alex_tx_antenna();
+        radio_band_changed();
         break;
     case NONE:
         break;
@@ -304,7 +306,7 @@ void load_filters(void) {
   // schedule "General" and "HighPrio" packets for P2
   //
   if(protocol==NEW_PROTOCOL) {
-    filter_board_changed();
+    schedule_general();
     schedule_high_priority();
   }
   //
@@ -573,7 +575,7 @@ void radio_menu(GtkWidget *parent) {
         }
         g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),radio);
         gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
-        row++;
+	row++;
       } else {
         GtkWidget *sample_rate_label=gtk_label_new(NULL);
         gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");

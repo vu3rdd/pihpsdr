@@ -44,7 +44,7 @@ static float *local_microphone_buffer=NULL;
 static GThread *mic_read_thread_id=0;
 static gboolean running;
 
-static GMutex audio_mutex;
+GMutex audio_mutex;
 
 static void source_list_cb(pa_context *context,const pa_source_info *s,int eol,void *data) {
   int i;

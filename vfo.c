@@ -349,10 +349,13 @@ void vfo_xvtr_changed() {
     BAND *band=band_get_band(vfo[1].band);
     vfo[1].lo=band->frequencyLO+band->errorLO;
   }
+  if (protocol == NEW_PROTOCOL) {
+    schedule_general();   // for disablePA
+  }
 }
 
 void vfo_apply_mode_settings(int id) {
-  int m; 
+  int m;
 
   m=vfo[id].mode;
 
@@ -427,7 +430,6 @@ void vfo_band_changed(int id,int b) {
   switch(id) {
     case 0:
       bandstack->current_entry=vfo[id].bandstack;
-      // set_alex_attenuation(band->alexAttenuation); // nowhere maintained
       receiver_vfo_changed(receiver[0]);
       break;
    case 1:
@@ -436,18 +438,7 @@ void vfo_band_changed(int id,int b) {
       }
       break;
   }
-  set_alex_rx_antenna();
-
-  if(can_transmit) {
-    set_alex_tx_antenna();
-    tx_set_mode(transmitter,get_tx_mode());
-    //
-    // If the band has changed, it is necessary to re-calculate
-    // the drive level. Furthermore, possibly the "PA disable"
-    // status has changed.
-    //
-    calcDriveLevel();  // sends HighPrio packet if in new protocol
-  }
+  radio_band_changed();
 
   switch(protocol) {
     case NEW_PROTOCOL:
@@ -478,7 +469,6 @@ void vfo_bandstack_changed(int b) {
   switch(id) {
     case 0:
       bandstack->current_entry=vfo[id].bandstack;
-      // set_alex_attenuation(band->alexAttenuation); // nowhere maintained
       receiver_vfo_changed(receiver[0]);
       break;
    case 1:
@@ -487,20 +477,11 @@ void vfo_bandstack_changed(int b) {
       }
       break;
   }
-
-  set_alex_rx_antenna();
-  if(can_transmit) {
-    set_alex_tx_antenna();
-    tx_set_mode(transmitter,get_tx_mode());
-    //
-    // I do not think the band can change within this function.
-    // But out of paranoia, I consider this possiblity here
-    //
-    calcDriveLevel();  // sends HighPrio packet if in new protocol
-    if (protocol == NEW_PROTOCOL) {
-      schedule_general();		// for PA disable
-    }
-  }
+  //
+  // I do not think the band can change within this function.
+  // But out of paranoia, I consider this possiblity here
+  //
+  radio_band_changed();
   g_idle_add(ext_vfo_update,NULL);
 
 }
@@ -586,12 +567,7 @@ void vfo_a_to_b() {
   if(receivers==2) {
     receiver_vfo_changed(receiver[1]);
   }
-  set_alex_rx_antenna();
-  if(can_transmit) {
-    set_alex_tx_antenna();
-    tx_set_mode(transmitter,get_tx_mode());
-    calcDriveLevel();  // sends HighPrio packet if in new protocol
-  }
+  radio_band_changed();
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -609,12 +585,7 @@ void vfo_b_to_a() {
   vfo[VFO_A].offset=vfo[VFO_B].offset;
 
   receiver_vfo_changed(receiver[0]);
-  set_alex_rx_antenna();
-  if(can_transmit) {
-    set_alex_tx_antenna();
-    tx_set_mode(transmitter,get_tx_mode());
-    calcDriveLevel();  // sends HighPrio packet if in new protocol
-  }
+  radio_band_changed();
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -671,12 +642,7 @@ void vfo_a_swap_b() {
   if(receivers==2) {
     receiver_vfo_changed(receiver[1]);
   }
-  set_alex_rx_antenna();
-  if(can_transmit) {
-    set_alex_tx_antenna();
-    tx_set_mode(transmitter,get_tx_mode());
-    calcDriveLevel();  // sends HighPrio packet if in new protocol
-  }
+  radio_band_changed();
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -774,7 +740,7 @@ void vfo_step(int steps) {
 
     sid=id==0?1:0;
     other_receiver=receiver[sid];
- 
+
     switch(sat_mode) {
       case SAT_NONE:
         break;
@@ -907,7 +873,7 @@ void vfo_id_move(int id,long long hz,int round) {
 
     sid=id==0?1:0;
     other_receiver=receiver[sid];
- 
+
     switch(sat_mode) {
       case SAT_NONE:
         break;
@@ -1068,7 +1034,7 @@ static gboolean vfo_draw_cb (GtkWidget *widget,
 }
 
 void vfo_update() {
-    
+
     int id=active_receiver->id;
     int txvfo=get_tx_vfo();
 
@@ -1142,7 +1108,7 @@ void vfo_update() {
 // So although I do not feel too well if the actual TX frequency is not
 // that on the display, I deactivate the code but leave it here so it
 // can quickly be re-activated if one wants.
-// 
+//
         //
         // If RIT or XIT is active, add this to displayed VFO frequency
         //
@@ -1179,8 +1145,8 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 5, 38);  
-        cairo_set_font_size(cr, DISPLAY_FONT_SIZE4); 
+        cairo_move_to(cr, 5, 38);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE4);
         cairo_show_text(cr, temp_text);
 
         sprintf(temp_text,"VFO B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
@@ -1196,12 +1162,12 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 300, 38);  
+        cairo_move_to(cr, 300, 38);
         cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
         if(can_transmit) {
-          cairo_move_to(cr, 130, 50);
+          cairo_move_to(cr, 120, 50);
           if(transmitter->puresignal) {
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           } else {
@@ -1211,7 +1177,7 @@ void vfo_update() {
           cairo_show_text(cr, "PS");
         }
 #endif
-        
+
         cairo_move_to(cr, 55, 50);
         if(active_receiver->zoom>1) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
@@ -1248,7 +1214,7 @@ void vfo_update() {
 	// NB and NB2 are mutually exclusive, therefore
 	// they are put to the same place in order to save
 	// some space
-        cairo_move_to(cr, 155, 50);
+        cairo_move_to(cr, 145, 50);
         if(active_receiver->nb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NB");
@@ -1261,7 +1227,7 @@ void vfo_update() {
         }
 
 	// NR and NR2 are mutually exclusive
-        cairo_move_to(cr, 180, 50);  
+        cairo_move_to(cr, 175, 50);
         if(active_receiver->nr) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NR");
@@ -1273,7 +1239,7 @@ void vfo_update() {
           cairo_show_text(cr, "NR");
         }
 
-        cairo_move_to(cr, 210, 50);  
+        cairo_move_to(cr, 200, 50);
         if(active_receiver->anf) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1281,7 +1247,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, 240, 50);  
+        cairo_move_to(cr, 230, 50);
         if(active_receiver->snb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1289,7 +1255,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, 270, 50);  
+        cairo_move_to(cr, 265, 50);
         switch(active_receiver->agc) {
           case AGC_OFF:
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
@@ -1318,20 +1284,20 @@ void vfo_update() {
 	// we should display the compressor (level)
 	//
         if(can_transmit) {
-          cairo_move_to(cr, 330, 50);  
+          cairo_move_to(cr, 335, 50);
   	  if (transmitter->compressor) {
               sprintf(temp_text,"CMPR %d",(int) transmitter->compressor_level);
               cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
               cairo_show_text(cr, temp_text);
 	  } else {
               cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-              cairo_show_text(cr, "CMPR OFF");
+              cairo_show_text(cr, "CMPR");
 	  }
         }
         //
         // Indicate whether an equalizer is active
         //
-        cairo_move_to(cr, 400, 50);  
+        cairo_move_to(cr, 400, 50);
         if ((isTransmitting() && enable_tx_equalizer) || (!isTransmitting() && enable_rx_equalizer)) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1339,7 +1305,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "EQ");
 
-        cairo_move_to(cr, 500, 50);  
+        cairo_move_to(cr, 500, 50);
         if(diversity_enabled) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1358,7 +1324,7 @@ void vfo_update() {
         cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         cairo_show_text(cr, temp_text);
 
-        cairo_move_to(cr, 430, 50);  
+        cairo_move_to(cr, 425, 50);
         if(vfo[id].ctun) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1366,7 +1332,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "CTUN");
 
-        cairo_move_to(cr, 470, 50);  
+        cairo_move_to(cr, 468, 50);
         if(cat_control>0) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1375,7 +1341,7 @@ void vfo_update() {
         cairo_show_text(cr, "CAT");
 
         if(can_transmit) {
-          cairo_move_to(cr, 500, 15);  
+          cairo_move_to(cr, 500, 15);
           if(vox_enabled) {
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           } else {
@@ -1392,7 +1358,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Locked");
 
-        cairo_move_to(cr, 260, 18);
+        cairo_move_to(cr, 265, 15);
         if(split) {
           cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
@@ -1400,7 +1366,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "Split");
 
-        cairo_move_to(cr, 260, 28);
+        cairo_move_to(cr, 265, 27);
         if(sat_mode!=SAT_NONE) {
           cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
@@ -1419,7 +1385,7 @@ void vfo_update() {
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
         sprintf(temp_text,"DUP");
-        cairo_move_to(cr, 260, 38);
+        cairo_move_to(cr, 265, 39);
         cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         cairo_show_text(cr, temp_text);
 
@@ -1525,3 +1491,28 @@ void vfo_rit(int rx,int i) {
   g_idle_add(ext_vfo_update,NULL);
 }
 
+//
+// Interface to set the frequency, including
+// "long jumps", for which we may have to
+// change the band
+//
+void vfo_set_frequency(int v,long long f) {
+  int b=get_band_from_frequency(f);
+  if(active_receiver->id==v) {
+    if (b != vfo[v].band) {
+      vfo_band_changed(active_receiver->id,b);
+    }
+    setFrequency(f);
+  } else {
+    // change VFO frequency of the non-active receiver
+    vfo[v].frequency=f;
+    vfo[v].band=b;
+    if (vfo[v].ctun) {
+      vfo[v].ctun=FALSE;
+      vfo[v].offset=0;
+      vfo[v].ctun_frequency=vfo[v].frequency);
+    }
+  }
+  radio_band_changed();
+  g_idle_add(vfo_update, NULL);
+}

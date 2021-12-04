@@ -1032,7 +1032,7 @@ void tx_set_filter(TRANSMITTER *tx) {
   if (tx->use_rx_filter) {
     //
     // Use only 'compatible' parts of RX filter settings
-    // to change TX values (importrant for split operation)
+    // to change TX values (important for split operation)
     //
     int id=active_receiver->id;
     int rxmode=vfo[id].mode;
@@ -1062,8 +1062,8 @@ void tx_set_filter(TRANSMITTER *tx) {
   switch(txmode) {
     case modeCWL:
     case modeCWU:
-      // default filter setting (low=150, high=2850) and "use rx filter" unreasonable here
-      // note currently WDSP is by-passed in CW anyway.
+      // Our CW signal is always at zero in IQ space, but note
+      // WDSP is by-passed anyway.
       tx->filter_low  =-150;
       tx->filter_high = 150;
       break;
@@ -1073,7 +1073,7 @@ void tx_set_filter(TRANSMITTER *tx) {
     case modeSPEC:
       // disregard the "low" value and use (-high, high)
       tx->filter_low =-high;
-      tx->filter_high=high;
+      tx->filter_high= high;
       break;
     case modeLSB:
     case modeDIGL:

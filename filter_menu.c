@@ -75,13 +75,8 @@ static gboolean filter_select_cb (GtkWidget *widget, gpointer        data) {
 static gboolean deviation_select_cb (GtkWidget *widget, gpointer data) {
   active_receiver->deviation=GPOINTER_TO_UINT(data);
   transmitter->deviation=GPOINTER_TO_UINT(data);
-  if(active_receiver->deviation==2500) {
-    set_filter(active_receiver,-5500,5500);
-    tx_set_filter(transmitter);
-  } else {
-    set_filter(active_receiver,-8000,8000);
-    tx_set_filter(transmitter);
-  }
+  set_filter(active_receiver);
+  tx_set_filter(transmitter);
   set_deviation(active_receiver);
   transmitter_set_deviation(transmitter);
   set_button_text_color(last_filter,"black");
@@ -100,8 +95,9 @@ static void var_spin_low_cb (GtkWidget *widget, gpointer data) {
 
   filter->low=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
   if(vfo[id].mode==modeCWL || vfo[id].mode==modeCWU) {
-    // Note that a 250 Hz filter has high=low=125 in CW
-    filter->high=filter->low=filter->low/2;
+    // Note a 250-Hz-wide CW filter has high=low=125
+    filter->low=filter->low/2;
+    filter->high=filter->low;
   }
   if(f==vfo[id].filter) {
     vfo_filter_changed(f);

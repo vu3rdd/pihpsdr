@@ -94,8 +94,6 @@ extern int region;
 extern int RECEIVERS;
 extern int MAX_RECEIVERS;
 extern int MAX_DDC;
-
-
 #ifdef PURESIGNAL
 extern int PS_TX_FEEDBACK;
 extern int PS_RX_FEEDBACK;
@@ -336,6 +334,8 @@ extern void start_radio();
 //extern void init_radio();
 extern void radio_change_receivers(int r);
 extern void radio_change_sample_rate(int rate);
+extern void radio_band_changed();
+extern void radio_set_split(int v);
 extern void setMox(int state);
 extern int getMox();
 extern void setTune(int state);
@@ -353,8 +353,6 @@ extern void setSquelch(RECEIVER *rx);
 extern void radio_set_rf_gain(RECEIVER *rx);
 
 extern void set_attenuation(int value);
-extern void set_alex_rx_antenna(void);
-extern void set_alex_tx_antenna(void);
 extern void set_alex_attenuation(int v);
 
 extern int isTransmitting();

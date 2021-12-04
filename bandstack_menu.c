@@ -71,6 +71,7 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer        data) {
     snprintf(label,32,"%lld %s",vfo[0].frequency,mode_string[vfo[0].mode]);
     gtk_button_set_label(GTK_BUTTON(last_bandstack), label);
   }
+
   set_button_text_color(last_bandstack,"black");
   last_bandstack=widget;
   set_button_text_color(last_bandstack,"orange");

@@ -94,13 +94,7 @@ void receiver_set_active(RECEIVER *rx) {
   g_idle_add(ext_vfo_update,NULL);
   g_idle_add(zoompan_active_receiver_changed,NULL);
   g_idle_add(sliders_active_receiver_changed,NULL);
-  // setup the transmitter mode and filter
-  if(can_transmit) {
-    // TX band has possibly changed
-    tx_set_mode(transmitter,get_tx_mode());
-    set_alex_tx_antenna();
-    calcDriveLevel();
-  }
+  radio_band_changed();
 }
 
 gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -157,7 +151,6 @@ gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, 
     // new frequency by just clicking in the panadaper. Futher analysis
     // showed that there were "moves" with zero offset arriving between
     // pressing and releasing the mouse button.
-    // (In fact, on my Macintosh I see zillions of moves with zero offset)
     // Accepting such a "move" between a  "press" and the next "release" event
     // sets "has_moved" and results in a "VFO drag" instead of a "VFO set".
     //
@@ -636,7 +629,26 @@ static gint update_display(gpointer data) {
       }
       g_mutex_unlock(&rx->display_mutex);
       if(active_receiver==rx) {
-        rx->meter=GetRXAMeter(rx->id,smeter)+meter_calibration;
+        //
+        // since rx->meter is used in other places as well (e.g. rigctl),
+        // the value obtained from WDSP is best corrected HERE for
+        // possible gain and attenuation
+        //
+        double level=GetRXAMeter(rx->id,smeter)+meter_calibration;
+        level += (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
+        if (filter_board == CHARLY25) {
+          // preamp/dither encodes the preamp level
+          if (rx->preamp) level -= 18.0;
+          if (rx->dither) level -= 18.0;
+        }
+        //
+        // Assume that alex_attenuation is set correctly if we have an ALEX board
+        //
+        if (filter_board == ALEX && rx->adc == 0) {
+          level += 10*rx->alex_attenuation;
+        }
+        rx->meter=level;
+
         meter_update(rx,SMETER,rx->meter,0.0,0.0,0.0,0.0);
       }
       return TRUE;
@@ -684,16 +696,38 @@ void set_mode(RECEIVER *rx,int m) {
   SetRXAMode(rx->id, vfo[rx->id].mode);
 }
 
-void set_filter(RECEIVER *rx,int low,int high) {
-  if(vfo[rx->id].mode==modeCWL) {
-    rx->filter_low=-cw_keyer_sidetone_frequency-low;
-    rx->filter_high=-cw_keyer_sidetone_frequency+high;
-  } else if(vfo[rx->id].mode==modeCWU) {
-    rx->filter_low=cw_keyer_sidetone_frequency-low;
-    rx->filter_high=cw_keyer_sidetone_frequency+high;
-  } else {
-    rx->filter_low=low;
-    rx->filter_high=high;
+void set_filter(RECEIVER *rx) {
+  int m=vfo[rx->id].mode;
+  FILTER *mode_filters=filters[m];
+  FILTER *filter=&mode_filters[vfo[rx->id].filter]; // ignored in FMN
+
+  switch (m) {
+    case modeCWL:
+      rx->filter_low=-cw_keyer_sidetone_frequency-filter->low;
+      rx->filter_high=-cw_keyer_sidetone_frequency+filter->high;
+      break;
+    case modeCWU:
+      rx->filter_low=cw_keyer_sidetone_frequency-filter->low;
+      rx->filter_high=cw_keyer_sidetone_frequency+filter->high;
+      break;
+    case  modeFMN:
+      //
+      // FM filter settings are ignored, instead, the filter
+      // size is calculated from the deviation
+      //
+      if(rx->deviation==2500) {
+        rx->filter_low=-5500;
+        rx->filter_high=5500;
+      } else {
+        rx->filter_low=-8000;
+        rx->filter_high=8000;
+      }
+      set_deviation(rx);
+      break;
+    default:
+      rx->filter_low=filter->low;
+      rx->filter_high=filter->high;
+      break;
   }
 
   RXASetPassband(rx->id,(double)rx->filter_low,(double)rx->filter_high);
@@ -703,13 +737,13 @@ void set_deviation(RECEIVER *rx) {
   SetRXAFMDeviation(rx->id, (double)rx->deviation);
 }
 
-void set_agc(RECEIVER *rx) {
+void set_agc(RECEIVER *rx, int agc) {
  
-  SetRXAAGCMode(rx->id, rx->agc);
+  SetRXAAGCMode(rx->id, agc);
   //SetRXAAGCThresh(rx->id, agc_thresh_point, 4096.0, rx->sample_rate);
   SetRXAAGCSlope(rx->id,rx->agc_slope);
   SetRXAAGCTop(rx->id,rx->agc_gain);
-  switch(rx->agc) {
+  switch(agc) {
     case AGC_OFF:
       break;
     case AGC_LONG:
@@ -742,6 +776,7 @@ void set_agc(RECEIVER *rx) {
   //
   GetRXAAGCHangLevel(rx->id, &rx->agc_hang);
   GetRXAAGCThresh(rx->id, &rx->agc_thresh, 4096.0, (double)rx->sample_rate);
+
 }
 
 void set_offset(RECEIVER *rx,long long offset) {
@@ -1049,7 +1084,7 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
-  rx->alex_attenuation=0;
+  rx->alex_attenuation=b->alexAttenuation;
 
   rx->agc=AGC_MEDIUM;
   rx->agc_gain=80.0;
@@ -1122,7 +1157,7 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
               0.010, 0.025, 0.0, 0.010, 0);
 
 //
-// It has been reported that the piHPSDR noise blankers do not function 
+// It has been reported that the piHPSDR noise blankers do not function
 // satisfactorily. I could reproduce this after building an "impulse noise source"
 // into the HPSDR simulator, and also confirmed that a popular Windows SDR program
 // has much better NB/NB2 performance.
@@ -1137,7 +1172,10 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
 //
   create_anbEXT(rx->id,1,  rx->buffer_size,rx->sample_rate,0.00001,0.00001,0.00001,0.05, 4.95);
   create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.00001,0.00001,0.00001,0.05, 4.95);
-  
+
+  //OLD create_anbEXT(rx->id,1,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+  //OLD create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+
   RXASetNC(rx->id, rx->fft_size);
   RXASetMP(rx->id, rx->low_latency);
 
@@ -1193,8 +1231,9 @@ g_print("%s: rx=%p id=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->local_audi
       rx->local_audio=0;
     }
   }
+
   // defer set_agc until here, otherwise the AGC threshold is not computed correctly
-  set_agc(rx);
+  set_agc(rx, rx->agc);
   return rx;
 }
 
@@ -1219,8 +1258,8 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
   // to the radio's sample rate and therefore may vary.
   // Since there is no downstream WDSP receiver her, the only thing
   // we have to do here is to adapt the spectrum display of the
-  // feedback and must then return (rx->id is not a WDSP channel!)
-  // 
+  // feedback and *must* then return (rx->id is not a WDSP channel!)
+  //
   if (rx->id == PS_RX_FEEDBACK && protocol == ORIGINAL_PROTOCOL) {
     rx->pixels = 2* scale * rx->width;
     g_free(rx->pixel_samples);
@@ -1310,30 +1349,11 @@ void receiver_frequency_changed(RECEIVER *rx) {
 }
 
 void receiver_filter_changed(RECEIVER *rx) {
-  int filter_low, filter_high;
-  int m=vfo[rx->id].mode;
-  if(m==modeFMN) {
-    if(rx->deviation==2500) {
-      filter_low=-5500;
-      filter_high=5500;
-    } else {
-      filter_low=-8000;
-      filter_high=8000;
-    }
-    set_filter(rx,filter_low,filter_high);
-    set_deviation(rx);
-  } else {
-    FILTER *mode_filters=filters[m];
-    FILTER *filter=&mode_filters[vfo[rx->id].filter];
-    filter_low=filter->low;
-    filter_high=filter->high;
-    set_filter(rx,filter_low,filter_high);
-  }
-
+  set_filter(rx);
   if(can_transmit && transmitter!=NULL) {
-    if(transmitter->use_rx_filter) {
+    if(transmitter->use_rx_filter && rx==active_receiver) {
       tx_set_filter(transmitter);
-    } 
+    }
   }
 }
 

@@ -58,8 +58,9 @@ extern int ext_nb_update(void *data);
 extern int ext_snb_update(void *data);
 extern int ext_anf_update(void *data);
 extern int ext_band_select(void *data);
-
+extern void band_plus(int id);
 extern int ext_band_plus(void *data);
+extern void band_minus(int id);
 extern int ext_band_minus(void *data);
 extern int ext_bandstack_plus(void *data);
 extern int ext_bandstack_minus(void *data);
@@ -75,10 +76,10 @@ extern int ext_mode_plus(void *data);
 extern int ext_mode_minus(void *data);
 extern int ext_b_to_a(void *data);
 extern int ext_a_swap_b(void *data);
+extern void ctun_update(int id,int state);
 extern int ext_ctun_update(void *data);
 extern int ext_agc_update(void *data);
 extern int ext_split_toggle(void *data);
-extern int ext_set_split(void *data);
 
 
 extern int ext_cw_setup();
@@ -142,15 +143,4 @@ extern int ext_remote_set_zoom(void *data);
 extern int ext_remote_set_pan(void *data);
 extern int ext_set_title(void *data);
 
-extern int ext_store_memory_slot(void *data);
-extern int ext_recall_memory_slot(void *data);
 
-//
-// Helper functions, will be moved elsewhere on the long run
-//
-extern void set_split(int val);
-extern void set_frequency(int v,long long f);
-extern void ctun_update(int id,int state);
-extern void band_plus(int id);
-extern void band_minus(int id);
-extern void num_pad(int num);

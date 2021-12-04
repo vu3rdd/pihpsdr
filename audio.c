@@ -65,7 +65,7 @@ static const int cw_high_water = 1152;                // high water mark for CW
 #include "vfo.h"
 
 int audio = 0;
-static GMutex audio_mutex;
+GMutex audio_mutex;
 
 static snd_pcm_t *record_handle=NULL;
 static snd_pcm_format_t record_audio_format;

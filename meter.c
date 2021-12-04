@@ -190,11 +190,6 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
     }
   }
 
-//
-// DL1YCF
-// there is a lot of code repetition in the analog and digital meter cases
-// which should be unified.
-//
 if(analog_meter) {
   cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
   cairo_paint (cr);
@@ -204,19 +199,7 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
-      level=value + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-      if (filter_board == CHARLY25) {
-	// preamp/dither encodes the preamp level
-        if (rx->preamp) level -= 18.0;
-        if (rx->dither) level -= 18.0;
-      }
-      //
-      // Assume that alex_attenuation is set correctly if we have an ALEX board
-      //
-      if (filter_board == ALEX && rx->adc == 0) {
-	level += 10*rx->alex_attenuation;
-      }
-	    
+      level=value;  // all corrections now in receiver.c
       offset=210.0;
 
       int i;
@@ -570,18 +553,7 @@ if(analog_meter) {
       // value is dBm
       text_location=10;
       offset=5.0;
-      level=value + (double)rx_gain_calibration + (double)adc[rx->adc].attenuation - adc[rx->adc].gain;
-      if (filter_board == CHARLY25) {
-	// preamp/dither encodes the preamp level
-        if (rx->preamp) level -= 18.0;
-        if (rx->dither) level -= 18.0;
-      }
-      //
-      // Assume that alex_attenuation is set correctly if we have an ALEX board
-      //
-      if (filter_board == ALEX && rx->adc == 0) {
-	level += 10*rx->alex_attenuation;
-      }
+      level=value;  // all corrections now in receiver.c
 
       if(meter_width>=114) {
         int db=1;

@@ -203,7 +203,6 @@ static int dot_held = 0;
 static int dash_held = 0;
 static int key_state = 0;
 static int dot_length = 0;
-static int dash_length = 0;
 static int dot_samples = 0;
 static int dash_samples = 0;
 static int kcwl = 0;
@@ -245,8 +244,6 @@ void keyer_update() {
     //
 
     dot_length = 1200 / cw_keyer_speed;
-    // will be 3 * dot length at standard weight
-    dash_length = (dot_length * 3 * cw_keyer_weight) / 50;
     dot_samples = 57600 / cw_keyer_speed;
     dash_samples = (3456 * cw_keyer_weight) / cw_keyer_speed;
 
@@ -281,6 +278,7 @@ void keyer_update() {
 static int enforce_cw_vox;
 
 void keyer_event(int left, int state) {
+    //g_print("%s: running=%d left=%d state=%d\n",__FUNCTION__,running,left,state);
     if (!running) return;
     if (state) {
         // This is to remember whether the key stroke interrupts a running CAT CW 
@@ -519,7 +517,7 @@ static void* keyer_thread(void *arg) {
 
             case SENDDASH:
                 //
-                // wait for dot being complete
+                // wait for dash being complete
                 //
                 if (cw_key_down == 0) {
                   gpio_cw_sidetone_set(0);
@@ -569,9 +567,7 @@ static void* keyer_thread(void *arg) {
                 key_state = EXITLOOP;
             }
 
-	    // time stamp in loop_delay is either the last time stamp from the
-	    // top of the loop, or the time stamp from the last key-down/key-up transition.
-	    // wait another milli-second before cycling the outer loop
+	    // Sleep such that the "state machine" loop is executed once per milli-second
             loop_delay.tv_nsec += interval;
             while (loop_delay.tv_nsec >= NSEC_PER_SEC) {
                 loop_delay.tv_nsec -= NSEC_PER_SEC;

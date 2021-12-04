@@ -155,12 +155,7 @@ static gboolean freqent_select_cb (GtkWidget *widget, gpointer data) {
         send_vfo_frequency(client_socket,active_receiver->id,f);
       } else {
 #endif
-        //This is inside a callback so we do not need g_idle_add
-        //fp=g_new(SET_FREQUENCY,1);
-        //fp->vfo=v;
-        //fp->frequency = f;
-        //g_idle_add(ext_set_frequency, fp);
-        set_frequency(v, f);
+        vfo_set_frequency(v, f);
 #ifdef CLIENT_SERVER
       }
 #endif

@@ -1908,60 +1908,66 @@ void set_attenuation(int value) {
 }
 
 //
-// For HPSDR, only receiver[0]->rx_antenna has an effect
-// The antenna is set according to what is stored in the "band" info
-// We have to call this routine in the HPSDR case each time a band is switched.
+// Upon each band change, the TX mode needs be specified again.
+// For HPSDR, one also needs new RX/TX antenna and PA calibration/disable settings.
+// For TX, this must also happen when changing the active receiver or the "split" status.
+// To avoid code duplications, the necessary actions are bundled here.
+// If the attenuation is stored with the band, this should also be adjusted here
 //
-void set_alex_rx_antenna() {
-    BAND *band;
-    switch (protocol) {
-      case ORIGINAL_PROTOCOL:
-        band=band_get_band(vfo[VFO_A].band);
-        receiver[0]->alex_antenna=band->alexRxAntenna;
-        break;
-      case NEW_PROTOCOL:
-        band=band_get_band(vfo[VFO_A].band);
-        receiver[0]->alex_antenna=band->alexRxAntenna;
-        schedule_high_priority();
-        break;
-      }
-      // This function is NOT called for SOAPY devices
-}
-
-//
-// For HPSDR, determine which band control the TX and
-// set TX antenna accordingly
-// We have to call this routine
-// in the HPSDR case each time the TX band is switched,
-// which is for each band switch, each time "split" is
-// changed, and in case of "split", each time the active
-// RX changes!
-//
-void set_alex_tx_antenna() {
-    BAND *band;
-    if (!can_transmit) return;
-    switch (protocol) {
-      case ORIGINAL_PROTOCOL:
-        band=band_get_band(vfo[get_tx_vfo()].band);
-        transmitter->alex_antenna=band->alexTxAntenna;
-	break;
-      case NEW_PROTOCOL:
-        band=band_get_band(vfo[get_tx_vfo()].band);
-        transmitter->alex_antenna=band->alexTxAntenna;
-        schedule_high_priority();
-	break;
+void radio_band_changed() {
+  BAND *band;
+  if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
+    //
+    // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
+    //
+    band=band_get_band(vfo[VFO_A].band);
+    receiver[0]->alex_antenna=band->alexRxAntenna;
+    receiver[0]->alex_attenuation=band->alexAttenuation;
+    update_att_preamp();
+    if (can_transmit) {
+      band=band_get_band(vfo[get_tx_vfo()].band);
+      transmitter->alex_antenna=band->alexTxAntenna;
     }
-    // This function is NOT called for SOAPY devices
+  }
+  if (can_transmit) {
+    tx_set_mode(transmitter,get_tx_mode());
+    calcDriveLevel();
+  }
+
+  if (protocol == NEW_PROTOCOL) {
+    schedule_high_priority();         // possibly update RX/TX antennas
+    schedule_general();               // possibly update PA disable
+  }
 }
 
 //
 // For HPSDR, only receiver[0]->alex_attenuation has an effect
 //
 void set_alex_attenuation(int v) {
-    receiver[0]->alex_attenuation=v;
+    BAND *band;
+    if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
+      //
+      // Store new attenuation value in band data structure
+      // Note this is the "old" step-attenuator 10/20/30 dB
+      //
+      band=band_get_band(vfo[VFO_A].band);
+      band->alexAttenuation=v;
+      receiver[0]->alex_attenuation=v;
+    }
     if(protocol==NEW_PROTOCOL) {
       schedule_high_priority();
     }
+}
+
+//
+// Interface to set split state
+//
+void radio_set_split(int val) {
+  if (can_transmit) {
+    split=val;
+    radio_band_changed();
+    g_idle_add(ext_vfo_update, NULL);
+  }
 }
 
 void radioRestoreState() {

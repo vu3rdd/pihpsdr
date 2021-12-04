@@ -96,7 +96,7 @@ struct desc {
    struct desc       *next;       // Next defined action for a controller/key with that note value (NULL for end of list)
 };
 
-extern struct desc *MidiCommandsTable[129];
+extern struct desc *MidiCommandsTable[129];  // slot #128 is for the pitch-bend
 
 extern int midi_debug;
 

@@ -287,7 +287,7 @@ static void agcgain_value_changed_cb(GtkWidget *widget, gpointer data) {
     send_agc_gain(client_socket,active_receiver->id,(int)active_receiver->agc_gain,(int)active_receiver->agc_hang,(int)active_receiver->agc_thresh);
   } else {
 #endif
-  set_agc(active_receiver);
+  set_agc(active_receiver, active_receiver->agc);
 #ifdef CLIENT_SERVER
   }
 #endif
@@ -296,7 +296,7 @@ static void agcgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 void set_agc_gain(int rx,double value) {
   g_print("%s\n",__FUNCTION__);
   receiver[rx]->agc_gain=value;
-  set_agc(receiver[rx]);
+  set_agc(receiver[rx], receiver[rx]->agc);
   if(display_sliders) {
     gtk_range_set_value (GTK_RANGE(agc_scale),receiver[rx]->agc_gain);
   } else {
@@ -695,8 +695,8 @@ void set_squelch(RECEIVER *rx) {
   setSquelch(rx);
 #ifndef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
   if(display_sliders && rx->id == active_receiver->id) {
-    gtk_range_set_value (GTK_RANGE(squelch_scale),active_receiver->squelch);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable),active_receiver->squelch_enable);
+    gtk_range_set_value (GTK_RANGE(squelch_scale),rx->squelch);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable),rx->squelch_enable);
   } else {
 #endif
     if(scale_status!=SQUELCH) {
@@ -709,12 +709,12 @@ void set_squelch(RECEIVER *rx) {
     if(scale_status==NO_ACTION) {
       scale_status=SQUELCH;
       char title[64];
-      sprintf(title,"Squelch RX %d (Hz)",active_receiver->id);
+      sprintf(title,"Squelch RX %d (Hz)",rx->id);
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
       squelch_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 100.0, 1.00);
       gtk_widget_override_font(squelch_scale, pango_font_description_from_string(SLIDERS_FONT));
-      gtk_range_set_value (GTK_RANGE(squelch_scale),active_receiver->squelch);
+      gtk_range_set_value (GTK_RANGE(squelch_scale),rx->squelch);
       gtk_widget_set_size_request (squelch_scale, 400, 30);
       gtk_widget_show(squelch_scale);
       gtk_container_add(GTK_CONTAINER(content),squelch_scale);
@@ -722,7 +722,7 @@ void set_squelch(RECEIVER *rx) {
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
       g_source_remove(scale_timer);
-      gtk_range_set_value (GTK_RANGE(squelch_scale),active_receiver->squelch);
+      gtk_range_set_value (GTK_RANGE(squelch_scale),rx->squelch);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
 #ifndef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH

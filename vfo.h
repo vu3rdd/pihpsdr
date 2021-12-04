@@ -114,5 +114,6 @@ extern void vfo_xvtr_changed();
 extern void vfo_rit_update(int rx);
 extern void vfo_rit_clear(int rx);
 extern void vfo_rit(int rx,int i);
+extern void vfo_set_frequency(int vfo, long long f);
 
 #endif
