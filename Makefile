@@ -167,7 +167,7 @@ SERVER_OPTIONS=-D CLIENT_SERVER
 SERVER_SOURCES= \
 client_server.c server_menu.c
 SERVER_HEADERS= \
-client_server.h
+client_server.h server_menu.h
 SERVER_OBJS= \
 client_server.o server_menu.o
 endif
