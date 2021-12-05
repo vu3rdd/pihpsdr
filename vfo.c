@@ -1494,25 +1494,31 @@ void vfo_rit(int rx,int i) {
 //
 // Interface to set the frequency, including
 // "long jumps", for which we may have to
-// change the band
+// change the band. This is solely used for
+//
+// - FREQ MENU
+// - MIDI or GPIO NumPad
+// - CAT "set frequency" command
 //
 void vfo_set_frequency(int v,long long f) {
   int b=get_band_from_frequency(f);
+  if (b != vfo[v].band) {
+    vfo_band_changed(v, b);
+  }
   if(active_receiver->id==v) {
-    if (b != vfo[v].band) {
-      vfo_band_changed(active_receiver->id,b);
-    }
     setFrequency(f);
   } else {
     // change VFO frequency of the non-active receiver
     vfo[v].frequency=f;
-    vfo[v].band=b;
     if (vfo[v].ctun) {
       vfo[v].ctun=FALSE;
       vfo[v].offset=0;
       vfo[v].ctun_frequency=vfo[v].frequency;
     }
+    if (receivers == 2) {
+      // VFO v controls a running  WDSP receiver,
+      // need to "manually change" it.
+    }
   }
-  radio_band_changed();
   g_idle_add(ext_vfo_update, NULL);
 }
