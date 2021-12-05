@@ -146,8 +146,7 @@ endif
 #
 ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
 STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY \
-  `$(PKG_CONFIG) --cflags avahi-gobject`
-  `$(PKG_CONFIG) --cflags libcurl`
+  `$(PKG_CONFIG) --cflags avahi-gobject` `$(PKG_CONFIG) --cflags libcurl`
 STEMLAB_LIBS=`$(PKG_CONFIG) --libs avahi-gobject --libs libcurl`
 STEMLAB_SOURCES=stemlab_discovery.c
 STEMLAB_HEADERS=stemlab_discovery.h
