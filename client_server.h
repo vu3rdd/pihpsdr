@@ -30,7 +30,7 @@
 // Assume that double data is between -200 and 200,
 // convert to uint16 via uint16 = 100.0*(double+200.0) (result in the range 0 to 40000)
 //
-#define htond(X) htons((uint16_6) ((X+200.0)*100.0) )
+#define htond(X) htons((uint16_t) ((X+200.0)*100.0) )
 #define ntohd(X) 0.01*ntohs(X)-200.0
 
 typedef enum {
