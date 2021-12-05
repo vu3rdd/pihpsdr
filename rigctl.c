@@ -134,32 +134,7 @@ typedef struct _command {
 } COMMAND;
 
 static CLIENT client[MAX_CLIENTS];
-
-int squelch=-160; //local sim of squelch level
-int fine = 0;     // FINE status for TS-2000 decides whether rit_increment is 1Hz/10Hz.
-
-
-int read_size;
-
-int freq_flag;  // Determines if we are in the middle of receiving frequency info
-
-int digl_offset = 0;
-int digl_pol = 0;
-int digu_offset = 0;
-int digu_pol = 0;
-double new_vol = 0;
-int  lcl_cmd=0;
-long long new_freqA = 0;
-long long new_freqB = 0;
-long long orig_freqA = 0;
-long long orig_freqB = 0;
-int  lcl_split = 0;
-int  mox_state = 0;
-// Radio functions - 
-// Memory channel stuff and things that aren't 
-// implemented - but here for a more complete emulation
-int ctcss_tone;  // Numbers 01-38 are legal values - set by CN command, read by CT command
-int ctcss_mode;  // Numbers 0/1 - on off.
+static CLIENT serial_client;       // serial lines must pass a valid CLIENT to parse_cmd
 
 static gpointer rigctl_client (gpointer data);
 
@@ -529,19 +504,6 @@ static gpointer rigctl_cw_thread(gpointer data)
   }
   return NULL;
 }
-
-// This looks up the frequency of the Active receiver with 
-// protection for 1 versus 2 receivers
-long long rigctl_getFrequency() {
-  if(receivers == 1) {
-    return vfo[VFO_A].frequency;
-  } else {
-    return vfo[active_receiver->id].frequency;
-  } 
-}
-// Looks up entry INDEX_NUM in the command structure and
-// returns the command string
-//
 
 void send_resp (int fd,char * msg) {
   if(rigctl_debug) g_print("RIGCTL: RESP=%s\n",msg);
@@ -3951,6 +3913,8 @@ static gpointer serial_server(gpointer data) {
        // CAT command of this client has been processed.
        // If for some reason this does not happen, resume after
        // waiting for about 500 msec.
+       // Check serial_running after the "pause" and after returning
+       // from "read".
        //
        while (client->fifo && client->busy > 0) {
          if (client->done) {
@@ -3964,9 +3928,9 @@ static gpointer serial_server(gpointer data) {
        }
        client->busy=0;
        client->done=0;
-       // TODO: for a FIFO, read() is blocking so we will "hang" here and the
-       //       thread will not terminate when loosing serial_running.
+       if (!serial_running) break;
        numbytes = read (client->fd, cmd_input, sizeof cmd_input);
+       if (!serial_running || numbytes < 0) break;
        if(numbytes>0) {
          for(i=0;i<numbytes;i++) {
            command[command_index]=cmd_input[i];
@@ -3986,18 +3950,13 @@ static gpointer serial_server(gpointer data) {
              command_index=0;
            }
          }
-       } else if(numbytes<0) {
-         break;
        }
-       //usleep(100L);
      }
-     close(client->fd);
      g_mutex_lock(&mutex_a->m);
      cat_control--;
      if(rigctl_debug) g_print("RIGCTL: SER DEC - cat_control=%d\n",cat_control);
      g_mutex_unlock(&mutex_a->m);
      g_idle_add(ext_vfo_update,NULL);
-     g_free(client);  // this is the serial_client allocated in launch_serial
      return NULL;
 }
 
@@ -4020,23 +3979,22 @@ int launch_serial () {
 
      g_print("serial port fd=%d\n",fd);
 
-     CLIENT *serial_client=g_new(CLIENT,1);
-     serial_client->fd=fd;
-     serial_client->busy=0;
-     serial_client->fifo=0;
+     serial_client.fd=fd;
+     serial_client.busy=0;
+     serial_client.fifo=0;
 
      if (set_interface_attribs (fd, serial_baud_rate, serial_parity) == 0) {
        set_blocking (fd, 0);                   // set no blocking
      } else {
        //
        // This tells the server that fd is something else
-       // than a serial line
+       // than a serial line.
        //
        g_print("serial port is probably a FIFO\n");
-       serial_client->fifo=1;
+       serial_client.fifo=1;
      }
 
-     serial_server_thread_id = g_thread_new( "Serial server", serial_server, serial_client);
+     serial_server_thread_id = g_thread_new( "Serial server", serial_server, &serial_client);
      return 1;
 }
 
@@ -4044,11 +4002,21 @@ int launch_serial () {
 void disable_serial () {
      g_print("RIGCTL: Disable Serial port %s\n",ser_port);
      serial_running=FALSE;
+     if (serial_client.fifo) {
+       //
+       // If the "serial port" is a fifo then the serial thread
+       // may hang in a blocking read().
+       // Fortunately, we can set the thread free
+       // by sending something to the FIFO
+       //
+       write (serial_client.fd, "ID;", 3);
+     }
      // wait for the serial server actually terminating
      if (serial_server_thread_id) {
        g_thread_join(serial_server_thread_id);
      }
      serial_server_thread_id=NULL;
+     close(serial_client.fd);
 }
 
 //
@@ -4071,57 +4039,3 @@ void launch_rigctl () {
      g_print("g_thread_new failed on rigctl_server\n");
    }
 }
-
-
-int rigctlGetMode()  {
-        switch(vfo[active_receiver->id].mode) {
-           case modeLSB: return(1); // LSB
-           case modeUSB: return(2); // USB
-           case modeCWL: return(7); // CWL
-           case modeCWU: return(3); // CWU
-           case modeFMN: return(4); // FMN
-           case modeAM:  return(5); // AM
-           case modeDIGU: return(9); // DIGU
-           case modeDIGL: return(6); // DIGL
-           default: return(0);
-        }
-}
-
-void set_freqB(long long new_freqB) {      
-
-   vfo[VFO_B].frequency = new_freqB;   
-   g_idle_add(ext_vfo_update,NULL);
-}
-
-
-int set_alc(gpointer data) {
-    int * lcl_ptr = (int *) data;
-    alc = *lcl_ptr;
-    g_print("RIGCTL: set_alc=%d\n",alc);
-    return 0;
-}
-
-int lookup_band(int val) {
-    int work_int;
-    switch(val) {
-       case 160: work_int = 0; break;
-       case  80: work_int = 1; break;
-       case  60: work_int = 2; break;
-       case  40: work_int = 3; break;
-       case  30: work_int = 4; break;
-       case  20: work_int = 5; break;
-       case  17: work_int = 6; break;
-       case  15: work_int = 7; break;
-       case  12: work_int = 8; break;
-       case  10: work_int = 9; break;
-       case   6: work_int = 10; break;
-       case 888: work_int = 11; break; // General coverage
-       case 999: work_int = 12; break; // WWV
-       case 136: work_int = 13; break; // WWV
-       case 472: work_int = 14; break; // WWV
-       default: work_int = 0;
-     }
-     return work_int;
-}
-
-
