@@ -25,7 +25,7 @@
 #define ntohll be64toh
 #endif
 
-/
+//
 // Conversion of host(double) to/from network(unsigned int)
 // Assume that double data is between -200 and 200,
 // convert to uint16 via uint16 = 100.0*(double+200.0) (result in the range 0 to 40000)
