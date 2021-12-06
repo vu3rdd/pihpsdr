@@ -769,19 +769,8 @@ int process_action(void *data) {
       break;
     case MOX:
       if(a->mode==PRESSED) {
-        if(getTune()==1) {
-          setTune(0);
-        }
-        if(getMox()==0) {
-          if(canTransmit() || tx_out_of_band) {
-            setMox(1);
-          } else {
-            transmitter_set_out_of_band(transmitter);
-          }
-        } else {
-          setMox(0);
-        }
-        g_idle_add(ext_vfo_update,NULL);
+        int state=getMox();
+        mox_update(!state);
       }
       break;
     case MUTE:
@@ -1075,19 +1064,8 @@ int process_action(void *data) {
       break;
     case TUNE:
       if(a->mode==PRESSED) {
-        if(getMox()==1) {
-          setMox(0);
-        }
-        if(getTune()==0) {
-          if(canTransmit() || tx_out_of_band) {
-            setTune(1);
-          } else {
-            transmitter_set_out_of_band(transmitter);
-          }
-        } else {
-          setTune(0);
-        }
-        g_idle_add(ext_vfo_update,NULL);
+        int state=getTune();
+        tune_update(!state);
       }
       break;
     case TUNE_DRIVE:
