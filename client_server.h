@@ -69,6 +69,7 @@ enum {
   CMD_RESP_RX_VOLUME,
   CMD_RESP_RX_AGC_GAIN,
   CMD_RESP_RX_ATTENUATION,
+  CMD_RESP_RX_GAIN,
   CMD_RESP_RX_SQUELCH,
   CMD_RESP_RX_FPS,
   CMD_RESP_RX_SELECT,
@@ -346,6 +347,12 @@ typedef struct __attribute__((__packed__)) _attenuation_command {
   uint16_t attenuation;
 } ATTENUATION_COMMAND;
 
+typedef struct __attribute__((__packed__)) _rfgain_command {
+  HEADER header;
+  uint8_t id;
+  uint16_t gain;
+} RFGAIN_COMMAND;
+
 typedef struct __attribute__((__packed__)) _squelch_command {
   HEADER header;
   uint8_t id;
@@ -495,6 +502,7 @@ extern void send_volume(int s,int rx,int volume);
 extern void send_agc(int s,int rx,int agc);
 extern void send_agc_gain(int s,int rx,int gain,int hang,int thresh);
 extern void send_attenuation(int s,int rx,int attenuation);
+extern void send_rfgain(int s,int rx, double gain);
 extern void send_squelch(int s,int rx,int enable,int squelch);
 extern void send_noise(int s,int rx,int nb,int nb2,int nr,int nr2,int anf,int snb);
 extern void send_band(int s,int rx,int band);

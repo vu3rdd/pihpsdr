@@ -622,6 +622,23 @@ g_print("server_client_thread: CMD_RESP_RX_AGC_GAIN\n");
          g_idle_add(ext_remote_command,agc_gain_command);
          }
          break;
+      case CMD_RESP_RX_GAIN:
+g_print("server_client_thread: CMD_RESP_RX_GAIN\n");
+         {
+         RFGAIN_COMMAND *command=g_new(RFGAIN_COMMAND,1);
+         command->header.data_type=header.data_type;
+         command->header.version=header.version;
+         command->header.context.client=client;
+         bytes_read=recv_bytes(client->socket,(char *)&command->id,sizeof(RFGAIN_COMMAND)-sizeof(header));
+         if(bytes_read<0) {
+           g_print("server_client_thread: read %d bytes for RFGAIN_COMMAND\n",bytes_read);
+           perror("server_client_thread");
+           // dialog box?
+           return NULL;
+         }
+         g_idle_add(ext_remote_command,command);
+         }
+         break;
       case CMD_RESP_RX_ATTENUATION:
 g_print("server_client_thread: CMD_RESP_RX_ATTENUATION\n");
          {
@@ -1265,6 +1282,22 @@ g_print("send_agc_gain rx=%d gain=%d\n",rx,gain);
     perror("send_command");
   } else {
     //g_print("send_command: %d\n",bytes_sent);
+  }
+}
+
+void send_rfgain(int s, int id, double gain) {
+  RFGAIN_COMMAND command;
+g_print("send_rfgain rx=%d gain=%f\n",id,gain);
+  command.header.sync=REMOTE_SYNC;
+  command.header.data_type=htons(CMD_RESP_RX_GAIN);
+  command.header.version=htonl(CLIENT_SERVER_VERSION);
+  command.id=id;
+  command.gain=htond(gain);
+  int bytes_sent=send_bytes(s,(char *)&command,sizeof(command));
+  if(bytes_sent<0) {
+    perror("send_command");
+  } else {
+    g_print("send_command RFGAIN: %d\n",bytes_sent);
   }
 }
 
@@ -2186,6 +2219,22 @@ g_print("AGC_COMMAND: rx=%d agc=%d\n",rx,a);
         receiver[rx]->agc_gain=(double)gain;
         receiver[rx]->agc_hang=(double)hang;
         receiver[rx]->agc_thresh=(double)thresh;
+        }
+        break;
+      case CMD_RESP_RX_GAIN:
+        {
+	RFGAIN_COMMAND command;
+        bytes_read=recv_bytes(client_socket,(char *)&command.id,sizeof(command)-sizeof(header));
+        if(bytes_read<0) {
+          g_print("client_thread: read %d bytes for RFGAIN_CMD\n",bytes_read);
+          perror("client_thread");
+          // dialog box?
+          return NULL;
+        }
+        int rx=command.id;
+        double gain=ntohd(command.gain);
+g_print("CMD_RESP_RX_GAIN: new=%f rx=%d old=%f\n",gain,rx,adc[receiver[rx]->adc].gain);
+        adc[receiver[rx]->adc].gain=gain;
         }
         break;
       case CMD_RESP_RX_ATTENUATION:
