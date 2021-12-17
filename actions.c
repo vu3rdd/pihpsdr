@@ -564,26 +564,14 @@ int process_action(void *data) {
       }
       break;
     case CW_FREQUENCY:
-#ifdef LOCALCW
-      value=KnobOrWheel(a, (double)cw_keyer_sidetone_frequency, 300.0, 1000.0, 10.0);
+      value=KnobOrWheel(a, (double)cw_keyer_sidetone_frequency, 400.0, 1000.0, 10.0);
       cw_keyer_sidetone_frequency=(int)value;
       g_idle_add(ext_vfo_update,NULL);
-#endif
-      break;
-    case CW_LEFT:
-    case CW_RIGHT:
-      if(a->mode==PRESSED || a->mode==RELEASED) {
-#ifdef LOCALCW
-        keyer_event(a->action==CW_LEFT,a->mode==PRESSED);
-#endif
-      }
       break;
     case CW_SPEED:
-#ifdef LOCALCW
       value=KnobOrWheel(a, (double)cw_keyer_speed, 1.0, 60.0, 1.0);
       cw_keyer_speed=(int)value;
       g_idle_add(ext_vfo_update,NULL);
-#endif
       break;
     case DIV:
       if(a->mode==PRESSED) {
