@@ -32,7 +32,7 @@
 #include "radio.h"
 #include "vfo.h"
 
-int  serial_enable;
+int  serial_enable = 1; // edit (enable serial at startup)
 char ser_port[64]="/dev/ttyACM0";
 int serial_baud_rate = B9600;
 int serial_parity = 0; // 0=none, 1=even, 2=odd
