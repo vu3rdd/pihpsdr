@@ -87,7 +87,7 @@ void step_menu(GtkWidget *parent) {
 
   GtkWidget *step_rb=NULL;
   int i=0;
-  while(steps[i]!=0) {
+  while(i < STEPS) {
     if(i==0) {
       step_rb=gtk_radio_button_new_with_label(NULL,step_labels[i]);
     } else {
