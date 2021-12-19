@@ -1883,164 +1883,164 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
     }
     break;
   case 'N': // ZZNx
-    switch (command[3]) {
-    case 'A': // ZZNA
-      // set/read RX1 NB1
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNA%d;", receiver[0]->nb);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->nb = atoi(&command[4]);
-        if (receiver[0]->nb) {
-          receiver[0]->nb2 = 0;
-        }
-        update_noise();
+      switch (command[3]) {
+      case 'A': // ZZNA
+          // set/read RX1 NB1
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNA%d;", receiver[0]->nb);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->nb = atoi(&command[4]);
+              if (receiver[0]->nb) {
+                  receiver[0]->nb2 = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'B': // ZZNB
+          // set/read RX1 NB2
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNB%d;", receiver[0]->nb2);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->nb2 = atoi(&command[4]);
+              if (receiver[0]->nb2) {
+                  receiver[0]->nb = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'C': // ZZNC
+          // set/read RX2 NB1
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNC%d;", receiver[1]->nb);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->nb = atoi(&command[4]);
+              if (receiver[1]->nb) {
+                  receiver[1]->nb2 = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'D': // ZZND
+          // set/read RX2 NB2
+          if (command[4] == ';') {
+              sprintf(reply, "ZZND%d;", receiver[1]->nb2);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->nb2 = atoi(&command[4]);
+              if (receiver[1]->nb2) {
+                  receiver[1]->nb = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'L': // ZZNL
+          // set/read NB1 threshold
+          implemented = FALSE;
+          break;
+      case 'M': // ZZNM
+          // set/read NB2 threshold
+          implemented = FALSE;
+          break;
+      case 'N': // ZZNN
+          // set/read RX1 SNB status
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNN%d;", receiver[0]->snb);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->snb = atoi(&command[4]);
+              update_noise();
+          }
+          break;
+      case 'O': // ZZNO
+          // set/read RX2 SNB status
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNO%d;", receiver[1]->snb);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->snb = atoi(&command[4]);
+              update_noise();
+          }
+          break;
+      case 'R': // ZZNR
+          // set/read RX1 NR
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNR%d;", receiver[0]->nr);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->nr = atoi(&command[4]);
+              if (receiver[0]->nr) {
+                  receiver[0]->nr2 = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'S': // ZZNS
+          // set/read RX1 NR2
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNS%d;", receiver[0]->nr2);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->nr2 = atoi(&command[4]);
+              if (receiver[0]->nr2) {
+                  receiver[0]->nr = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'T': // ZZNT
+          // set/read RX1 ANF
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNT%d;", receiver[0]->anf);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[0]->anf = atoi(&command[4]);
+              update_noise();
+          }
+          break;
+      case 'U': // ZZNU
+          // set/read RX2 ANF
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNU%d;", receiver[1]->anf);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->anf = atoi(&command[4]);
+              update_noise();
+          }
+          break;
+      case 'V': // ZZNV
+          // set/read RX2 NR
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNV%d;", receiver[1]->nr);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->nr = atoi(&command[4]);
+              if (receiver[1]->nr) {
+                  receiver[1]->nr2 = 0;
+              }
+              update_noise();
+          }
+          break;
+      case 'W': // ZZNW
+          // set/read RX2 NR2
+          if (command[4] == ';') {
+              sprintf(reply, "ZZNW%d;", receiver[1]->nr2);
+              send_resp(client->fd, reply);
+          } else if (command[5] == ';') {
+              receiver[1]->nr2 = atoi(&command[4]);
+              if (receiver[1]->nr2) {
+                  receiver[1]->nr = 0;
+              }
+              update_noise();
+          }
+          break;
+      default:
+          implemented = FALSE;
+          break;
       }
       break;
-    case 'B': // ZZNB
-      // set/read RX1 NB2
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNB%d;", receiver[0]->nb2);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->nb2 = atoi(&command[4]);
-        if (receiver[0]->nb2) {
-          receiver[0]->nb = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'C': // ZZNC
-      // set/read RX2 NB1
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNC%d;", receiver[1]->nb);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->nb = atoi(&command[4]);
-        if (receiver[1]->nb) {
-          receiver[1]->nb2 = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'D': // ZZND
-      // set/read RX2 NB2
-      if (command[4] == ';') {
-        sprintf(reply, "ZZND%d;", receiver[1]->nb2);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->nb2 = atoi(&command[4]);
-        if (receiver[1]->nb2) {
-          receiver[1]->nb = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'L': // ZZNL
-      // set/read NB1 threshold
-      implemented = FALSE;
-      break;
-    case 'M': // ZZNM
-      // set/read NB2 threshold
-      implemented = FALSE;
-      break;
-    case 'N': // ZZNN
-      // set/read RX1 SNB status
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNN%d;", receiver[0]->snb);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->snb = atoi(&command[4]);
-        update_noise();
-      }
-      break;
-    case 'O': // ZZNO
-      // set/read RX2 SNB status
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNO%d;", receiver[1]->snb);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->snb = atoi(&command[4]);
-        update_noise();
-      }
-      break;
-    case 'R': // ZZNR
-      // set/read RX1 NR
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNR%d;", receiver[0]->nr);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->nr = atoi(&command[4]);
-        if (receiver[0]->nr) {
-          receiver[0]->nr2 = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'S': // ZZNS
-      // set/read RX1 NR2
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNS%d;", receiver[0]->nr2);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->nr2 = atoi(&command[4]);
-        if (receiver[0]->nr2) {
-          receiver[0]->nr = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'T': // ZZNT
-      // set/read RX1 ANF
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNT%d;", receiver[0]->anf);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[0]->anf = atoi(&command[4]);
-        update_noise();
-      }
-      break;
-    case 'U': // ZZNU
-      // set/read RX2 ANF
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNU%d;", receiver[1]->anf);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->anf = atoi(&command[4]);
-        update_noise();
-      }
-      break;
-    case 'V': // ZZNV
-      // set/read RX2 NR
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNV%d;", receiver[1]->nr);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->nr = atoi(&command[4]);
-        if (receiver[1]->nr) {
-          receiver[1]->nr2 = 0;
-        }
-        update_noise();
-      }
-      break;
-    case 'W': // ZZNW
-      // set/read RX2 NR2
-      if (command[4] == ';') {
-        sprintf(reply, "ZZNW%d;", receiver[1]->nr2);
-        send_resp(client->fd, reply);
-      } else if (command[5] == ';') {
-        receiver[1]->nr2 = atoi(&command[4]);
-        if (receiver[1]->nr2) {
-          receiver[1]->nr = 0;
-        }
-        update_noise();
-      }
-      break;
-    default:
-      implemented = FALSE;
-      break;
-    }
-    break;
   case 'O': // ZZOx
     switch (command[3]) {
     default:
