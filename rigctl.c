@@ -2040,6 +2040,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       implemented = FALSE;
       break;
     }
+    break;
   case 'O': // ZZOx
     switch (command[3]) {
     default:
@@ -2195,6 +2196,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       implemented = FALSE;
       break;
     }
+    break;
   case 'S': // ZZSx
     switch (command[3]) {
     case 'A': // ZZSA
