@@ -147,6 +147,7 @@ static int current_rx=0;
 static int samples=0;
 static int mic_samples=0;
 static int mic_sample_divisor=1;
+static int micsamplecount=0;
 
 static int local_ptt=0;
 static int dash=0;
@@ -209,6 +210,42 @@ static unsigned char usb_buffer_block = 0;
 
 static GMutex dump_mutex;
 
+//
+// Ring buffer for outgoing samples.
+// Samples going to the radio are produces in big chunks.
+// The TX engine receives bunches of mic samples (e.g. 1024),
+// and produces bunches of TX IQ samples (1024 * (sample_rate/48)).
+// During RX, audio samples are also created in chunks although
+// they are smaller, namely 1024 / (sample_rate/48). The "magic"
+// constant 1024 is the "buffer size" from the props file and
+// can also be 512 or 2048.
+//
+// So what happens is that the TX IQ FIFO in the SDR is nearly
+// drained, then several UDP packets are sent within 1 msec
+// and then no further packets are sent for some time. This also
+// produces a possible delay when sending the C&C data.
+//
+// So the idea is to put all the samples that go to the radio into
+// a large ring buffer (about 4096 samples), and send them to the
+// radio following the pace of incoming mic samples. If we decide
+// to send a packet to the radio, we must have at least 126 samples
+// in the ring buffer and will send 126 samples (two ozy buffers)
+// in one shot.
+//
+// TXRINGBUF must contain a multiple of 8 bytes (1 sample = 8 bytes,
+// since there are four 16-bit numbers, namely I, Q, L, R where
+// L and R are the left and right audio samples.
+//
+// We will try to make the ring buffer access thread-safe, however
+// this is not necessary since everything happens within the
+// P1 "receive thread".
+//
+#define TXRINGBUFLEN 32768
+static unsigned char TXRINGBUF[TXRINGBUFLEN];
+static unsigned int txring_inptr=0;   // pointer updated when writing into the ring buffer
+static unsigned int txring_outptr=0;  // pointer updated when reading from the ring buffer
+static unsigned int txring_flag=0;    // 0: RX, 1: TX
+
 void dump_buffer(unsigned char *buffer,int length,const char *who) {
   g_mutex_lock(&dump_mutex);
   g_print("%s: %s: %d\n",__FUNCTION__,who,length);
@@ -242,14 +279,12 @@ void old_protocol_stop() {
 }
 
 void old_protocol_run() {
-#ifdef USBOZY
-  if(device!=DEVICE_OZY) {
-#endif
+    //
+    // Several things done in metis_restart are also needed for
+    // USBOZY
+    //
     g_print("%s\n",__FUNCTION__);
     metis_restart();
-#ifdef USBOZY
-  }
-#endif
 }
 
 void old_protocol_set_mic_sample_rate(int rate) {
@@ -1121,6 +1156,9 @@ static void process_ozy_byte(int b) {
           fsample = transmitter->local_microphone ? audio_get_next_mic_sample() : (float) mic_sample * 0.00003051;
         }
         add_mic_sample(transmitter,fsample);
+        // micsamplecount is the "heart beat" for sending data from the 
+        // ring buffer to the radio
+        micsamplecount++;
         mic_samples=0;
       }
       nsamples++;
@@ -1143,6 +1181,39 @@ static void process_ozy_input_buffer(unsigned char  *buffer) {
   rx2channel = second_receiver_channel();
   for(i=0;i<512;i++) {
     process_ozy_byte(buffer[i]&0xFF);
+    //
+    // The first time data is available, micsamplecount will be
+    // MUCH larger than 126. It is reset to zero once the first
+    // buffer has been sent. This way, a complete buffer is sent
+    // as early as possible. Note we send two buffers at once since
+    // METIS sends buffers in UDP packets containing two of them.
+    //
+    if (micsamplecount >= 126) {
+      int avail = txring_inptr - txring_outptr;
+      if (avail < 0) avail += TXRINGBUFLEN;
+      if (avail >= 1008) {
+        //
+        // ship out two buffers with 2*63 samples
+        // the i-loop could be done with 1-2 memcpy
+        //
+        for (int j=0; j<2; j++) {
+          unsigned char *p=output_buffer+8;
+          for (int k=0; k<63; k++) {
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            *p++ = TXRINGBUF[txring_outptr++];
+            if (txring_outptr >= TXRINGBUFLEN) txring_outptr=0;
+          }
+          ozy_send_buffer();
+        }
+        micsamplecount=0;
+      }
+    }
   }
 }
 
@@ -1157,6 +1228,15 @@ static pthread_mutex_t send_buffer_mutex   = PTHREAD_MUTEX_INITIALIZER;
 void old_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right_audio_sample) {
   if(!isTransmitting()) {
     pthread_mutex_lock(&send_buffer_mutex);
+    if (txring_flag) {
+      //
+      // First time we arrive here after a TX->RX transition:
+      // Clear TX IQ ring buffer, so the audio samples will be sent
+      // as soon as possible at the radio.
+      //
+      txring_flag=0;
+      txring_inptr = txring_outptr = 0;
+    }
     //
     // The HL2 makes no use of audio samples, but instead
     // uses them to write to extended addrs which we do not
@@ -1165,24 +1245,21 @@ void old_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
     // completely
     //
     if (device == DEVICE_HERMES_LITE2) {
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
     } else {
-      output_buffer[output_buffer_index++]=left_audio_sample>>8;
-      output_buffer[output_buffer_index++]=left_audio_sample;
-      output_buffer[output_buffer_index++]=right_audio_sample>>8;
-      output_buffer[output_buffer_index++]=right_audio_sample;
+      TXRINGBUF[txring_inptr++]=left_audio_sample>>8;
+      TXRINGBUF[txring_inptr++]=left_audio_sample;
+      TXRINGBUF[txring_inptr++]=right_audio_sample>>8;
+      TXRINGBUF[txring_inptr++]=right_audio_sample;
     }
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    if(output_buffer_index>=OZY_BUFFER_SIZE) {
-      ozy_send_buffer();
-      output_buffer_index=8;
-    }
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    if (txring_inptr >= TXRINGBUFLEN) txring_inptr=0;
     pthread_mutex_unlock(&send_buffer_mutex);
   }
 }
@@ -1197,25 +1274,31 @@ void old_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
 void old_protocol_iq_samples_with_sidetone(int isample, int qsample, int side) {
   if(isTransmitting()) {
     pthread_mutex_lock(&send_buffer_mutex);
+    if (!txring_flag) {
+      //
+      // First time we arrive here after a RX->TX transition:
+      // Clear tX IQ ring buffer so the samples will be sent
+      // as soon as possible.
+      //
+      txring_flag=1;
+      txring_inptr = txring_outptr = 0;
+    }
     if (device == DEVICE_HERMES_LITE2) {
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
-      output_buffer[output_buffer_index++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
+      TXRINGBUF[txring_inptr++]=0;
     } else {
-      output_buffer[output_buffer_index++]=side >> 8;
-      output_buffer[output_buffer_index++]=side;
-      output_buffer[output_buffer_index++]=side >> 8;
-      output_buffer[output_buffer_index++]=side;
+      TXRINGBUF[txring_inptr++]=side >> 8;
+      TXRINGBUF[txring_inptr++]=side;
+      TXRINGBUF[txring_inptr++]=side >> 8;
+      TXRINGBUF[txring_inptr++]=side;
     }
-    output_buffer[output_buffer_index++]=isample>>8;
-    output_buffer[output_buffer_index++]=isample;
-    output_buffer[output_buffer_index++]=qsample>>8;
-    output_buffer[output_buffer_index++]=qsample;
-    if(output_buffer_index>=OZY_BUFFER_SIZE) {
-      ozy_send_buffer();
-      output_buffer_index=8;
-    }
+    TXRINGBUF[txring_inptr++]=isample >> 8;
+    TXRINGBUF[txring_inptr++]=isample;
+    TXRINGBUF[txring_inptr++]=qsample >> 8;
+    TXRINGBUF[txring_inptr++]=qsample;
+    if (txring_inptr >= TXRINGBUFLEN) txring_inptr=0;
     pthread_mutex_unlock(&send_buffer_mutex);
   }
 }
@@ -1223,18 +1306,24 @@ void old_protocol_iq_samples_with_sidetone(int isample, int qsample, int side) {
 void old_protocol_iq_samples(int isample,int qsample) {
   if(isTransmitting()) {
     pthread_mutex_lock(&send_buffer_mutex);
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=0;
-    output_buffer[output_buffer_index++]=isample>>8;
-    output_buffer[output_buffer_index++]=isample;
-    output_buffer[output_buffer_index++]=qsample>>8;
-    output_buffer[output_buffer_index++]=qsample;
-    if(output_buffer_index>=OZY_BUFFER_SIZE) {
-      ozy_send_buffer();
-      output_buffer_index=8;
+    if (!txring_flag) {
+      //
+      // First time we arrive here after a RX->TX transition:
+      // Clear TX IQ ring buffer so the amples will be sent
+      // as soon as possible.
+      //
+      txring_flag=1;
+      txring_inptr = txring_outptr = 0;
     }
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=0;
+    TXRINGBUF[txring_inptr++]=isample >> 8;
+    TXRINGBUF[txring_inptr++]=isample;
+    TXRINGBUF[txring_inptr++]=qsample >> 8;
+    TXRINGBUF[txring_inptr++]=qsample;
+    if (txring_inptr >= TXRINGBUFLEN) txring_inptr=0;
     pthread_mutex_unlock(&send_buffer_mutex);
   }
 }
@@ -1528,12 +1617,41 @@ void ozy_send_buffer() {
 	    // NOTE: When using predistortion (PURESIGNAL), the IQ scaling must be switched off.
 	    //       In this case, the output  power can also be stronger than intended.
 	    //
-            if (power > 0) {
-              int hl2power = 15+(int)lround(ceil(40.0 * log10((double) power / 255.0)));
-              if (hl2power < 0) hl2power=0;
-	      // hl2power=0: -7.5 dB, hl2power=1: -7.0 dB, ..., hl2power=15: 0dB
-              power=hl2power << 4;  // shift to upper bits
+            int hl2power;
+            if (power < 102) {
+              hl2power=0;                   // -7.5 dB TX attenuation
+            } else if (power < 108) {
+              hl2power=16;                  // -7.0 dB TX attenuation
+            } else if (power < 114) {
+              hl2power=32;                  // -6.5 dB TX attenuation
+            } else if (power < 121) {
+              hl2power=48;                  // -6.0 dB TX attenuation
+            } else if (power < 128) {
+              hl2power=64;                  // -5.5 dB TX attenuation
+            } else if (power < 136) {
+              hl2power=80;                  // -5.0 dB TX attenuation
+            } else if (power < 144) {
+              hl2power=96;                  // -4.5 dB TX attenuation
+            } else if (power < 152) {
+              hl2power=112;                 // -4.0 dB TX attenuation
+            } else if (power < 161) {
+              hl2power=128;                 // -3.5 dB TX attenuation
+            } else if (power < 171) {
+              hl2power=144;                 // -3.0 dB TX attenuation
+            } else if (power < 181) {
+              hl2power=160;                 // -2.5 dB TX attenuation
+            } else if (power < 192) {
+              hl2power=176;                 // -2.0 dB TX attenuation
+            } else if (power < 203) {
+              hl2power=192;                 // -1.5 dB TX attenuation
+            } else if (power < 215) {
+              hl2power=208;                 // -1.0 dB TX attenuation
+            } else if (power < 228) {
+              hl2power=224;                 // -0.5 dB TX attenuation
+            } else {
+              hl2power=240;                 // no      TX attenuation
             }
+            power=hl2power;
           }
         }
 
@@ -1979,15 +2097,22 @@ static void metis_restart() {
   for(i=8;i<OZY_BUFFER_SIZE;i++) {
     output_buffer[i]=0;
   }
+  //
+  // Clear TX IQ ring buffer
+  //
+  txring_inptr = 0;
+  txring_outptr = 0;
   // 
   // Some (older) HPSDR apps on the RedPitaya have very small
   // buffers that over-run if too much data is sent
   // to the RedPitaya *before* sending a METIS start packet.
   // We fill the DUC FIFO here with about 500 samples before
-  // starting.
+  // starting. This also sends some vital C&C data.
+  // Note we send 8 OZY buffers, that is, 4 METIS buffers
+  // containing 504 samples.
   //
   command=1;
-  for (i=1; i<8; i++) {
+  for (i=0; i<8; i++) {
     ozy_send_buffer();
   }
 
