@@ -1194,7 +1194,7 @@ static void process_ozy_input_buffer(unsigned char  *buffer) {
       if (avail >= 1008) {
         //
         // ship out two buffers with 2*63 samples
-        // the i-loop could be done with 1-2 memcpy
+        // the k-loop could be done with 1-2 memcpy
         //
         for (int j=0; j<2; j++) {
           unsigned char *p=output_buffer+8;
