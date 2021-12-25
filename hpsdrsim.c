@@ -68,6 +68,8 @@
 #include "MacOS.h"  // emulate clock_gettime on old MacOS systems
 #endif
 
+//#define PACKETLIST  // indicate incoming packets with time-stamp
+
 #define EXTERN 
 #include "hpsdrsim.h"
 
@@ -406,9 +408,6 @@ int main(int argc, char *argv[])
 	{
 		memcpy(buffer, id, 4);
 
-		ts.tv_sec = 0;
-		ts.tv_nsec = 1000000;
-
 		if (sock_TCP_Client > -1)
 		{
 			// Using recvmmsg with a time-out should be used for a byte-stream protocol like TCP
@@ -428,6 +427,10 @@ int main(int argc, char *argv[])
 				bytes_left -= size;
 
 			}
+#ifdef PACKETLIST
+			clock_gettime(CLOCK_MONOTONIC, &ts);
+                        fprintf(stderr,"TCP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec/1000000L));
+#endif
 
 			bytes_read=size;
 			if (size >= 0)
@@ -466,6 +469,10 @@ int main(int argc, char *argv[])
 			if (bytes_read > 0)
 			{
 				udp_retries=0;
+#ifdef PACKETLIST
+			clock_gettime(CLOCK_MONOTONIC, &ts);
+                        fprintf(stderr,"UDP:%d.%03d\n", (int) (ts.tv_sec % 1000), (int) (ts.tv_nsec/1000000L));
+#endif
 			}
 			else
 			{
