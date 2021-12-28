@@ -106,13 +106,13 @@ static void get_info(char *driver) {
   }
 
   size_t rx_channels=SoapySDRDevice_getNumChannels(sdr, SOAPY_SDR_RX);
-  fprintf(stderr,"Rx channels: %ld\n",rx_channels);
+  fprintf(stderr,"Rx channels: %ld\n", (long) rx_channels);
   for(int i=0;i<rx_channels;i++) {
     fprintf(stderr,"Rx channel full duplex: channel=%d fullduplex=%d\n",i,SoapySDRDevice_getFullDuplex(sdr, SOAPY_SDR_RX, i));
   }
 
   size_t tx_channels=SoapySDRDevice_getNumChannels(sdr, SOAPY_SDR_TX);
-  fprintf(stderr,"Tx channels: %ld\n",tx_channels);
+  fprintf(stderr,"Tx channels: %ld\n", (long) tx_channels);
   for(int i=0;i<tx_channels;i++) {
     fprintf(stderr,"Tx channel full duplex: channel=%d fullduplex=%d\n",i,SoapySDRDevice_getFullDuplex(sdr, SOAPY_SDR_TX, i));
   }
@@ -303,9 +303,8 @@ fprintf(stderr,"Rx gains: \n");
 
 void soapy_discovery() {
   size_t length;
-  int i,j;
+  int i;
   SoapySDRKwargs input_args={};
-  SoapySDRKwargs args={};
 
 fprintf(stderr,"%s\n",__FUNCTION__);
   rtlsdr_count=0;

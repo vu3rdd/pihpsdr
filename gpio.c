@@ -615,7 +615,6 @@ static int interrupt_cb(int event_type, unsigned int line, const struct timespec
 #endif
 
 void gpio_set_defaults(int ctrlr) {
-  int i;
   g_print("%s: %d\n",__FUNCTION__,ctrlr);
   switch(ctrlr) {
     case NO_CONTROLLER:
@@ -670,8 +669,6 @@ void gpio_restore_state() {
     sprintf(name,"encoders[%d].bottom_encoder_address_b",i);
     value=getProperty(name);
     if(value) encoders[i].bottom_encoder_address_b=atoi(value);
-    sprintf(name,"encoders[%d].bottom_encoder_address_b",i);
-    value=getProperty(name);
     sprintf(name,"encoders[%d].top_encoder_enabled",i);
     value=getProperty(name);
     if(value) encoders[i].top_encoder_enabled=atoi(value);
@@ -969,9 +966,9 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
 #endif
 
 int gpio_init() {
-  int ret=0;
 
 #ifdef GPIO
+  int ret=0;
   initialiseEpoch();
 
   g_mutex_init(&encoder_mutex);
@@ -1078,15 +1075,15 @@ int gpio_init() {
 #endif
   return 0;
 
+#ifdef GPIO
 err:
 g_print("%s: err\n",__FUNCTION__);
-#ifdef GPIO
   if(chip!=NULL) {
     gpiod_chip_close(chip);
     chip=NULL;
   }
-#endif
   return ret;
+#endif
 }
 
 void gpio_close() {
@@ -1097,9 +1094,9 @@ void gpio_close() {
 
 #ifdef LOCALCW
 void gpio_cw_sidetone_set(int level) {
+#ifdef GPIO
   int rc;
   if (ENABLE_GPIO_SIDETONE) {
-#ifdef GPIO
 #ifdef OLD_GPIOD
     if((rc=gpiod_ctxless_set_value(gpio_device,SIDETONE_GPIO,level,FALSE,consumer,NULL,NULL))<0) {
 #else
@@ -1107,8 +1104,8 @@ void gpio_cw_sidetone_set(int level) {
 #endif
       g_print("%s: err=%d\n",__FUNCTION__,rc);
     }
-#endif
   }
+#endif
 }
 
 int  gpio_cw_sidetone_enabled() {

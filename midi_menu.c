@@ -187,9 +187,6 @@ static void update_wheelparams(gpointer user_data) {
 }
 
 static void type_changed_cb(GtkWidget *widget, gpointer data) {
-  int i=1;
-  int j=1;
-
 
   // update actions available for the type
   gchar *type=gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(widget));
@@ -754,8 +751,8 @@ static void delete_cb(GtkButton *widget,gpointer user_data) {
 
 void midi_menu(GtkWidget *parent) {
   int i;
-  int col=0;
-  int row=0;
+  int col;
+  int row;
   GtkCellRenderer *renderer;
   GtkWidget *lbl;
 
@@ -1138,8 +1135,6 @@ static int update(void *data) {
   int state=GPOINTER_TO_INT(data);
   gchar text[32];
   gint i=1;
-  gint j;
-
 
   switch(state) {
     case UPDATE_NEW:

@@ -97,7 +97,6 @@ void memRestoreState() {
 
 void recall_memory_slot(int index) {
     long long new_freq;
-    int id=active_receiver->id;
 
     new_freq = mem[index].frequency;
     fprintf(stderr,"recall_select_cb: Index=%d\n",index);
@@ -125,7 +124,6 @@ void recall_memory_slot(int index) {
 }
 
 void store_memory_slot(int index) {
-   char workstr[40];
    int id=active_receiver->id;
 
    //

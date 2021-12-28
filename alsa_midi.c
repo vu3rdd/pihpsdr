@@ -252,7 +252,6 @@ void get_midi_devices() {
     snd_rawmidi_info_t *info;
     int card, device, subs, sub, ret;
     const char *devnam, *subnam;
-    int found=0;
     char portname[64];
 
     n_midi_devices=0;
@@ -299,7 +298,6 @@ void get_midi_devices() {
                                    card, device, sub, snd_strerror(ret));
                     break;
                 }
-                if (found) break;
                 devnam = snd_rawmidi_info_get_name(info);
                 subnam = snd_rawmidi_info_get_subdevice_name(info);
                 // If there is only one sub-device and it has no name, we  use

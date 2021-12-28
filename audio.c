@@ -424,7 +424,7 @@ int cw_audio_write(RECEIVER *rx, float sample){
 	      break;
           }
         } else {
-	  g_print("%s: short write lost=%d\n", __FUNCTION__, out_buffer_size - rc);
+	  g_print("%s: short write lost=%d\n", __FUNCTION__, out_buffer_size - (int) rc);
 	}
       }
       rx->local_audio_buffer_offset=0;
@@ -538,7 +538,7 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
 	      break;
           }
         } else {
-	  g_print("%s: short write lost=%d\n", __FUNCTION__, out_buffer_size - rc);
+	  g_print("%s: short write lost=%d\n", __FUNCTION__, out_buffer_size - (int) rc);
 	}
       }
       rx->local_audio_buffer_offset=0;

@@ -78,8 +78,9 @@ static gboolean switch_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
   return TRUE;
 }
 
-static void response_event(GtkWidget *dialog,gint id,gpointer user_data) {
-  gtk_widget_destroy(dialog);
+static void response_event(GtkWidget *mydialog,gint id,gpointer user_data) {
+  // mydialog is a copy of dialog
+  gtk_widget_destroy(mydialog);
   dialog=NULL;
   active_menu=NO_MENU;
   sub_menu=NULL;

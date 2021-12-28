@@ -268,8 +268,6 @@ fprintf(stderr,"soapy_protocol_stop_transmitter: deactivateStream\n");
 void soapy_protocol_init(gboolean hf) {
   SoapySDRKwargs args={};
   char temp[32];
-  int rc;
-  int i;
 
 
   SoapySDR_setLogLevel(SOAPY_SDR_TRACE);

@@ -639,14 +639,9 @@ static gpointer rigctl_client (gpointer data) {
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update,NULL);
 
-  int save_flag = 0; // Used to concatenate two cmd lines together
-  int semi_number = 0;
   int i;
-  char * work_ptr;
-  char work_buf[MAXDATASIZE];
   int numbytes;
   char  cmd_input[MAXDATASIZE] ;
-  char cmd_save[80];
 
   char *command=g_new(char,MAXDATASIZE);
   int command_index=0;
@@ -2662,7 +2657,7 @@ int parse_cmd(void *data) {
           break;
         case 'T': //CT
           // sets/reads CTCSS status
-          if(command[3]==';') {
+          if(command[2]==';') {
             sprintf(reply,"CT%d;",transmitter->ctcss_enabled);
             send_resp(client->fd,reply) ;
           } else if(command[3]==';') {
@@ -3340,7 +3335,7 @@ int parse_cmd(void *data) {
         case 'A': //SA
           // set/read stallite mode status
           if(command[2]==';') {
-            sprintf(reply,"SA%d%d%d%d%d%d%dSAT?    ;",sat_mode==SAT_MODE|sat_mode==RSAT_MODE,0,0,0,sat_mode==SAT_MODE,sat_mode==RSAT_MODE,0);
+            sprintf(reply,"SA%d%d%d%d%d%d%dSAT?    ;",(sat_mode==SAT_MODE)|(sat_mode==RSAT_MODE),0,0,0,sat_mode==SAT_MODE,sat_mode==RSAT_MODE,0);
             send_resp(client->fd,reply);
           } else if(command[9]==';') {
             if(command[2]=='0') {

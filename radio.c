@@ -680,11 +680,8 @@ g_print("create_visual: calling radio_change_receivers: receivers=%d r=%d\n",rec
   
 void start_radio() {
   int i;
-  int y;
 //g_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_WATCH));
-
-  int rc;
 
   protocol=radio->protocol;
   device=radio->device;
@@ -1158,7 +1155,6 @@ void start_radio() {
   adc[0].gain=rx_gain_calibration;
   adc[0].min_gain=0.0;
   adc[0].max_gain=100.0;
-  adc[0].antenna=0;
   dac[0].antenna=1;
   dac[0].gain=0;
 
@@ -1193,7 +1189,6 @@ void start_radio() {
   adc[1].gain=rx_gain_calibration;
   adc[1].min_gain=0.0;
   adc[1].max_gain=100.0;
-  adc[1].antenna=0;
   dac[1].antenna=1;
   dac[1].gain=0;
 

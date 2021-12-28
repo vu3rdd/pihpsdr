@@ -87,9 +87,6 @@ typedef struct _CHANNEL CHANNEL;
 
 
 
-extern int band;
-extern gboolean displayHF;
-
 #define UK_CHANNEL_ENTRIES 11
 #define OTHER_CHANNEL_ENTRIES 5
 #define WRC15_CHANNEL_ENTRIES 1

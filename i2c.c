@@ -52,7 +52,7 @@ unsigned int i2c_sw[16]=
 static int write_byte_data(unsigned char reg, unsigned char data) {
   int rc;
 
-  if(i2c_smbus_write_byte_data(fd,reg,data&0xFF)<0) {
+  if((rc=i2c_smbus_write_byte_data(fd,reg,data&0xFF))<0) {
     g_print("%s: write REG_GCONF config failed: addr=%02X %s\n",__FUNCTION__,i2c_address_1,g_strerror(errno));
   }
   

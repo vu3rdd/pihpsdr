@@ -51,7 +51,6 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void step_select_cb (GtkToggleButton *widget, gpointer        data) {
-  int val=GPOINTER_TO_INT(data);
   if(gtk_toggle_button_get_active(widget)) {
     vfo_set_step_from_index(GPOINTER_TO_INT(data));
     g_idle_add(ext_vfo_update,NULL);

@@ -273,12 +273,6 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
 int process_action(void *data) {
   PROCESS_ACTION *a=(PROCESS_ACTION *)data;
   double value;
-  int mode;
-  int id;
-  FILTER * band_filters=filters[vfo[active_receiver->id].mode];
-  FILTER *band_filter;
-  FILTER *filter;
-  int new_val;
   int i;
   gboolean free_action=TRUE;
 
@@ -1167,7 +1161,7 @@ int process_action(void *data) {
     case XIT_MINUS:
       if(a->mode==PRESSED) {
         if(can_transmit) {
-          double value=(double)transmitter->xit;
+          value=(double)transmitter->xit;
           value-=(double)rit_increment;
           if(value<-10000.0) {
             value=-10000.0;
@@ -1175,7 +1169,7 @@ int process_action(void *data) {
             value=10000.0;
           }
           transmitter->xit=(int)value;
-	  transmitter->xit_enabled=(value!=0);
+	  transmitter->xit_enabled=(transmitter->xit!=0);
           if(protocol==NEW_PROTOCOL) {
             schedule_high_priority();
           }
@@ -1186,7 +1180,7 @@ int process_action(void *data) {
     case XIT_PLUS:
       if(a->mode==PRESSED) {
         if(can_transmit) {
-          double value=(double)transmitter->xit;
+          value=(double)transmitter->xit;
           value+=(double)rit_increment;
           if(value<-10000.0) {
             value=-10000.0;
@@ -1194,7 +1188,7 @@ int process_action(void *data) {
             value=10000.0;
           }
           transmitter->xit=(int)value;
-	  transmitter->xit_enabled=(value!=0);
+	  transmitter->xit_enabled=(transmitter->xit!=0);
           if(protocol==NEW_PROTOCOL) {
             schedule_high_priority();
           }

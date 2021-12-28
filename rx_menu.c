@@ -141,7 +141,7 @@ static void mute_radio_cb(GtkWidget *widget, gpointer data) {
 //
 static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
   int i = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-  fprintf(stderr,"local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
+  
   if(active_receiver->local_audio) {
     audio_close_output(active_receiver);                     // audio_close with OLD device
   }
@@ -152,6 +152,7 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
   }
   
   if(i>=0) {
+    fprintf(stderr,"local_output_changed rx=%d %s\n",active_receiver->id,output_devices[i].name);
     active_receiver->audio_name=g_new(gchar,strlen(output_devices[i].name)+1);
     strcpy(active_receiver->audio_name,output_devices[i].name);
     //active_receiver->audio_device=output_devices[i].index;  // update rx to NEW device

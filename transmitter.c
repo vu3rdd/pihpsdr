@@ -1015,7 +1015,6 @@ fprintf(stderr,"transmitter: allocate buffers: mic_input_buffer=%d iq_output_buf
 
 void tx_set_mode(TRANSMITTER* tx,int mode) {
   if(tx!=NULL) {
-    int filter_low, filter_high;
     tx->mode=mode;
     SetTXAMode(tx->id, tx->mode);
     tx_set_filter(tx);

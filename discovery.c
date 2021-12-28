@@ -93,13 +93,12 @@ static gboolean start_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
   // we otherwise lose the information about which app has been selected.
   if (radio->protocol == STEMLAB_PROTOCOL) {
     const int device_id = radio - discovered;
-    int ret;
     if (radio->software_version & BARE_REDPITAYA) {
 	// Start via the simple web interface
-	ret=alpine_start_app(gtk_combo_box_get_active_id(GTK_COMBO_BOX(apps_combobox[device_id])));
+	(void) alpine_start_app(gtk_combo_box_get_active_id(GTK_COMBO_BOX(apps_combobox[device_id])));
     } else {
 	// Start via the STEMlab "bazaar" interface
-	ret=stemlab_start_app(gtk_combo_box_get_active_id(GTK_COMBO_BOX(apps_combobox[device_id])));
+	(void) stemlab_start_app(gtk_combo_box_get_active_id(GTK_COMBO_BOX(apps_combobox[device_id])));
     }
     //
     // To make this bullet-proof, we do another "discover" now
