@@ -32,7 +32,7 @@
 
 #define LINESDR
 
-int band=band20;
+static int current_band=band20;
 int xvtr_band=BANDS;
 
 char* outOfBand="Out of band";
@@ -347,13 +347,13 @@ BANDSTACK_ENTRY *bandstack_get_bandstack_entry(int band,int entry) {
 }
 
 BANDSTACK_ENTRY *bandstack_entry_get_current() {
-    BANDSTACK *bandstack=bands[band].bandstack;
+    BANDSTACK *bandstack=bands[current_band].bandstack;
     BANDSTACK_ENTRY *entry=&bandstack->entry[bandstack->current_entry];
     return entry;
 }
 
 BANDSTACK_ENTRY *bandstack_entry_next() {
-    BANDSTACK *bandstack=bands[band].bandstack;
+    BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry++;
     if(bandstack->current_entry>=bandstack->entries) {
         bandstack->current_entry=0;
@@ -363,7 +363,7 @@ BANDSTACK_ENTRY *bandstack_entry_next() {
 }
 
 BANDSTACK_ENTRY *bandstack_entry_previous() {
-    BANDSTACK *bandstack=bands[band].bandstack;
+    BANDSTACK *bandstack=bands[current_band].bandstack;
     bandstack->current_entry--;
     if(bandstack->current_entry<0) {
         bandstack->current_entry=bandstack->entries-1;
@@ -374,11 +374,11 @@ BANDSTACK_ENTRY *bandstack_entry_previous() {
 
 
 int band_get_current() {
-    return band;
+    return current_band;
 }
 
 BAND *band_get_current_band() {
-    BAND *b=&bands[band];
+    BAND *b=&bands[current_band];
     return b;
 }
 
@@ -388,7 +388,7 @@ BAND *band_get_band(int b) {
 }
 
 BAND *band_set_current(int b) {
-    band=b;
+    current_band=b;
     return &bands[b];
 }
 
@@ -497,7 +497,7 @@ void bandSaveState() {
       }
     }
 
-    sprintf(value,"%d",band);
+    sprintf(value,"%d",current_band);
     setProperty("band",value);
 }
 
@@ -627,7 +627,7 @@ void bandRestoreState() {
     }
 
     value=getProperty("band");
-    if(value) band=atoi(value);
+    if(value) current_band=atoi(value);
 }
 
 int get_band_from_frequency(long long f) {
