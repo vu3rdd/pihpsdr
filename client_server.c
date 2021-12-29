@@ -1899,8 +1899,9 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         locked=radio_data.locked;
         receivers=ntohs(radio_data.receivers);
         can_transmit=radio_data.can_transmit;
-//TEMP
-can_transmit=0;
+
+	can_transmit=0;  // forced temporarily until Client/Server supports transmitters
+
         step=ntohll(radio_data.step);
         split=radio_data.split;
         sat_mode=radio_data.sat_mode;
