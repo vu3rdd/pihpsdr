@@ -463,9 +463,9 @@ static void load_original_cb(GtkWidget *widget,gpointer user_data) {
   if(res==GTK_RESPONSE_ACCEPT) {
     char *loadfilename=gtk_file_chooser_get_filename(chooser);
     clear_cb(NULL,NULL);
-    MIDIstartup(loadfilename);
-    g_free(loadfilename);
+    ReadLegacyMidiFile(loadfilename);
     load_store();
+    g_free(loadfilename);
   }
   gtk_widget_destroy(load_dialog);
 }

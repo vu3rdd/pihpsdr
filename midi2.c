@@ -301,7 +301,7 @@ static int keyword2action(char *s) {
     return NO_ACTION;
 }
 
-int MIDIstartup(char *filename) {
+int ReadLegacyMidiFile(char *filename) {
     FILE *fpin;
     char zeile[255];
     char *cp,*cq;
