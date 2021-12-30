@@ -328,26 +328,27 @@ extern GMutex property_mutex;
 extern gboolean server;
 #endif
 
-extern void radio_stop();
-extern void reconfigure_radio();
-extern void start_radio();
-//extern void init_radio();
+extern void radio_stop(void);
+extern void reconfigure_radio(void);
+extern void start_radio(void);
+//extern void init_radio(void);
 extern void radio_change_receivers(int r);
 extern void radio_change_sample_rate(int rate);
-extern void radio_band_changed();
+extern void set_alex_antennas(void);
+extern void tx_vfo_changed(void);
 extern void radio_set_split(int v);
 extern void setMox(int state);
-extern int getMox();
+extern int getMox(void);
 extern void setTune(int state);
-extern int getTune();
+extern int getTune(void);
 extern void vox_changed(int state);
 extern void frequency_changed(RECEIVER *rx);
-extern double getDrive();
+extern double getDrive(void);
 extern void setDrive(double d);
-extern void calcDriveLevel();
-extern double getTuneDrive();
+extern void calcDriveLevel(void);
+extern double getTuneDrive(void);
 extern void setTuneDrive(double d);
-extern void calcTuneDriveLevel();
+extern void calcTuneDriveLevel(void);
 extern void setSquelch(RECEIVER *rx);
 
 extern void radio_set_rf_gain(RECEIVER *rx);
@@ -355,22 +356,22 @@ extern void radio_set_rf_gain(RECEIVER *rx);
 extern void set_attenuation(int value);
 extern void set_alex_attenuation(int v);
 
-extern int isTransmitting();
+extern int isTransmitting(void);
 
 extern void setFrequency(long long f);
-extern long long getFrequency();
+extern long long getFrequency(void);
 
-extern void radioRestoreState();
-extern void radioSaveState();
+extern void radioRestoreState(void);
+extern void radioSaveState(void);
 
-extern void calculate_display_average();
+extern void calculate_display_average(RECEIVER *rx);
 
 extern void set_filter_type(int filter_type);
 extern void set_filter_size(int filter_size);
 
 extern void radio_change_region(int region);
 
-extern void disable_rigctl();
+extern void disable_rigctl(void);
 
 #ifdef CLIENT_SERVER
 extern int remote_start(void *data);

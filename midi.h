@@ -102,8 +102,7 @@ extern int midi_debug;
 
 //
 // Layer-1 entry point, called once for all the MIDI devices
-// that have been defined. This is called upon startup by
-// Layer-2 through the function MIDIstartup.
+// that have been defined.
 //
 void register_midi_device(int index);
 void close_midi_device(int index);
@@ -115,14 +114,11 @@ void configure_midi_device(gboolean state);
 // When Layer-1 has received a MIDI message, it calls
 // NewMidiEvent.
 //
-// MIDIstartup looks for files containing descriptions for MIDI
-// devices and calls the Layer-1 function register_midi_device
-// for each device description that was successfully read.
 
 void NewMidiEvent(enum MIDIevent event, int channel, int note, int val);
-int MIDIstartup(char *filename);
+int ReadLegacyMidiFile(char *filename);
 void MidiAddCommand(int note, struct desc *desc);
-void MidiReleaseCommands();
+void MidiReleaseCommands(void);
 
 //
 // Layer-3 entry point (called by Layer2). In Layer-3, all the pihpsdr

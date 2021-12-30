@@ -33,7 +33,7 @@ extern void update_att_preamp(void);
 
 extern int sliders_active_receiver_changed(void *data);
 extern void update_agc_gain(double gain);
-extern void update_af_gain();
+extern void update_af_gain(void);
 extern int update_mic_gain(void *);
 extern int update_drive(void *);
 extern int update_tune_drive(void *);
@@ -49,12 +49,12 @@ extern void set_filter_width(int rx,int width);
 extern void set_filter_shift(int rx,int width);
 extern GtkWidget *sliders_init(int my_width, int my_height);
 
-extern void sliders_update();
+extern void sliders_update(void);
 
 extern void set_squelch(RECEIVER *rx);
 extern void set_compression(TRANSMITTER *tx);
 
-extern void show_diversity_gain();
-extern void show_diversity_phase();
+extern void show_diversity_gain(void);
+extern void show_diversity_phase(void);
 
 #endif

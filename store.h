@@ -38,8 +38,8 @@ struct _MEM_STORE {
 typedef struct _MEM_STORE MEM; 
 
 extern MEM mem[];
-void memRestoreState(); 
-void memSaveState(); 
+void memRestoreState(void); 
+void memSaveState(void); 
 void recall_memory_slot(int index);
 void store_memory_slot(int index);
 

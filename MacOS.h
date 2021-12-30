@@ -2,8 +2,8 @@
  *  Some functions are possibly missing on MacOS and in this case
  *  are replaced with "static inline" functions:
  *
- *  clock_gettime()
- *  clock_nanosleep()
+ *  clock_gettime(void)
+ *  clock_nanosleep(void)
  */
 
 #ifdef __APPLE__
