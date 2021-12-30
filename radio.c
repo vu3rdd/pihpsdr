@@ -1902,19 +1902,15 @@ void set_attenuation(int value) {
     }
 }
 
-//
-// Upon each band change, the TX mode needs be specified again.
-// For HPSDR, one also needs new RX/TX antenna and PA calibration/disable settings.
-// For TX, this must also happen when changing the active receiver or the "split" status.
-// To avoid code duplications, the necessary actions are bundled here.
-// If the attenuation is stored with the band, this should also be adjusted here
-//
-void radio_band_changed() {
+void set_alex_antennas() {
+  //
+  // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
+  // This function is a no-op when running SOAPY.
+  // This function also takes care of updating the PA dis/enable
+  // status for P2.
+  //
   BAND *band;
   if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
-    //
-    // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
-    //
     band=band_get_band(vfo[VFO_A].band);
     receiver[0]->alex_antenna=band->alexRxAntenna;
     receiver[0]->alex_attenuation=band->alexAttenuation;
@@ -1924,21 +1920,38 @@ void radio_band_changed() {
       transmitter->alex_antenna=band->alexTxAntenna;
     }
   }
-  if (can_transmit) {
-    tx_set_mode(transmitter,get_tx_mode());
-    calcDriveLevel();
-  }
-
   if (protocol == NEW_PROTOCOL) {
     schedule_high_priority();         // possibly update RX/TX antennas
     schedule_general();               // possibly update PA disable
   }
 }
 
-//
-// For HPSDR, only receiver[0]->alex_attenuation has an effect
-//
+void tx_vfo_changed() {
+  //
+  // When changing the active receiver or changing the split status,
+  // the VFO that controls the transmitter my flip between VFOA/VFOB.
+  // In these cases, we have to update the TX mode,
+  // and re-calculate the drive level from the band-specific PA calibration
+  // values. For SOAPY, the only thing to do is the update the TX mode.
+  //
+  // Note each time tx_vfo_changed() is called, calling set_alex_antennas()
+  // is also due.
+  //
+  if (can_transmit) {
+    tx_set_mode(transmitter,get_tx_mode());
+    calcDriveLevel();
+  }
+  if (protocol == NEW_PROTOCOL) {
+    schedule_high_priority();         // possibly update RX/TX antennas
+    schedule_general();               // possibly update PA disable
+  }
+}
+
 void set_alex_attenuation(int v) {
+    //
+    // The value of the "old" ALEX step-attenuator is stored in
+    // the receiver[0] data structure
+    //
     BAND *band;
     if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
       //
@@ -1954,13 +1967,15 @@ void set_alex_attenuation(int v) {
     }
 }
 
-//
-// Interface to set split state
-//
 void radio_set_split(int val) {
+  //
+  // "split" *must only* be set through this interface,
+  // since it may change the TX band
+  //
   if (can_transmit) {
     split=val;
-    radio_band_changed();
+    tx_vfo_changed();
+    set_alex_antennas();
     g_idle_add(ext_vfo_update, NULL);
   }
 }

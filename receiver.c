@@ -94,7 +94,11 @@ void receiver_set_active(RECEIVER *rx) {
   g_idle_add(ext_vfo_update,NULL);
   g_idle_add(zoompan_active_receiver_changed,NULL);
   g_idle_add(sliders_active_receiver_changed,NULL);
-  radio_band_changed();
+  //
+  // Changing the active receiver flips the TX vfo
+  //
+  tx_vfo_changed();
+  set_alex_antennas();
 }
 
 gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {

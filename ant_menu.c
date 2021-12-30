@@ -65,7 +65,7 @@ static void rx_ant_cb(GtkToggleButton *widget, gpointer data) {
     int ant=(GPOINTER_TO_UINT(data))&0xF;
     BAND *band=band_get_band(b);
     band->alexRxAntenna=ant;
-    radio_band_changed();
+    set_alex_antennas();
   }
 }
 
@@ -99,7 +99,7 @@ static void tx_ant_cb(GtkToggleButton *widget, gpointer data) {
     int ant=(GPOINTER_TO_UINT(data))&0xF;
     BAND *band=band_get_band(b);
     band->alexTxAntenna=ant;
-    radio_band_changed();
+    set_alex_antennas();
   }
 }
 

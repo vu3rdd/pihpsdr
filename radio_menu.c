@@ -294,7 +294,7 @@ void load_filters(void) {
     case APOLLO:
     case CHARLY25:
         // This is most likely not necessary here, but can do no harm
-        radio_band_changed();
+        set_alex_antennas();
         break;
     case NONE:
         break;

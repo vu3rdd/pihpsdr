@@ -438,18 +438,18 @@ void vfo_band_changed(int id,int b) {
       }
       break;
   }
-  radio_band_changed();
-
-  switch(protocol) {
-    case NEW_PROTOCOL:
-      schedule_general();
-      break;
+  tx_vfo_changed(); 
+  set_alex_antennas();  // This includes scheduling hiprio and general packets
 #ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_set_rx_frequency(active_receiver,id);
-      break;
-#endif
+  //
+  // This is strange, since it already done via receiver_vfo_changed()
+  // correctly and the present code seems to be wrong if
+  // (receivers == 1 && id == 1) or (receivers == 2 && id == 0)
+  //
+  if (protocol == SOAPYSDR_PROTOCOL) {
+    soapy_protocol_set_rx_frequency(active_receiver,id);
   }
+#endif
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -477,13 +477,9 @@ void vfo_bandstack_changed(int b) {
       }
       break;
   }
-  //
-  // I do not think the band can change within this function.
-  // But out of paranoia, I consider this possiblity here
-  //
-  radio_band_changed();
+  tx_vfo_changed(); 
+  set_alex_antennas();  // This includes scheduling hiprio and general packets
   g_idle_add(ext_vfo_update,NULL);
-
 }
 
 void vfo_mode_changed(int m) {
@@ -567,7 +563,8 @@ void vfo_a_to_b() {
   if(receivers==2) {
     receiver_vfo_changed(receiver[1]);
   }
-  radio_band_changed();
+  tx_vfo_changed();
+  set_alex_antennas();  // This includes scheduling hiprio and general packets
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -585,7 +582,8 @@ void vfo_b_to_a() {
   vfo[VFO_A].offset=vfo[VFO_B].offset;
 
   receiver_vfo_changed(receiver[0]);
-  radio_band_changed();
+  tx_vfo_changed();
+  set_alex_antennas();  // This includes scheduling hiprio and general packets
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -642,7 +640,8 @@ void vfo_a_swap_b() {
   if(receivers==2) {
     receiver_vfo_changed(receiver[1]);
   }
-  radio_band_changed();
+  tx_vfo_changed();
+  set_alex_antennas();  // This includes scheduling hiprio and general packets
   g_idle_add(ext_vfo_update,NULL);
 }
 
@@ -1518,6 +1517,8 @@ void vfo_set_frequency(int v,long long f) {
     if (receivers == 2) {
       // VFO v controls a running  WDSP receiver,
       // need to "manually change" it.
+      // DO NOT DO IT HERE. Better add a "RECEIVER *rx" argument
+      // to setFrequency in radio.c
     }
   }
   g_idle_add(ext_vfo_update, NULL);
