@@ -72,12 +72,12 @@ static void comp_cb(GtkWidget *widget, gpointer data) {
 
 static void tx_spin_low_cb (GtkWidget *widget, gpointer data) {
   tx_filter_low=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  tx_set_filter(transmitter,tx_filter_low,tx_filter_high);
+  tx_set_filter(transmitter);
 }
 
 static void tx_spin_high_cb (GtkWidget *widget, gpointer data) {
   tx_filter_high=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-  tx_set_filter(transmitter,tx_filter_low,tx_filter_high);
+  tx_set_filter(transmitter);
 }
 
 static void micboost_cb(GtkWidget *widget, gpointer data) {
@@ -128,30 +128,8 @@ static void tune_percent_cb (GtkWidget *widget, gpointer data) {
 
 static void use_rx_filter_cb(GtkWidget *widget, gpointer data) {
   transmitter->use_rx_filter=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-  int filter_low,filter_high;
 
-  if(transmitter->use_rx_filter) {
-    int m=vfo[active_receiver->id].mode;
-    if(m==modeFMN) {
-      if(active_receiver->deviation==2500) {
-        filter_low=-4000;
-        filter_high=4000;
-      } else {
-        filter_low=-8000;
-        filter_high=8000;
-      }
-    } else {
-      FILTER *mode_filters=filters[m];
-      FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
-      filter_low=filter->low;
-      filter_high=filter->high;
-    }
-  } else {
-    filter_low=tx_filter_low;
-    filter_high=tx_filter_high;
-  }
-
-  tx_set_filter(transmitter,filter_low,filter_high);
+  tx_set_filter(transmitter);
 
   if(transmitter->use_rx_filter) {
     gtk_widget_set_sensitive (tx_spin_low, FALSE);
@@ -228,7 +206,7 @@ g_print("local_input_changed_cp: %d %s\n",i,input_devices[i].name);
 }
 
 static gboolean emp_cb (GtkWidget *widget, gpointer data) {
-  pre_emphasize=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  pre_emphasize=!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
   tx_set_pre_emphasize(transmitter,pre_emphasize);
   return FALSE;
 }
@@ -504,7 +482,7 @@ void tx_menu(GtkWidget *parent) {
   col=0;
 
   GtkWidget *emp_b=gtk_check_button_new_with_label("FM TX Pre-emphasize before limiting");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), pre_emphasize);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (emp_b), !pre_emphasize);
   gtk_widget_show(emp_b);
   gtk_grid_attach(GTK_GRID(grid),emp_b,col,row,2,1);
   g_signal_connect(emp_b,"toggled",G_CALLBACK(emp_cb),NULL);

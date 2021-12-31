@@ -351,7 +351,12 @@ int main(int argc, char **argv) {
 
   char name[1024];
 
-  sprintf(name, "com.verdure.sdr.pid%d", getpid());
+#ifdef __APPLE__
+  void MacOSstartup(char *path);
+  MacOSstartup(argv[0]);
+#endif
+
+  sprintf(name,"org.g0orx.pihpsdr.pid%d",getpid());
 
   // fprintf(stderr,"gtk_application_new: %s\n",name);
 

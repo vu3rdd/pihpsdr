@@ -886,52 +886,303 @@ static int ts2000_mode(int m) {
 gboolean parse_extended_cmd(char *command, CLIENT *client) {
   gboolean implemented = TRUE;
   char reply[256];
-  reply[0] = '\0';
-  switch (command[2]) {
-  case 'A': // ZZAx
-    switch (command[3]) {
-    case 'A': // ZZAA
-      implemented = FALSE;
-      break;
-    case 'B': // ZZAB
-      implemented = FALSE;
-      break;
-    case 'C': // ZZAC
-      // sets or reads the Step Size
-      if (command[4] == ';') {
-        // read the step size
-        int i = 0;
-        for (i = 0; i <= 14; i++) {
-          if (steps[i] == step)
-            break;
-        }
-        if (i <= 14) {
-          // send reply back
-          sprintf(reply, "ZZAC%02d;", i);
-          send_resp(client->fd, reply);
-        }
-      } else if (command[6] == ';') {
-        // set the step size
-        int i = atoi(&command[4]);
-        if (i >= 0 && i <= 14) {
-          step = steps[i];
-          vfo_update();
-        }
-      } else {
+  reply[0]='\0';
+  switch(command[2]) {
+    case 'A': //ZZAx
+      switch(command[3]) {
+        case 'A': //ZZAA
+          implemented=FALSE;
+          break;
+        case 'B': //ZZAB
+          implemented=FALSE;
+          break;
+        case 'C': //ZZAC
+          // sets or reads the Step Size
+          if(command[4]==';') {
+            // read the step size
+           sprintf(reply,"ZZAC%02d;",vfo_get_stepindex());
+           send_resp(client->fd,reply) ;
+          } else if(command[6]==';') {
+            // set the step size
+            int i=atoi(&command[4]) ;
+            vfo_set_step_from_index(i);
+            vfo_update();
+          } else {
+          }
+          break;
+        case 'D': //ZZAD
+          // move VFO A down by selected step
+          if(command[6]==';') {
+            int step_index=atoi(&command[4]);
+            long long hz = (long long) vfo_get_step_from_index(step_index);
+            vfo_id_move(VFO_A,-hz,FALSE);
+          } else {
+          }
+          break;
+        case 'E': //ZZAE
+          // move VFO A down nn tune steps
+          if(command[6]==';') {
+            int steps=atoi(&command[4]);
+            vfo_id_step(VFO_A,-steps);
+          }
+          break;
+        case 'F': //ZZAF
+          // move VFO A up nn tune steps
+          if(command[6]==';') {
+            int steps=atoi(&command[4]);
+            vfo_id_step(VFO_A,steps);
+          }
+          break;
+        case 'G': //ZZAG
+          // read/set audio gain
+          if(command[4]==';') {
+            // send reply back
+            sprintf(reply,"ZZAG%03d;",(int)(active_receiver->volume*100.0));
+            send_resp(client->fd,reply) ;
+          } else {
+            int gain=atoi(&command[4]);
+            active_receiver->volume=(double)gain/100.0;
+            update_af_gain();
+          }
+          break;
+        case 'I': //ZZAI
+          implemented=FALSE;
+          break;
+        case 'P': //ZZAP
+          implemented=FALSE;
+          break;
+        case 'R': //ZZAR
+          // read/set RX0 AGC Threshold
+          if(command[4]==';') {
+            // send reply back
+            sprintf(reply,"ZZAR%+04d;",(int)(receiver[0]->agc_gain));
+            send_resp(client->fd,reply) ;
+          } else {
+            int threshold=atoi(&command[4]);
+            set_agc_gain(VFO_A,(double)threshold);
+          }
+          break;
+        case 'S': //ZZAS
+          // read/set RX1 AGC Threshold
+          if(receivers==2) {
+            if(command[4]==';') {
+              // send reply back
+              sprintf(reply,"ZZAS%+04d;",(int)(receiver[1]->agc_gain));
+              send_resp(client->fd,reply) ;
+            } else {
+              int threshold=atoi(&command[4]);
+              set_agc_gain(VFO_B,(double)threshold);
+            }
+          }
+          break;
+        case 'T': //ZZAT
+          implemented=FALSE;
+          break;
+        case 'U': //ZZAU
+          // move VFO A up by selected step
+          if(command[6]==';') {
+            int step_index=atoi(&command[4]);
+            long long hz = (long long) vfo_get_step_from_index(step_index);
+            vfo_id_move(VFO_A, hz, FALSE);
+          } else {
+          }
+          break;
+        default:
+           implemented=FALSE;
+           break;
       }
       break;
-    case 'D': // ZZAD
-      // move VFO A down by selected step
-      if (command[6] == ';') {
-        int step_index = atoi(&command[4]);
-        long long hz = 0;
-        if (step_index >= 0 && step_index <= 14) {
-          hz = (long long)steps[step_index];
-        }
-        if (hz != 0LL) {
-          vfo_id_move(VFO_A, -hz, FALSE);
-        }
-      } else {
+    case 'B': //ZZBx
+      switch(command[3]) {
+        case 'A': //ZZBA
+          // move RX2 down one band
+          if(command[4]==';') {
+            if(receivers==2) {
+              band_minus(receiver[1]->id);
+            }
+          }
+          break;
+        case 'B': //ZZBB
+          // move RX2 up one band
+          if(command[4]==';') {
+            if(receivers==2) {
+              band_plus(receiver[1]->id);
+            }
+          }
+          break;
+        case 'D': //ZZBD
+          // move RX1 down one band
+          if(command[4]==';') {
+            band_minus(receiver[0]->id);
+          }
+          break;
+        case 'E': //ZZBE
+          // move VFO B down nn tune steps
+          if(command[6]==';') {
+            int steps=atoi(&command[4]);
+            vfo_id_step(VFO_B,-steps);
+          }
+
+          break;
+        case 'F': //ZZBF
+          // move VFO B up nn tune steps
+          if(command[6]==';') {
+            int steps=atoi(&command[4]);
+            vfo_id_step(VFO_B,+steps);
+          }
+          break;
+        case 'G': //ZZBG
+          implemented=FALSE;
+          break;
+        case 'I': //ZZBI
+          implemented=FALSE;
+          break;
+        case 'M': //ZZBM
+          // move VFO B down by selected step
+          if(command[6]==';') {
+            int step_index=atoi(&command[4]);
+            long long hz = (long long) vfo_get_step_from_index(step_index);
+            vfo_id_move(VFO_B,-hz,FALSE);
+          } else {
+          }
+
+          break;
+        case 'P': //ZZBP
+          // move VFO B up by selected step
+          if(command[6]==';') {
+            int step_index=atoi(&command[4]);
+            long long hz = (long long) vfo_get_step_from_index(step_index);
+            vfo_id_move(VFO_B,hz,FALSE);
+          } else {
+          }
+          break;
+        case 'R': //ZZBR
+          implemented=FALSE;
+          break;
+        case 'S': //ZZBS
+          // set/read RX1 band switch
+          if(command[4]==';') {
+            int b;
+            switch(vfo[VFO_A].band) {
+              case band136:
+                b=136;
+                break;
+              case band472:
+                b=472;
+                break;
+              case band160:
+                b=160;
+                break;
+              case band80:
+                b=80;
+                break;
+              case band60:
+                b=60;
+                break;
+              case band40:
+                b=40;
+                break;
+              case band30:
+                b=30;
+                break;
+              case band20:
+                b=20;
+                break;
+              case band17:
+                b=17;
+                break;
+              case band15:
+                b=15;
+                break;
+              case band12:
+                b=12;
+                break;
+              case band10:
+                b=10;
+                break;
+              case band6:
+                b=6;
+                break;
+              case bandGen:
+                b=888;
+                break;
+              case bandWWV:
+                b=999;
+                break;
+              default:
+                b=20;
+                break;
+            }
+            sprintf(reply,"ZZBS%03d;",b);
+            send_resp(client->fd,reply) ;
+          } else if(command[7]==';') {
+            int band=band20;
+            int b=atoi(&command[4]);
+            switch(b) {
+              case 136:
+                band=band136;
+                break;
+              case 472:
+                band=band472;
+                break;
+              case 160:
+                band=band160;
+                break;
+              case 80:
+                band=band80;
+                break;
+              case 60:
+                band=band60;
+                break;
+              case 40:
+                band=band40;
+                break;
+              case 30:
+                band=band30;
+                break;
+              case 20:
+                band=band20;
+                break;
+              case 17:
+                band=band17;
+                break;
+              case 15:
+                band=band15;
+                break;
+              case 12:
+                band=band12;
+                break;
+              case 10:
+                band=band10;
+                break;
+              case 6:
+                band=band6;
+                break;
+              case 888:
+                band=bandGen;
+                break;
+              case 999:
+                band=bandWWV;
+                break;
+            }
+            vfo_band_changed(VFO_A,band);
+          }
+          break;
+        case 'T': //ZZBT
+          // set/read RX2 band switch
+          break;
+        case 'U': //ZZBU
+          // move RX1 up one band
+          if(command[4]==';') {
+            band_plus(receiver[0]->id);
+          }
+          break;
+        case 'Y': //ZZBY
+          // closes console (ignored)
+          break;
+        default:
+           implemented=FALSE;
+           break;
       }
       break;
     case 'E': // ZZAE
@@ -2734,19 +2985,1121 @@ int parse_cmd(void *data) {
   gboolean implemented = TRUE;
   gboolean errord = FALSE;
 
-  switch (command[0]) {
-  case '#':
-    switch (command[1]) {
+  switch(command[0]) {
+    case 'A':
+      switch(command[1]) {
+        case 'C': //AC
+          // set/read internal atu status
+          implemented=FALSE;
+          break;
+        case 'G': //AG
+          // set/read AF Gain
+          if(command[2]==';') {
+            // send reply back (covert from 0..1 to 0..255)
+            sprintf(reply,"AG0%03d;",(int)(receiver[0]->volume*255.0));
+            send_resp(client->fd,reply) ;
+          } else if(command[6]==';') {
+            int gain=atoi(&command[3]);
+            receiver[0]->volume=(double)gain/255.0;
+            update_af_gain();
+          }
+          break;
+        case 'I': //AI
+          // set/read Auto Information
+          implemented=FALSE;
+          break;
+        case 'L': // AL
+          // set/read Auto Notch level
+          implemented=FALSE;
+          break;
+        case 'M': // AM
+          // set/read Auto Mode
+          implemented=FALSE;
+          break;
+        case 'N': // AN
+          // set/read Antenna Connection
+          implemented=FALSE;
+          break;
+        case 'S': // AS
+          // set/read Auto Mode Function Parameters
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'B':
+      switch(command[1]) {
+        case 'C': //BC
+          // set/read Beat Canceller
+          implemented=FALSE;
+          break;
+        case 'D': //BD
+          //band down 1 band
+          band_minus(receiver[0]->id);
+          break;
+        case 'P': //BP
+          // set/read Manual Beat Canceller frequency
+          implemented=FALSE;
+          break;
+        case 'U': //BU
+          //band up 1 band
+          band_plus(receiver[0]->id);
+          break;
+        case 'Y': //BY
+          // read busy signal
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'C':
+      switch(command[1]) {
+        case 'A': //CA
+          // set/read CW Auto Tune
+          implemented=FALSE;
+          break;
+        case 'G': //CG
+          // set/read Carrier Gain
+          implemented=FALSE;
+          break;
+        case 'I': //CI
+          // sets the current frequency to the CALL Channel
+          implemented=FALSE;
+          break;
+        case 'M': //CM
+          // sets/reads the Packet Cluster Tune function
+          implemented=FALSE;
+          break;
+        case 'N': //CN
+          // sets/reads CTCSS function
+          if(command[3]==';') {
+            sprintf(reply,"CN%02d;",transmitter->ctcss+1);
+            send_resp(client->fd,reply) ;
+          } else if(command[4]==';') {
+            int i=atoi(&command[2])-1;
+            transmitter_set_ctcss(transmitter,transmitter->ctcss_enabled,i);
+          }
+          break;
+        case 'T': //CT
+          // sets/reads CTCSS status
+          if(command[3]==';') {
+            sprintf(reply,"CT%d;",transmitter->ctcss_enabled);
+            send_resp(client->fd,reply) ;
+          } else if(command[3]==';') {
+            int state=atoi(&command[2]);
+            transmitter_set_ctcss(transmitter,state,transmitter->ctcss);
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'D':
+      switch(command[1]) {
+        case 'C': //DC
+          // set/read TX band status
+          implemented=FALSE;
+          break;
+        case 'N': //DN
+          // move VFO A down 1 step size
+          vfo_id_step(VFO_A,-1);
+          break;
+        case 'Q': //DQ
+          // set/read DCS function status
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'E':
+      switch(command[1]) {
+        case 'X': //EX
+          // set/read the extension menu
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'F':
+      switch(command[1]) {
+        case 'A': //FA
+          // set/read VFO-A frequency
+          if(command[2]==';') {
+            if(vfo[VFO_A].ctun) {
+              sprintf(reply,"FA%011lld;",vfo[VFO_A].ctun_frequency);
+            } else {
+              sprintf(reply,"FA%011lld;",vfo[VFO_A].frequency);
+            }
+            send_resp(client->fd,reply) ;
+          } else if(command[13]==';') {
+            long long f=atoll(&command[2]);
+            local_set_frequency(VFO_A,f);
+            vfo_update();
+          }
+          break;
+        case 'B': //FB
+          // set/read VFO-B frequency
+          if(command[2]==';') {
+            if(vfo[VFO_B].ctun) {
+              sprintf(reply,"FB%011lld;",vfo[VFO_B].ctun_frequency);
+            } else {
+              sprintf(reply,"FB%011lld;",vfo[VFO_B].frequency);
+            }
+            send_resp(client->fd,reply) ;
+          } else if(command[13]==';') {
+            long long f=atoll(&command[2]);
+            local_set_frequency(VFO_B,f);
+            vfo_update();
+          }
+          break;
+        case 'C': //FC
+          // set/read the sub receiver VFO frequency menu
+          implemented=FALSE;
+          break;
+        case 'D': //FD
+          // set/read the filter display dot pattern
+          implemented=FALSE;
+          break;
+        case 'R': //FR
+          // set/read transceiver receive VFO
+          if(command[2]==';') {
+            sprintf(reply,"FR%d;",active_receiver->id);
+            send_resp(client->fd,reply) ;
+          } else if(command[3]==';') {
+            int id=atoi(&command[2]);
+            switch(id) {
+              case 0:
+                active_receiver=receiver[id];
+                break;
+              case 1:
+                if(receivers==2) {
+                  active_receiver=receiver[id];
+                } else {
+                  implemented=FALSE;
+                }
+                break;
+              default:
+                implemented=FALSE;
+                break;
+            }
+          }
+          break;
+        case 'S': //FS
+          // set/read the fine tune function status
+          implemented=FALSE;
+          break;
+        case 'T': //FT
+          // set/read transceiver transmit VFO
+          if(command[2]==';') {
+            sprintf(reply,"FT%d;",split);
+            send_resp(client->fd,reply) ;
+          } else if(command[3]==';') {
+            split=atoi(&command[2]);
+            tx_set_mode(transmitter,get_tx_mode());
+            vfo_update();
+          }
+          break;
+        case 'W': //FW
+          // set/read filter width. Switch to Var1 only when setting
+          if(command[2]==';') {
+            int val=0;
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            switch(vfo[active_receiver->id].mode) {
+              case modeCWL:
+              case modeCWU:
+                val=filter->low*2;
+                break;
+              case modeAM:
+              case modeSAM:
+                val=filter->low>=-4000;
+                break;
+              case modeFMN:
+                val=active_receiver->deviation==5000;
+                break;
+              default:
+                implemented=FALSE;
+                break;
+            }
+            if(implemented) {
+              sprintf(reply,"FW%04d;",val);
+              send_resp(client->fd,reply) ;
+            }
+          } else if(command[6]==';') {
+            // make sure filter is filterVar1
+            if(vfo[active_receiver->id].filter!=filterVar1) {
+              vfo_filter_changed(filterVar1);
+            }
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[filterVar1];
+            int fw=atoi(&command[2]);
+            filter->low=fw;
+            switch(vfo[active_receiver->id].mode) {
+              case modeCWL:
+              case modeCWU:
+                filter->low=fw/2;
+                filter->high=fw/2;
+                break;
+              case modeFMN:
+                if(fw==0) {
+                  filter->low=-5500;
+                  filter->high=5500;
+                  active_receiver->deviation=2500;
+                } else {
+                  filter->low=-8000;
+                  filter->high=8000;
+                  active_receiver->deviation=5000;
+                }
+                break;
+              case modeAM:
+              case modeSAM:
+                if(fw==0) {
+                  filter->low=-4000;
+                  filter->high=4000;
+                } else {
+                  filter->low=-8000;
+                  filter->high=8000;
+                }
+                break;
+              default:
+                implemented=FALSE;
+                break;
+            }
+            if(implemented) {
+              vfo_filter_changed(filterVar1);
+            }
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'G':
+      switch(command[1]) {
+        case 'T': //GT
+          // set/read RX1 AGC
+          if(command[2]==';') {
+            sprintf(reply,"GT%03d;",receiver[0]->agc*5);
+            send_resp(client->fd,reply) ;
+          } else if(command[5]==';') {
+            // update RX1 AGC
+            receiver[0]->agc=atoi(&command[2])/5;
+            vfo_update();
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'H':
+      switch(command[1]) {
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'I':
+      switch(command[1]) {
+        case 'D': //ID
+          // get ID
+          strcpy(reply,"ID019;"); // TS-2000
+          send_resp(client->fd,reply);
+          break;
+        case 'F': //IF
+          {
+          int mode=ts2000_mode(vfo[VFO_A].mode);
+          sprintf(reply,"IF%011lld%04lld%+06lld%d%d%d%02d%d%d%d%d%d%d%02d%d;",
+                  vfo[VFO_A].ctun?vfo[VFO_A].ctun_frequency:vfo[VFO_A].frequency,
+                  step,vfo[VFO_A].rit,vfo[VFO_A].rit_enabled,transmitter==NULL?0:transmitter->xit_enabled,
+                  0,0,isTransmitting(),mode,0,0,split,transmitter->ctcss_enabled?2:0,transmitter->ctcss,0);
+          send_resp(client->fd,reply);
+          }
+          break;
+        case 'S': //IS
+          // set/read IF shift
+          if(command[2]==';') {
+            strcpy(reply,"IS 0000;");
+            send_resp(client->fd,reply);
+          } else {
+            implemented=FALSE;
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'J':
+      switch(command[1]) {
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'K':
+      switch(command[1]) {
+        case 'S': //KS
+          // set/read keying speed
+          if(command[2]==';') {
+            sprintf(reply,"KS%03d;",cw_keyer_speed);
+            send_resp(client->fd,reply);
+          } else if(command[5]==';') {
+            int speed=atoi(&command[2]);
+            if(speed>=1 && speed<=60) {
+              cw_keyer_speed=speed;
+#ifdef LOCALCW
+              keyer_update();
+#endif
+              vfo_update();
+            }
+          } else {
+          }
+          break;
+        case 'Y': //KY
+          // convert the chaaracters into Morse Code
+          if(command[2]==';') {
+            sprintf(reply,"KY%d;",cw_busy);
+            send_resp(client->fd,reply);
+          } else if(command[27]==';') {
+            if(cw_busy==0) {
+              strncpy(cw_buf,&command[3],24);
+              cw_busy=1;
+            }
+          } else {
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'L':
+      switch(command[1]) {
+        case 'K': //LK
+          // set/read key lock
+          if(command[2]==';') {
+            sprintf(reply,"LK%d%d;",locked,locked);
+            send_resp(client->fd,reply);
+          } else if(command[27]==';') {
+            locked=command[2]=='1';
+            vfo_update();
+          }
+          break;
+        case 'M': //LM
+          // set/read keyer recording status
+          implemented=FALSE;
+          break;
+        case 'T': //LT
+          // set/read ALT fucntion status
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'M':
+      switch(command[1]) {
+        case 'C': //MC
+          // set/read Memory Channel
+          implemented=FALSE;
+          break;
+        case 'D': //MD
+          // set/read operating mode
+          if(command[2]==';') {
+            int mode=ts2000_mode(vfo[VFO_A].mode);
+            sprintf(reply,"MD%d;",mode);
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            int mode=modeUSB;
+            switch(atoi(&command[2])) {
+              case 1:
+                mode=modeLSB;
+                break;
+              case 2:
+                mode=modeUSB;
+                break;
+              case 3:
+                mode=modeCWU;
+                break;
+              case 4:
+                mode=modeFMN;
+                break;
+              case 5:
+                mode=modeAM;
+                break;
+              case 6:
+                mode=modeDIGL;
+                break;
+              case 7:
+                mode=modeCWL;
+                break;
+              case 9:
+                mode=modeDIGU;
+                break;
+              default:
+                break;
+            }
+            vfo_mode_changed(mode);
+          }
+          break;
+        case 'F': //MF
+          // set/read Menu
+          implemented=FALSE;
+          break;
+        case 'G': //MG
+          // set/read Menu Gain (-12..60 converts to 0..100)
+          if(command[2]==';') {
+            sprintf(reply,"MG%03d;",(int)(((mic_gain+12.0)/72.0)*100.0));
+            send_resp(client->fd,reply);
+          } else if(command[5]==';') {
+            double gain=(double)atoi(&command[2]);
+            gain=((gain/100.0)*72.0)-12.0;
+            set_mic_gain(gain);
+          }
+          break;
+        case 'L': //ML
+          // set/read Monitor Function Level
+          implemented=FALSE;
+          break;
+        case 'O': //MO
+          // set/read Monitor Function On/Off
+          implemented=FALSE;
+          break;
+        case 'R': //MR
+          // read Memory Channel
+          implemented=FALSE;
+          break;
+        case 'U': //MU
+          // set/read Memory Group
+          implemented=FALSE;
+          break;
+        case 'W': //MW
+          // Write Memory Channel
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'N':
+      switch(command[1]) {
+        case 'B': //NB
+          // set/read noise blanker
+          if(command[2]==';') {
+            sprintf(reply,"NB%d;",active_receiver->nb);
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            active_receiver->nb=atoi(&command[2]);
+            if(active_receiver->nb) {
+              active_receiver->nb2=0;
+            }
+            update_noise();
+          }
+          break;
+        case 'L': //NL
+          // set/read noise blanker level
+          implemented=FALSE;
+          break;
+        case 'R': //NR
+          // set/read noise reduction
+          if(command[2]==';') {
+            int n=0;
+            if(active_receiver->nr) {
+              n=1;
+            } else if(active_receiver->nr2) {
+              n=2;
+            }
+            sprintf(reply,"NR%d;",n);
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            int n=atoi(&command[2]);
+            switch(n) {
+              case 0: // NR OFF
+                active_receiver->nr=0;
+                active_receiver->nr2=0;
+                break;
+              case 1: // NR ON
+                active_receiver->nr=1;
+                active_receiver->nr2=0;
+                break;
+              case 2: // NR2 ON
+                active_receiver->nr=0;
+                active_receiver->nr2=1;
+                break;
+            }
+            update_noise();
+          }
+          break;
+        case 'T': //NT
+          // set/read ANF
+          if(command[2]==';') {
+            sprintf(reply,"NT%d;",active_receiver->anf);
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            active_receiver->anf=atoi(&command[2]);
+            SetRXAANFRun(active_receiver->id, active_receiver->anf);
+            vfo_update();
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'O':
+      switch(command[1]) {
+        case 'F': //OF
+          // set/read offset frequency
+          implemented=FALSE;
+          break;
+        case 'I': //OI
+          // set/read offset frequency
+          implemented=FALSE;
+          break;
+        case 'S': //OS
+          // set/read offset function status
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'P':
+      switch(command[1]) {
+        case 'A': //PA
+          // set/read preamp function status
+          if(command[2]==';') {
+            sprintf(reply,"PA%d0;",active_receiver->preamp);
+            send_resp(client->fd,reply);
+          } else if(command[4]==';') {
+            active_receiver->preamp=command[2]=='1';
+          }
+          break;
+        case 'B': //PB
+          // set/read FRU-3A playback status
+          implemented=FALSE;
+          break;
+        case 'C': //PC
+          // set/read PA Power
+          if(command[2]==';') {
+            sprintf(reply,"PC%03d;",(int)transmitter->drive);
+            send_resp(client->fd,reply);
+          } else if(command[5]==';') {
+            set_drive((double)atoi(&command[2]));
+          }
+          break;
+        case 'I': //PI
+          // store in program memory channel
+          implemented=FALSE;
+          break;
+        case 'K': //PK
+          // read packet cluster data
+          implemented=FALSE;
+          break;
+        case 'L': //PL
+          // set/read speach processor input/output level
+          if(command[2]==';') {
+            sprintf(reply,"PL%03d000;",(int)((transmitter->compressor_level/20.0)*100.0));
+            send_resp(client->fd,reply);
+          } else if(command[8]==';') {
+            command[5]='\0';
+            double level=(double)atoi(&command[2]);
+            level=(level/100.0)*20.0;
+            transmitter_set_compressor_level(transmitter,level);
+            vfo_update();
+          }
+          break;
+        case 'M': //PM
+          // recall program memory
+          implemented=FALSE;
+          break;
+        case 'R': //PR
+          // set/read speech processor function
+          implemented=FALSE;
+          break;
+        case 'S': //PS
+          // set/read Power (always ON)
+          if(command[2]==';') {
+            sprintf(reply,"PS1;");
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            // ignore set
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'Q':
+      switch(command[1]) {
+        case 'C': //QC
+          // set/read DCS code
+          implemented=FALSE;
+          break;
+        case 'I': //QI
+          // store in quick memory
+          implemented=FALSE;
+          break;
+        case 'R': //QR
+          // set/read quick memory channel data
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
+    case 'R':
+      switch(command[1]) {
+        case 'A': //RA
+          // set/read Attenuator function
+          if(command[2]==';') {
+            int att=0;
+            if(have_rx_gain) {
+              att=(int)(adc[active_receiver->adc].attenuation+12);
+              att=(int)(((double)att/60.0)*99.0);
+            } else {
+              att=(int)(adc[active_receiver->adc].attenuation);
+              att=(int)(((double)att/31.0)*99.0);
+            }
+            sprintf(reply,"RA%02d00;",att);
+            send_resp(client->fd,reply);
+          } else if(command[4]==';') {
+            int att=atoi(&command[2]);
+            if(have_rx_gain) {
+              att=(int)((((double)att/99.0)*60.0)-12.0);
+            } else {
+              att=(int)(((double)att/99.0)*31.0);
+            }
+            set_attenuation_value((double)att);
+          }
+          break;
+        case 'C': //RC
+          // clears RIT
+          if(command[2]==';') {
+            vfo[VFO_A].rit=0;
+            vfo_update();
+          }
+          break;
+        case 'D': //RD
+          // decrements RIT Frequency
+          if(command[2]==';') {
+            if(vfo[VFO_A].mode==modeCWL || vfo[VFO_A].mode==modeCWU) {
+              vfo[VFO_A].rit-=10;
+            } else {
+              vfo[VFO_A].rit-=50;
+            }
+            vfo_update();
+          } else if(command[7]==';') {
+            vfo[VFO_A].rit=atoi(&command[2]);
+            vfo_update();
+          }
+          break;
+        case 'G': //RG
+          // set/read RF gain status
+          implemented=FALSE;
+          break;
+        case 'L': //RL
+          // set/read noise reduction level
+          implemented=FALSE;
+          break;
+        case 'M': //RM
+          // set/read meter function
+          implemented=FALSE;
+          break;
+        case 'T': //RT
+          // set/read RIT enable
+          if(command[2]==';') {
+            sprintf(reply,"RT%d;",vfo[VFO_A].rit_enabled);
+            send_resp(client->fd,reply);
+          } else if(command[3]==';') {
+            vfo[VFO_A].rit_enabled=atoi(&command[2]);
+            vfo_update();
+          }
+          break;
+        case 'U': //RU
+          // increments RIT Frequency
+          if(command[2]==';') {
+            if(vfo[VFO_A].mode==modeCWL || vfo[VFO_A].mode==modeCWU) {
+              vfo[VFO_A].rit+=10;
+            } else {
+              vfo[VFO_A].rit+=50;
+            }
+            vfo_update();
+          } else if(command[7]==';') {
+            vfo[VFO_A].rit=atoi(&command[2]);
+            vfo_update();
+          }
+          break;
+        case 'X': //RX
+          // set transceiver to RX mode
+          if(command[2]==';') {
+            mox_update(0);
+          }
+          break;
+        default:
+          implemented=FALSE;
+          break;
+      }
+      break;
     case 'S':
-      if (command[2] == ';') {
-        radioSaveState();
-        if (protocol == ORIGINAL_PROTOCOL) {
-          old_protocol_stop();
-        } else {
-          new_protocol_stop();
-        }
-        int rc = system("shutdown -h -P now");
-        _exit(0);
+      switch(command[1]) {
+        case 'A': //SA
+          // set/read stallite mode status
+          if(command[2]==';') {
+            sprintf(reply,"SA%d%d%d%d%d%d%dSAT?    ;",sat_mode==SAT_MODE|sat_mode==RSAT_MODE,0,0,0,sat_mode==SAT_MODE,sat_mode==RSAT_MODE,0);
+            send_resp(client->fd,reply);
+          } else if(command[9]==';') {
+            if(command[2]=='0') {
+              sat_mode=SAT_NONE;
+            } else if(command[2]=='1') {
+              if(command[6]=='0' && command[7]=='0') {
+                sat_mode=SAT_NONE;
+              } else if(command[6]=='1' && command[7]=='0') {
+                sat_mode=SAT_MODE;
+              } else if(command[6]=='0' && command[7]=='1') {
+                sat_mode=RSAT_MODE;
+              } else {
+                implemented=FALSE;
+              }
+            }
+          } else {
+            implemented=FALSE;
+          }
+          break;
+        case 'B': //SB
+          // set/read SUB,TF-W status
+          implemented=FALSE;
+          break;
+        case 'C': //SC
+          // set/read SCAN function status
+          implemented=FALSE;
+          break;
+        case 'D': //SD
+          // set/read CW break-in time delay
+          if(command[2]==';') {
+            sprintf(reply,"SD%04d;",(int)fmin(cw_keyer_hang_time,1000));
+            send_resp(client->fd,reply);
+          } else if(command[6]==';') {
+            int b=fmin(atoi(&command[2]),1000);
+            cw_breakin=b==0;
+            cw_keyer_hang_time=b;
+          } else {
+            implemented=FALSE;
+          }
+          break;
+        case 'H': //SH
+          // set/read filter high, switch to Var1 only when setting
+	  if(command[2]==';') {
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            int fh=5;
+            int high=filter->high;
+            if(vfo[active_receiver->id].mode==modeLSB) {
+              high=abs(filter->low);
+            }
+            if(high<=1400) {
+              fh=0;
+            } else if(high<=1600) {
+              fh=1;
+            } else if(high<=1800) {
+              fh=2;
+            } else if(high<=2000) {
+              fh=3;
+            } else if(high<=2200) {
+              fh=4;
+            } else if(high<=2400) {
+              fh=5;
+            } else if(high<=2600) {
+              fh=6;
+            } else if(high<=2800) {
+              fh=7;
+            } else if(high<=3000) {
+              fh=8;
+            } else if(high<=3400) {
+              fh=9;
+            } else if(high<=4000) {
+              fh=10;
+            } else {
+              fh=11;
+            }
+            sprintf(reply,"SH%02d;",fh);
+            send_resp(client->fd,reply) ;
+          } else if(command[4]==';') {
+            // make sure filter is filterVar1
+            if(vfo[active_receiver->id].filter!=filterVar1) {
+              vfo_filter_changed(filterVar1);
+            }
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[filterVar1];
+            int i=atoi(&command[2]);
+            int fh=100;
+            switch(vfo[active_receiver->id].mode) {
+              case modeLSB:
+              case modeUSB:
+              case modeFMN:
+                switch(i) {
+                  case 0:
+                    fh=1400;
+                    break;
+                  case 1:
+                    fh=1600;
+                    break;
+                  case 2:
+                    fh=1800;
+                    break;
+                  case 3:
+                    fh=2000;
+                    break;
+                  case 4:
+                    fh=2200;
+                    break;
+                  case 5:
+                    fh=2400;
+                    break;
+                  case 6:
+                    fh=2600;
+                    break;
+                  case 7:
+                    fh=2800;
+                    break;
+                  case 8:
+                    fh=3000;
+                    break;
+                  case 9:
+                    fh=3400;
+                    break;
+                  case 10:
+                    fh=4000;
+                    break;
+                  case 11:
+                    fh=5000;
+                    break;
+                  default:
+                    fh=100;
+                    break;
+                }
+                break;
+              case modeAM:
+              case modeSAM:
+                switch(i) {
+                  case 0:
+                    fh=10;
+                    break;
+                  case 1:
+                    fh=100;
+                    break;
+                  case 2:
+                    fh=200;
+                    break;
+                  case 3:
+                    fh=500;
+                    break;
+                  default:
+                    fh=100;
+                    break;
+                }
+                break;
+            }
+            if(vfo[active_receiver->id].mode==modeLSB) {
+              filter->low=-fh;
+            } else {
+              filter->high=fh;
+            }
+            vfo_filter_changed(filterVar1);
+          }
+          break;
+        case 'I': //SI
+          // enter satellite memory name
+          implemented=FALSE;
+          break;
+        case 'L': //SL
+          // set/read filter low, switch to Var1 only when setting
+	  if(command[2]==';') {
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
+            int fl=2;
+            int low=filter->low;
+            if(vfo[active_receiver->id].mode==modeLSB) {
+              low=abs(filter->high);
+            }
+          
+            if(low<=10) {
+              fl=0;
+            } else if(low<=50) {
+              fl=1;
+            } else if(low<=100) {
+              fl=2;
+            } else if(low<=200) {
+              fl=3;
+            } else if(low<=300) {
+              fl=4;
+            } else if(low<=400) {
+              fl=5;
+            } else if(low<=500) {
+              fl=6;
+            } else if(low<=600) {
+              fl=7;
+            } else if(low<=700) {
+              fl=8;
+            } else if(low<=800) {
+              fl=9;
+            } else if(low<=900) {
+              fl=10;
+            } else {
+              fl=11;
+            }
+            sprintf(reply,"SL%02d;",fl);
+            send_resp(client->fd,reply) ;
+          } else if(command[4]==';') {
+            // make sure filter is filterVar1
+            if(vfo[active_receiver->id].filter!=filterVar1) {
+              vfo_filter_changed(filterVar1);
+            }
+            FILTER *mode_filters=filters[vfo[active_receiver->id].mode];
+            FILTER *filter=&mode_filters[filterVar1];
+            int i=atoi(&command[2]);
+            int fl=100;
+            switch(vfo[active_receiver->id].mode) {
+              case modeLSB:
+              case modeUSB:
+              case modeFMN:
+                switch(i) {
+                  case 0:
+                    fl=10;
+                    break;
+                  case 1:
+                    fl=50;
+                    break;
+                  case 2:
+                    fl=100;
+                    break;
+                  case 3:
+                    fl=200;
+                    break;
+                  case 4:
+                    fl=300;
+                    break;
+                  case 5:
+                    fl=400;
+                    break;
+                  case 6:
+                    fl=500;
+                    break;
+                  case 7:
+                    fl=600;
+                    break;
+                  case 8:
+                    fl=700;
+                    break;
+                  case 9:
+                    fl=800;
+                    break;
+                  case 10:
+                    fl=900;
+                    break;
+                  case 11:
+                    fl=1000;
+                    break;
+                  default:
+                    fl=100;
+                    break;
+                }
+                break;
+              case modeAM:
+              case modeSAM:
+                switch(i) {
+                  case 0:
+                    fl=10;
+                    break;
+                  case 1:
+                    fl=100;
+                    break;
+                  case 2:
+                    fl=200;
+                    break;
+                  case 3:
+                    fl=500;
+                    break;
+                  default:
+                    fl=100;
+                    break;
+                }
+                break;
+            }
+            if(vfo[active_receiver->id].mode==modeLSB) {
+              filter->high=-fl;
+            } else {
+              filter->low=fl;
+            }
+            vfo_filter_changed(filterVar1);
+          }
+          break;
+        case 'M': //SM
+          // read the S meter
+          if(command[3]==';') {
+            int id=atoi(&command[2]);
+            if(id==0 || id==1) {
+              sprintf(reply,"SM%04d;",(int)receiver[id]->meter);
+              send_resp(client->fd,reply);
+            }
+          }
+          break;
+        case 'Q': //SQ
+          // set/read Squelch level
+          if(command[3]==';') {
+            int p1=atoi(&command[2]);
+            if(p1==0) { // Main receiver
+              sprintf(reply,"SQ%d%03d;",p1,(int)((double)active_receiver->squelch/100.0*255.0));
+              send_resp(client->fd,reply);
+            }
+          } else if(command[6]==';') {
+            if(command[2]=='0') {
+              int p2=atoi(&command[3]);
+              active_receiver->squelch=(int)((double)p2/255.0*100.0);
+              set_squelch(active_receiver);
+            }
+          } else {
+          }
+          break;
+        case 'R': //SR
+          // reset transceiver
+          implemented=FALSE;
+          break;
+        case 'S': //SS
+          // set/read program scan pause frequency
+          implemented=FALSE;
+          break;
+        case 'T': //ST
+          // set/read MULTI/CH channel frequency steps
+          implemented=FALSE;
+          break;
+        case 'U': //SU
+          // set/read program scan pause frequency
+          implemented=FALSE;
+          break;
+        case 'V': //SV
+          // execute memory transfer function
+          implemented=FALSE;
+          break;
+        default:
+          implemented=FALSE;
+          break;
       }
       break;
     }

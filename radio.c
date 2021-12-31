@@ -491,19 +491,19 @@ static void create_visual() {
   gtk_fixed_put(GTK_FIXED(fixed), minimize_b, VFO_WIDTH + METER_WIDTH, y);
   y += MENU_HEIGHT;
 
-  GtkWidget *menu_b = gtk_button_new_with_label("Menu");
-  gtk_widget_override_font(
-      menu_b, pango_font_description_from_string("FreeSans Bold 8"));
-  gtk_widget_set_size_request(menu_b, MENU_WIDTH, MENU_HEIGHT);
-  g_signal_connect(menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL);
-  gtk_fixed_put(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, y);
-  y += MENU_HEIGHT;
+  GtkWidget *minimize_b=gtk_button_new_with_label("Hide");
+  gtk_widget_override_font(minimize_b, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_size_request (minimize_b, MENU_WIDTH, MENU_HEIGHT);
+  g_signal_connect (minimize_b, "button-press-event", G_CALLBACK(minimize_cb), NULL) ;
+  gtk_fixed_put(GTK_FIXED(fixed),minimize_b,VFO_WIDTH+METER_WIDTH,y);
+  y+=MENU_HEIGHT;
 
-  // edit
-  GdkColor color_bg;
-  gdk_color_parse("black", &color_bg);
-  gtk_widget_modify_bg(GTK_WIDGET(minimize_b), GTK_STATE_NORMAL, &color_bg);
-  gtk_widget_modify_bg(GTK_WIDGET(menu_b), GTK_STATE_NORMAL, &color_bg);
+  GtkWidget *menu_b=gtk_button_new_with_label("Menu");
+  gtk_widget_override_font(menu_b, pango_font_description_from_string(SLIDERS_FONT));
+  gtk_widget_set_size_request (menu_b, MENU_WIDTH, MENU_HEIGHT);
+  g_signal_connect (menu_b, "button-press-event", G_CALLBACK(menu_cb), NULL) ;
+  gtk_fixed_put(GTK_FIXED(fixed),menu_b,VFO_WIDTH+METER_WIDTH,y);
+  y+=MENU_HEIGHT;
 
   gtk_button_set_relief(GTK_BUTTON(minimize_b), GTK_RELIEF_NONE);
   gtk_button_set_relief(GTK_BUTTON(menu_b), GTK_RELIEF_NONE);

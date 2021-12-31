@@ -271,6 +271,7 @@ void vfo_xvtr_changed() {
 void vfo_band_changed(int id,int b) {
   BANDSTACK *bandstack;
 
+  //fprintf(stderr,"%s: %d\n",__FUNCTION__,b);
 #ifdef CLIENT_SERVER
   if(radio_is_remote) {
     send_band(client_socket,id,b);
@@ -294,7 +295,7 @@ void vfo_band_changed(int id,int b) {
     vfo[id].bandstack=bandstack->current_entry;
   }
 
-  BAND *band=band_get_band(b);
+  BAND *band=band_set_current(b);
   BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
   vfo[id].band=b;
   vfo[id].frequency=entry->frequency;
@@ -560,6 +561,59 @@ void vfo_a_swap_b() {
     tx_set_mode(transmitter,get_tx_mode());
   }
   g_idle_add(ext_vfo_update,NULL);
+}
+
+//
+// here we collect various functions to
+// get/set the VFO step size
+//
+
+int vfo_get_step_from_index(int index) {
+  //
+  // This function is used for some
+  // extended CAT commands
+  //
+  if (index < 0) index=0;
+  if (index >= STEPS) index=STEPS-1;
+  return steps[index];
+}
+
+int vfo_get_stepindex() {
+  //
+  // return index of current step size in steps[] array,
+  //
+  int i;
+  for(i=0;i<STEPS;i++) {
+    if(steps[i]==step) break;
+  }
+  //
+  // If step size is not found (this should not happen)
+  // report some "convenient" index at the small end
+  // (here: index 4 corresponding to 100 Hz)
+  //
+  if (i >= STEPS) i=4;
+  return i;
+}
+
+void vfo_set_step_from_index(int index) {
+  //
+  // Set VFO step size to steps[index], with range checking
+  //
+  if (index < 0)      index=0;
+  if (index >= STEPS) index = STEPS-1;
+  vfo_set_stepsize(steps[index]);
+}
+
+void vfo_set_stepsize(int newstep) {
+  //
+  // Set current VFO step size.
+  // and store the value in mode_settings of the current mode
+  //
+  int id=active_receiver->id;
+  int m=vfo[id].mode;
+
+  step=newstep;
+  //mode_settings[m].step=newstep;
 }
 
 void vfo_step(int steps) {
@@ -910,14 +964,17 @@ void vfo_update() {
         cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
         cairo_paint (cr);
 
-        cairo_select_font_face(cr, "FreeSans",
+        cairo_select_font_face(cr, DISPLAY_FONT,
             CAIRO_FONT_SLANT_NORMAL,
             CAIRO_FONT_WEIGHT_BOLD);
 
         switch(vfo[id].mode) {
           case modeFMN:
+            //
+            // filter edges are +/- 5500 if deviation==2500,
+            //              and +/- 8000 if deviation==5000
             if(active_receiver->deviation==2500) {
-              sprintf(temp_text,"%s 8k",mode_string[vfo[id].mode]);
+              sprintf(temp_text,"%s 11k",mode_string[vfo[id].mode]);
             } else {
               sprintf(temp_text,"%s 16k",mode_string[vfo[id].mode]);
             }
@@ -936,7 +993,7 @@ void vfo_update() {
             sprintf(temp_text,"%s %s",mode_string[vfo[id].mode],band_filter->title);
             break;
         }
-        cairo_set_font_size(cr, 12);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         cairo_move_to(cr, 5, 15);
         cairo_show_text(cr, temp_text);
@@ -975,7 +1032,7 @@ void vfo_update() {
             }
         }
         cairo_move_to(cr, 5, 38);  
-        cairo_set_font_size(cr, 22); 
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE4); 
         cairo_show_text(cr, temp_text);
 
         sprintf(temp_text,"VFO B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
@@ -1002,7 +1059,7 @@ void vfo_update() {
           } else {
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
           }
-          cairo_set_font_size(cr, 12);
+          cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
           cairo_show_text(cr, "PS");
         }
 #endif
@@ -1013,7 +1070,7 @@ void vfo_update() {
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
-        cairo_set_font_size(cr, 12);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
         cairo_show_text(cr, temp_text);
 
@@ -1024,7 +1081,7 @@ void vfo_update() {
         }
         sprintf(temp_text,"RIT: %lldHz",vfo[id].rit);
         cairo_move_to(cr, 170, 15);
-        cairo_set_font_size(cr, 12);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         cairo_show_text(cr, temp_text);
 
 
@@ -1036,7 +1093,7 @@ void vfo_update() {
           }
           sprintf(temp_text,"XIT: %lldHz",transmitter->xit);
           cairo_move_to(cr, 310, 15);
-          cairo_set_font_size(cr, 12);
+          cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
           cairo_show_text(cr, temp_text);
         }
 
@@ -1215,7 +1272,7 @@ void vfo_update() {
         }
         sprintf(temp_text,"DUP");
         cairo_move_to(cr, 260, 38);
-        cairo_set_font_size(cr, 12);
+        cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
         cairo_show_text(cr, temp_text);
 
         cairo_destroy (cr);

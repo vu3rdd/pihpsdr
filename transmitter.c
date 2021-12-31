@@ -427,6 +427,7 @@ static gboolean update_display(gpointer data) {
       int start = (full-width) /2;      // Copy from start ... (end-1) 
       float *tfp=tx->pixel_samples;
       float *rfp=rx_feedback->pixel_samples+start;
+      float offset;
       int i;
       //
       // The TX panadapter shows a RELATIVE signal strength. A CW or single-tone signal at
@@ -440,18 +441,20 @@ static gboolean update_display(gpointer data) {
       // feedback channel, old=0.407, new=0.2899, difference is 3 dB).
       switch (protocol) {
         case ORIGINAL_PROTOCOL:
-          for (i=0; i<width; i++) {
-            *tfp++ =*rfp++ + 12.0;
-          }
+          // TX dac feedback peak = 0.406, on HermesLite2 0.230
+          offset = (device == DEVICE_HERMES_LITE2) ? 17.0 : 12.0;
           break;
         case NEW_PROTOCOL:
-          for (i=0; i<width; i++) {
-            *tfp++ =*rfp++ + 15.0;
-          }
+          // TX dac feedback peak = 0.2899
+          offset = 15.0;
           break;
         default:
-          memcpy(tfp, rfp, width*sizeof(float));
+          // we probably never come here
+          offset = 0.0;
           break;
+      }
+      for (i=0; i<width; i++) {
+        *tfp++ =*rfp++ + offset;
       }
       g_mutex_unlock(&rx_feedback->mutex);
     } else {
@@ -608,11 +611,12 @@ static gboolean update_display(gpointer data) {
 
     double fwd=compute_power(transmitter->fwd);
     double rev=compute_power(transmitter->rev);
+    double ex=compute_power(transmitter->exciter);
 
 //g_print("transmitter: meter_update: fwd:%f->%f rev:%f->%f ex_fwd=%d alex_fwd=%d alex_rev=%d\n",transmitter->fwd,fwd,transmitter->rev,rev,exciter_power,alex_forward_power,alex_reverse_power);
 
     if(!duplex) {
-      meter_update(active_receiver,POWER,/*transmitter->*/fwd,/*transmitter->*/rev,transmitter->exciter,transmitter->alc);
+      meter_update(active_receiver,POWER,/*transmitter->*/fwd,/*transmitter->*/rev,/*transmitter->exciter*/ex,transmitter->alc);
     }
 
     return TRUE; // keep going
@@ -801,6 +805,8 @@ fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_
   tx->dialog_x=-1;
   tx->dialog_y=-1;
 
+  tx->alc=0.0;
+
   transmitter_restore_state(tx);
 
 
@@ -910,58 +916,83 @@ void tx_set_mode(TRANSMITTER* tx,int mode) {
     int filter_low, filter_high;
     tx->mode=mode;
     SetTXAMode(tx->id, tx->mode);
-    if(tx->use_rx_filter) {
-      int m=vfo[active_receiver->id].mode;
-      if(m==modeFMN) {
-        if(active_receiver->deviation==2500) {
-         filter_low=-4000;
-         filter_high=4000;
-        } else {
-         filter_low=-8000;
-         filter_high=8000;
-        }
-      } else {
-        FILTER *mode_filters=filters[m];
-        FILTER *filter=&mode_filters[vfo[active_receiver->id].filter];
-        filter_low=filter->low;
-        filter_high=filter->high;
-      }
-    } else {
-      filter_low=tx_filter_low;
-      filter_high=tx_filter_high;
-    }
-    tx_set_filter(tx,filter_low,filter_high);
+    tx_set_filter(tx);
   }
 }
 
-void tx_set_filter(TRANSMITTER *tx,int low,int high) {
+void tx_set_filter(TRANSMITTER *tx) {
   int txmode=get_tx_mode();
 
+  // load default values
+  int low  = tx_filter_low;
+  int high = tx_filter_high;  // 0 < low < high
+
+  if (tx->use_rx_filter) {
+    //
+    // Use only 'compatible' parts of RX filter settings
+    // to change TX values (important for split operation)
+    //
+    int id=active_receiver->id;
+    int rxmode=vfo[id].mode;
+    FILTER *mode_filters=filters[rxmode];
+    FILTER *filter=&mode_filters[vfo[id].filter];
+
+    switch (rxmode) {
+      case modeDSB:
+      case modeAM:
+      case modeSAM:
+      case modeSPEC:
+        high =  filter->high;
+        break;
+      case modeLSB:
+      case modeDIGL:
+        high = -filter->low;
+        low  = -filter->high;
+        break;
+      case modeUSB:
+      case modeDIGU:
+        high = filter->high;
+        low  = filter->low;
+        break;
+    }
+  }
+
   switch(txmode) {
-    case modeLSB:
     case modeCWL:
-    case modeDIGL:
-      tx->filter_low=-high;
-      tx->filter_high=-low;
-      break;
-    case modeUSB:
     case modeCWU:
-    case modeDIGU:
-      tx->filter_low=low;
-      tx->filter_high=high;
+      // Our CW signal is always at zero in IQ space, but note
+      // WDSP is by-passed anyway.
+      tx->filter_low  =-150;
+      tx->filter_high = 150;
       break;
     case modeDSB:
     case modeAM:
     case modeSAM:
+    case modeSPEC:
+      // disregard the "low" value and use (-high, high)
+      tx->filter_low =-high;
+      tx->filter_high= high;
+      break;
+    case modeLSB:
+    case modeDIGL:
+      // in IQ space, the filter edges are (-high, -low)
       tx->filter_low=-high;
+      tx->filter_high=-low;
+      break;
+    case modeUSB:
+    case modeDIGU:
+      // in IQ space, the filter edges are (low, high)
+      tx->filter_low=low;
       tx->filter_high=high;
       break;
     case modeFMN:
+      // calculate filter size from deviation,
+      // assuming that the highest AF frequency is 3000
       if(tx->deviation==2500) {
-        tx->filter_low=-4000;
-        tx->filter_high=4000;
+        tx->filter_low=-5500;  // Carson's rule: +/-(deviation + max_af_frequency)
+        tx->filter_high=5500;  // deviation=2500, max freq = 3000
       } else {
-        tx->filter_low=-8000;
+        tx->filter_low=-8000;  // deviation=5000, max freq = 3000
         tx->filter_high=8000;
       }
       break;
@@ -1042,6 +1073,33 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     }
   } else {
     update_vox(tx);
+
+    //   
+    // DL1YCF:
+    // The FM pre-emphasis filter in WDSP has maximum unit 
+    // gain at about 3000 Hz, so that it attenuates at 300 Hz
+    // by about 20 dB and at 1000 Hz by about 10 dB.
+    // Natural speech has much energy at frequencies below 1000 Hz
+    // which will therefore aquire only little energy, such that 
+    // FM sounds rather "thin".
+    //   
+    // At the expense of having some distortion for the highest
+    // frequencies, we amplify the mic samples here by 15 dB
+    // when doing FM, such that enough "punch" remains after the
+    // FM pre-emphasis filter.
+    //   
+    // If ALC happens before FM pre-emphasis, this has little effect
+    // since the additional gain applied here will most likely be
+    // compensated by ALC, so it is important to have FM pre-emphasis
+    // before ALC (checkbox in tx_menu checked, that is, pre_emphasis==0).
+    //   
+    // Note that mic sample amplification has to be done after update_vox()
+    //   
+    if (tx->mode == modeFMN && !tune) {
+      for (int i=0; i<2*tx->samples; i+=2) {
+        tx->mic_input_buffer[i] *= 5.6234;  // 20*Log(5.6234) is 15
+      }    
+    }    
 
     fexchange0(tx->id, tx->mic_input_buffer, tx->iq_output_buffer, &error);
     if(error!=0) {
@@ -1134,13 +1192,8 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	//
 	for(j=0;j<tx->output_samples;j++) {
             double is,qs;
-            if(iqswap) {
-	      qs=tx->iq_output_buffer[j*2];
-	      is=tx->iq_output_buffer[(j*2)+1];
-            } else {
-	      is=tx->iq_output_buffer[j*2];
-	      qs=tx->iq_output_buffer[(j*2)+1];
-            }
+	    is=tx->iq_output_buffer[j*2];
+	    qs=tx->iq_output_buffer[(j*2)+1];
 	    isample=is>=0.0?(long)floor(is*gain+0.5):(long)ceil(is*gain-0.5);
 	    qsample=qs>=0.0?(long)floor(qs*gain+0.5):(long)ceil(qs*gain-0.5);
 	    switch(protocol) {
@@ -1152,7 +1205,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 		    break;
 #ifdef SOAPYSDR
                 case SOAPYSDR_PROTOCOL:
-                    soapy_protocol_iq_samples((float)isample,(float)qsample);
+                    soapy_protocol_iq_samples((float)is,(float)qs);
                     break;
 #endif
 	    }
