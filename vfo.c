@@ -928,7 +928,7 @@ char **draw_vfo_val(char *vfo_str, int step) {
 
     s2[0] = vfo_str[l - step_index - 1];
 
-    for (int i = 0; i < step; i++) {
+    for (int i = 0; i < step_index; i++) {
         s3[i] = vfo_str[l - step_index + i];
     }
 
