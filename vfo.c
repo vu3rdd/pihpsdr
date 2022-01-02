@@ -920,7 +920,7 @@ char **draw_vfo_val(char *vfo_str, int step) {
 
     int step_index = step;
     if (step == 6) {
-        step_index = step - 1; // to account for the dot
+        step_index = step + 1; // to account for the dot
     }
     for (int i = 0; i < l - step_index - 1; i++) {
         s1[i] = vfo_str[i];
