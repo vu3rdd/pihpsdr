@@ -64,8 +64,8 @@ static int my_height;
 static GtkWidget *vfo_panel;
 static cairo_surface_t *vfo_surface = NULL;
 
-int steps[]={1,10,25,50,100,250,500,1000,5000,9000,10000,100000,250000,500000,1000000};
-char *step_labels[]={"1Hz","10Hz","25Hz","50Hz","100Hz","250Hz","500Hz","1kHz","5kHz","9kHz","10kHz","100kHz","250KHz","500KHz","1MHz"};
+int steps[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
+char *step_labels[] = { "1Hz", "10Hz", "100Hz", "1kHz", "10kHz", "100kHz", "1MHz" };
 
 static GtkWidget* menu=NULL;
 static GtkWidget* band_menu=NULL;
@@ -896,6 +896,45 @@ static gboolean vfo_draw_cb (GtkWidget *widget,
   return FALSE;
 }
 
+char **draw_vfo_val(char *vfo_str, int step) {
+    // given a VFO string of the form 01.234567, depending on the step
+    // value (only multiples of 10 allowed for now), render the digit
+    // that would change when the VFO dial is moved, in a different
+    // colour. For that, return VFO string as 3 separate strings,
+    // string until the "step" digit, the "step" digit alone and the
+    // digits after step. For eg: The vfo_str is "VFO A: 7.123456" and
+    // the step is 1khz (meaning, the step index passed to this
+    // function would be 3), we should return:
+    //   ["VFO A: 7.12", "3", "456"]
+    int l = strlen(vfo_str);
+
+    char **s = malloc(3 * sizeof(char *));
+
+    char *s1 = malloc(sizeof(char) * 20);
+    char *s2 = malloc(sizeof(char) * 20);
+    char *s3 = malloc(sizeof(char) * 20);
+
+    memset(s1, '\0', 20);
+    memset(s2, '\0', 20);
+    memset(s3, '\0', 20);
+
+    for (int i = 0; i < l - step - 1; i++) {
+        s1[i] = vfo_str[i];
+    }
+
+    s2[0] = vfo_str[l - step - 1];
+
+    for (int i = 0; i < step; i++) {
+        s3[i] = vfo_str[l - step + i];
+    }
+
+    s[0] = s1;
+    s[1] = s2;
+    s[2] = s3;
+
+    return s;
+}
+
 void vfo_update() {
     
     int id=active_receiver->id;
@@ -961,7 +1000,18 @@ void vfo_update() {
         int oob=0;
         if (can_transmit) oob=transmitter->out_of_band;
 
+        int s;
+	for (s = 0; s < STEPS; s++) {
+            if (steps[s] == step)
+                break;
+        }
+
+	if(s >= STEPS)
+            s=0;
+
         sprintf(temp_text,"VFO A: %0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
+        char **vfo_texts = draw_vfo_val(temp_text, s);
+
         if(txvfo == 0 && (isTransmitting() || oob)) {
             if (oob) sprintf(temp_text,"VFO A: Out of band");
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
@@ -976,7 +1026,15 @@ void vfo_update() {
         }
         cairo_move_to(cr, 5, 38);  
         cairo_set_font_size(cr, 22); 
-        cairo_show_text(cr, temp_text);
+        // cairo_show_text(cr, temp_text);
+
+        // try to show VFO text according to step value
+        cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+        cairo_show_text(cr, vfo_texts[0]);
+        cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+        cairo_show_text(cr, vfo_texts[1]);
+        cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+        cairo_show_text(cr, vfo_texts[2]);
 
         sprintf(temp_text,"VFO B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
         if(txvfo == 1 && (isTransmitting() || oob)) {
@@ -984,11 +1042,13 @@ void vfo_update() {
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
             if(vfo[1].entering_frequency) {
-              cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
 	    } else if(id==1) {
-              cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+                // vfo A
+                cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
             } else {
-              cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
+                // vfo B
+                cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
         cairo_move_to(cr, 300, 38);  
@@ -1131,12 +1191,6 @@ void vfo_update() {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
         cairo_show_text(cr, "DIV");
-
-	int s;
-	for(s=0;s<STEPS;s++) {
-          if(steps[s]==step) break;
-        }
-	if(s>=STEPS) s=0;
 
         sprintf(temp_text,"Step %s",step_labels[s]);
         cairo_move_to(cr, 400, 15);

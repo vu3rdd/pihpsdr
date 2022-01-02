@@ -71,7 +71,7 @@ typedef struct _set_frequency {
   long long frequency;
 } SET_FREQUENCY;
 
-#define STEPS 15
+#define STEPS 7
 extern int steps[];
 extern char *step_labels[];
 
