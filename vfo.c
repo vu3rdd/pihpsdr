@@ -1198,10 +1198,10 @@ void vfo_update() {
         }
         cairo_show_text(cr, "DIV");
 
-        sprintf(temp_text,"Step %s",step_labels[s]);
-        cairo_move_to(cr, 400, 15);
-        cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        cairo_show_text(cr, temp_text);
+        /* sprintf(temp_text,"Step %s",step_labels[s]); */
+        /* cairo_move_to(cr, 400, 15); */
+        /* cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /* cairo_show_text(cr, temp_text); */
 
         cairo_move_to(cr, 405, 50);  
         if(vfo[id].ctun) {
