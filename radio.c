@@ -1905,6 +1905,7 @@ void set_attenuation(int value) {
 void set_alex_antennas() {
   //
   // Obtain band of VFO-A and transmitter, set ALEX RX/TX antennas
+  // and the step attenuator
   // This function is a no-op when running SOAPY.
   // This function also takes care of updating the PA dis/enable
   // status for P2.
@@ -1949,14 +1950,15 @@ void tx_vfo_changed() {
 
 void set_alex_attenuation(int v) {
     //
-    // The value of the "old" ALEX step-attenuator is stored in
-    // the receiver[0] data structure
+    // Change the value of the step attenuator. Store it
+    // in the "band" data structure of the current band,
+    // and in the receiver[0] data structure
     //
     BAND *band;
     if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
       //
-      // Store new attenuation value in band data structure
-      // Note this is the "old" step-attenuator 10/20/30 dB
+      // Store new value of the step attenuator in band data structure
+      // (v can be 0,1,2,3)
       //
       band=band_get_band(vfo[VFO_A].band);
       band->alexAttenuation=v;
@@ -1970,7 +1972,8 @@ void set_alex_attenuation(int v) {
 void radio_set_split(int val) {
   //
   // "split" *must only* be set through this interface,
-  // since it may change the TX band
+  // since it may change the TX band and thus requires
+  // tx_vfo_changed() and set_alex_antennas().
   //
   if (can_transmit) {
     split=val;
