@@ -1036,6 +1036,12 @@ void vfo_update() {
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         cairo_show_text(cr, vfo_texts[2]);
 
+        // free the memory
+        free(vfo_texts[0]);
+        free(vfo_texts[1]);
+        free(vfo_texts[2]);
+        free(vfo_texts);
+
         sprintf(temp_text,"VFO B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
         if(txvfo == 1 && (isTransmitting() || oob)) {
             if (oob) sprintf(temp_text,"VFO B: Out of band");
