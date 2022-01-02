@@ -918,14 +918,18 @@ char **draw_vfo_val(char *vfo_str, int step) {
     memset(s2, '\0', 20);
     memset(s3, '\0', 20);
 
-    for (int i = 0; i < l - step - 1; i++) {
+    int step_index = step;
+    if (step == 6) {
+        step_index = step - 1; // to account for the dot
+    }
+    for (int i = 0; i < l - step_index - 1; i++) {
         s1[i] = vfo_str[i];
     }
 
-    s2[0] = vfo_str[l - step - 1];
+    s2[0] = vfo_str[l - step_index - 1];
 
     for (int i = 0; i < step; i++) {
-        s3[i] = vfo_str[l - step + i];
+        s3[i] = vfo_str[l - step_index + i];
     }
 
     s[0] = s1;
