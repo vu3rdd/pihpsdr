@@ -1035,7 +1035,8 @@ void vfo_update() {
         // try to show VFO text according to step value
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         cairo_show_text(cr, vfo_texts[0]);
-        cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+        // show the step digit in white
+        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
         cairo_show_text(cr, vfo_texts[1]);
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         cairo_show_text(cr, vfo_texts[2]);
