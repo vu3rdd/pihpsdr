@@ -257,7 +257,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   gtk_grid_attach(GTK_GRID(grid),label,0,1,3,1);
 
   GtkWidget *step_rb=NULL;
-  for (i=0; i<16; i++) {
+  for (i=0; i<STEPS; i++) {
     btn[i]=gtk_button_new_with_label(btn_labels[i]);
     set_button_text_color(btn[i],"black");
     gtk_widget_show(btn[i]);
@@ -291,7 +291,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   gtk_grid_attach(GTK_GRID(grid),vfo_label,3,3,1,1);
 
   GtkWidget *vfo_b=gtk_combo_box_text_new();
-  for(i=0;i<15;i++) {
+  for(i=0;i<STEPS;i++) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(vfo_b),NULL,step_labels[i]);
     if(steps[i]==step) {
       gtk_combo_box_set_active (GTK_COMBO_BOX(vfo_b), i);
