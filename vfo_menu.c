@@ -257,7 +257,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
   gtk_grid_attach(GTK_GRID(grid),label,0,1,3,1);
 
   GtkWidget *step_rb=NULL;
-  for (i=0; i<STEPS; i++) {
+  for (i=0; i<16; i++) {
     btn[i]=gtk_button_new_with_label(btn_labels[i]);
     set_button_text_color(btn[i],"black");
     gtk_widget_show(btn[i]);
