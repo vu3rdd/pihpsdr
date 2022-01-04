@@ -4153,10 +4153,6 @@ int launch_serial() {
     return 0;
   }
 
-  // send a PING message
-  char *ping = "PING";
-  send_resp(serial_client->fd, ping);
-
   return 1;
 }
 
