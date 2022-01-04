@@ -4152,6 +4152,11 @@ int launch_serial() {
     g_print("g_thread_new failed on serial_server\n");
     return 0;
   }
+
+  // send a PING message
+  char *ping = "PING";
+  send_resp(serial_client->fd, ping);
+
   return 1;
 }
 
