@@ -1275,7 +1275,6 @@ void start_radio() {
 
   if (rigctl_enable) {
     launch_rigctl();
-    launch_serial(); // edit
   }
 
   if (can_transmit) {
