@@ -353,10 +353,10 @@ void discovery() {
     old_discovery();
   }
 
-  if(enable_protocol_2) {
-    status_text("Protocol 2 ... Discovering Devices");
-    new_discovery();
-  }
+  /* if(enable_protocol_2) { */
+  /*   status_text("Protocol 2 ... Discovering Devices"); */
+  /*   new_discovery(); */
+  /* } */
 
 #ifdef SOAPYSDR
   if(enable_soapy_protocol) {
@@ -622,7 +622,8 @@ fprintf(stderr,"showing device dialog\n");
     // autostart if one device and autostart enabled
     g_print("%s: devices=%d autostart=%d\n",__FUNCTION__,devices,autostart);
 
-    if(devices==1 && autostart) {
+    // if(devices==1 && autostart) {
+    if(autostart) {
         d=&discovered[0];
 	if(d->status==STATE_AVAILABLE) {
           if(start_cb(NULL,NULL,(gpointer)d)) return;
