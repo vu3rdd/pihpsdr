@@ -166,6 +166,8 @@ typedef struct _receiver {
 
   gint x;
   gint y;
+
+  int rxcount; int maxcount;
 } RECEIVER;
 
 extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int pixels);

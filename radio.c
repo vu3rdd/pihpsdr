@@ -1546,6 +1546,10 @@ static void rxtx(int state) {
         gtk_fixed_put(GTK_FIXED(fixed),receiver[i]->panel,receiver[i]->x,receiver[i]->y);
         SetChannelState(receiver[i]->id,1,0);
         set_displaying(receiver[i],1);
+        receiver[i]->rxcount=0;
+        receiver[i]->maxcount=-1;
+	// if not duplex, clear RX iq buffer
+        receiver[i]->samples=0;
       }
     }
   }
