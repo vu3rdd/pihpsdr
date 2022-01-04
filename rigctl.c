@@ -3447,13 +3447,14 @@ int parse_cmd(void *data) {
         sprintf(reply, "RA%02d00;", att);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
-        int att = atoi(&command[2]);
-        if (have_rx_gain) {
-          att = (int)((((double)att / 99.0) * 60.0) - 12.0);
-        } else {
-          att = (int)(((double)att / 99.0) * 31.0);
-        }
-        set_attenuation_value((double)att);
+          command[4] = '\0';
+          int att = atoi(&command[2]);
+          if (have_rx_gain) {
+              att = (int)((((double)att / 99.0) * 60.0) - 12.0);
+          } else {
+              att = (int)(((double)att / 99.0) * 31.0);
+          }
+          set_attenuation_value((double)att);
       }
       break;
     case 'C': // RC
