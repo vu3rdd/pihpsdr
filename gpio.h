@@ -79,7 +79,9 @@ extern void gpio_save_state(void);
 extern void gpio_save_actions(void);
 extern int gpio_init(void);
 extern void gpio_close(void);
+#ifdef GPIO
 extern unsigned int millis(void); // to allow debouncing in i2c.c 
+#endif
 
 #ifdef LOCALCW
 extern int CWL_BUTTON;

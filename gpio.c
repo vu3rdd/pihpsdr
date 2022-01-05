@@ -341,6 +341,7 @@ static GThread *rotary_encoder_thread_id;
 
 static uint64_t epochMilli;
 
+#ifdef GPIO
 static void initialiseEpoch() {
   struct timespec ts ;
 
@@ -355,6 +356,7 @@ unsigned int millis () {
   now  = (uint64_t)ts.tv_sec * (uint64_t)1000 + (uint64_t)(ts.tv_nsec / 1000000L) ;
   return (uint32_t)(now - epochMilli) ;
 }
+#endif
 
 static gpointer rotary_encoder_thread(gpointer data) {
   int i;
