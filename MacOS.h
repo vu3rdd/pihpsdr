@@ -19,6 +19,7 @@
 
 #define CLOCK_REALTIME  0
 #define CLOCK_MONOTONIC 6
+#define CLOCK_MONOTONIC_RAW 6
 typedef int clockid_t;
 
 #include <sys/time.h>
