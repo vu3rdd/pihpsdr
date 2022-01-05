@@ -1544,10 +1544,18 @@ static void rxtx(int state) {
     if(!duplex) {
       //
       // Set parameters for the "silence first RXIQ samples after TX/RX transition" feature
-      // the default is "no silence", that is, fastest turnaround
+      // the default is "no silence", that is, fastest turnaround.
+      // Seeing "tails" of the own TX signal (from crosstalk at the T/R relay) has been observed
+      // for RedPitayas (the identify themself as STEMlab or HERMES) and HermesLite2 devices,
+      // we also include the original HermesLite in this list (which can be enlarged if necessary).
       //
       int do_silence=0;
-      if (protocol == ORIGINAL_PROTOCOL && (device == DEVICE_HERMES_LITE2 || device == DEVICE_STEMLAB)) {
+      if (protocol == ORIGINAL_PROTOCOL && (
+                 device == DEVICE_HERMES_LITE2 || 
+                 device == DEVICE_HERMES_LITE ||
+                 device == DEVICE_HERMES ||
+                 device == DEVICE_STEMLAB
+                )) {
         //
         // These systems get a significant "tail" of the RX feedback signal into the RX after TX/RX,
         // leading to AGC pumping. The problem is most severe if there is a carrier until the end of
