@@ -1239,7 +1239,8 @@ g_print("%s: rx=%p id=%d local_audio=%d\n",__FUNCTION__,rx,rx->id,rx->local_audi
   // defer set_agc until here, otherwise the AGC threshold is not computed correctly
   set_agc(rx, rx->agc);
 
-  rx->rxcount=99999;
+  rx->txrxcount=0;
+  rx->txrxmax=0;
   return rx;
 }
 
@@ -1252,7 +1253,6 @@ void receiver_change_sample_rate(RECEIVER *rx,int sample_rate) {
   g_mutex_lock(&rx->mutex);
 
   rx->sample_rate=sample_rate;
-  rx->samples=0;  // clear RX iq buffer
   int scale=rx->sample_rate/48000;
   rx->output_samples=rx->buffer_size/scale;
   rx->hz_per_pixel=(double)rx->sample_rate/(double)rx->width;
@@ -1500,17 +1500,21 @@ static int tx_buffer_seen=0;
 
 void add_iq_samples(RECEIVER *rx, double i_sample,double q_sample) {
 
-  if (rx->rxcount <= 20000) {
-    if (i_sample*i_sample + q_sample*q_sample > 0.01) rx->maxcount=rx->rxcount;
-    if (rx->rxcount < (int)(rx->sample_rate >> 5)) {
-      i_sample=0.0;
-      q_sample=0.0;
-    }
-    if (rx->rxcount == 20000) {
-      fprintf(stderr,"ID=%d MAXCOUNT=%d\n", rx->id, rx->maxcount);
-      rx->rxcount = 99999;
-    }
-    rx->rxcount++;
+  //
+  // At the end of a TX/RX transition, txrxcount is set to zero,
+  // and txrxmax to some suitable value.
+  // Then, the first txrxmax RXIQ samples are "silenced"
+  // This is necessary on systems where RX feedback samples
+  // from cross-talk at the TRX relay arrive with some delay.
+  //
+  // If txrxmax is zero, no "silencing" takes place here,
+  // this is the case for radios not showing this problem,
+  // and generally if in CW mode or using duplex.
+  //
+  if (rx->txrxcount < rx->txrxmax) {
+    i_sample=0.0;
+    q_sample=0.0;
+    rx->txrxcount++;
   }
 
   rx->iq_input_buffer[rx->samples*2]=i_sample;
@@ -1526,8 +1530,19 @@ void add_iq_samples(RECEIVER *rx, double i_sample,double q_sample) {
 // Note that we sum the second channel onto the first one.
 //
 void add_div_iq_samples(RECEIVER *rx, double i0, double q0, double i1, double q1) {
-  rx->iq_input_buffer[rx->samples*2]    = i0 + (div_cos*i1 - div_sin*q1);
-  rx->iq_input_buffer[(rx->samples*2)+1]= q0 + (div_sin*i1 + div_cos*q1);
+  double i_sample=i0 + (div_cos*i1 - div_sin*q1);
+  double q_sample=q0 + (div_sin*i1 + div_cos*q1);
+  //
+  // The rest of the code is copied from add_iq_samples()
+  //
+  if (rx->txrxcount < rx->txrxmax) {
+    i_sample=0.0;
+    q_sample=0.0;
+    rx->txrxcount++;
+  }
+
+  rx->iq_input_buffer[rx->samples*2]=i_sample;
+  rx->iq_input_buffer[(rx->samples*2)+1]=q_sample;
   rx->samples=rx->samples+1;
   if(rx->samples>=rx->buffer_size) {
     full_rx_buffer(rx);

@@ -1542,14 +1542,50 @@ static void rxtx(int state) {
       gtk_container_remove(GTK_CONTAINER(fixed), transmitter->panel);
     }
     if(!duplex) {
+      //
+      // Set parameters for the "silence first RXIQ samples after TX/RX transition" feature
+      // the default is "no silence", that is, fastest turnaround
+      //
+      int do_silence=0;
+      if (protocol == ORIGINAL_PROTOCOL && (device == DEVICE_HERMES_LITE2 || device == DEVICE_STEMLAB)) {
+        //
+        // These systems get a significant "tail" of the RX feedback signal into the RX after TX/RX,
+        // leading to AGC pumping. The problem is most severe if there is a carrier until the end of
+        // the TX phase (TUNE, AM, FM), the problem is virtually non-existent for CW, and of medium
+        // importance in SSB. On the other hand, one want a very fast turnaround in CW.
+        // So there is no "muting" for CW, 31 msec off "muting" for TUNE/AM/FM, and 16 msec for other modes.
+        //
+        switch(get_tx_mode()) {
+          case modeCWU:
+	  case modeCWL:
+	    do_silence=0;  // no "silence"
+            break;
+          case modeAM:
+	  case modeFMN:
+	    do_silence=5;  // leads to 31 ms "silence"
+            break;
+          default:
+	    do_silence=6;  // leads to 16 ms "silence"
+            break;
+        }
+        if (tune) do_silence=5; // 31 ms "silence" for TUNEing in any mode
+      }
+
       for(i=0;i<receivers;i++) {
         gtk_fixed_put(GTK_FIXED(fixed),receiver[i]->panel,receiver[i]->x,receiver[i]->y);
         SetChannelState(receiver[i]->id,1,0);
         set_displaying(receiver[i],1);
-        receiver[i]->rxcount=0;
-        receiver[i]->maxcount=-1;
-	// if not duplex, clear RX iq buffer
+        //
+        // There might be some left-over samples in the RX buffer that were filled in
+        // *before* going TX, delete them
+        //
         receiver[i]->samples=0;
+        if (do_silence) {
+          receiver[i]->txrxmax = receiver[i]->sample_rate >> do_silence;
+        } else {
+          receiver[i]->txrxmax = 0;
+        }
+        receiver[i]->txrxcount = 0;
       }
     }
   }

@@ -167,7 +167,13 @@ typedef struct _receiver {
   gint x;
   gint y;
 
-  int rxcount; int maxcount;
+  // two variables that implement the new
+  // "mute first RX IQ samples after TX/RX transition"
+  // feature that is relevant for HermesLite-II and STEMlab
+  // (and possibly some other radios)
+  //
+  guint txrxcount;
+  guint txrxmax;
 } RECEIVER;
 
 extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int pixels);
