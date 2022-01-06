@@ -63,8 +63,8 @@ static GtkWidget *apps_combobox[MAX_DEVICES];
 
 GtkWidget *tcpaddr;
 #define IPADDR_LEN 20
-static char ipaddr_tcp_buf[IPADDR_LEN] = "10.10.10.10";
-char *ipaddr_tcp = &ipaddr_tcp_buf[0];
+static char ipaddr_buf[IPADDR_LEN] = "";
+char *ipaddr_radio = &ipaddr_buf[0];
 
 #ifdef CLIENT_SERVER
 GtkWidget *host_addr_entry;
@@ -73,14 +73,6 @@ char *host_addr = &host_addr_buffer[0];
 GtkWidget *host_port_spinner;
 gint host_port=50000;  // default listening port
 #endif
-
-//
-// This is a variable for the second phase of STEMlab discovery.
-// If set, we already have detected + selected the STEMlab,
-// started the SDR app on the RedPitaya and run a "P1 only"
-// discovery to obtain data from the SDR app
-//
-static int discover_only_p1 = 0;
 
 static gboolean delete_event_cb(GtkWidget *widget, GdkEvent *event, gpointer data) {
   _exit(0);
@@ -107,7 +99,7 @@ static gboolean start_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
     //
     stemlab_cleanup();
     sleep(2);          // let Stemlab SDR app start
-    discover_only_p1=1;
+    discover_only_stemlab=1;
     gtk_widget_destroy(discovery_dialog);
     g_idle_add(ext_discovery,NULL);
     return TRUE;
@@ -148,26 +140,29 @@ static gboolean exit_cb (GtkWidget *widget, GdkEventButton *event, gpointer data
   return TRUE;
 }
 
-static gboolean tcp_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-    strncpy(ipaddr_tcp, gtk_entry_get_text(GTK_ENTRY(tcpaddr)), IPADDR_LEN);
-    ipaddr_tcp[IPADDR_LEN-1]=0;
-    // remove possible trailing newline chars in ipaddr_tcp
-	    int len=strnlen(ipaddr_tcp,IPADDR_LEN);
-	    while (--len >= 0) {
-	      if (ipaddr_tcp[len] != '\n') break;
-	      ipaddr_tcp[len]=0;
-	    }
-	    //fprintf(stderr,"New TCP addr = %s.\n", ipaddr_tcp);
-	    // save this value to config file
-	    FILE *fp = fopen("ip.addr", "w");
-	    if (fp) {
-		fprintf(fp,"%s\n",ipaddr_tcp);
-		fclose(fp);
-	    }
-	    gtk_widget_destroy(discovery_dialog);
-	    g_idle_add(ext_discovery,NULL);
-	    return TRUE;
-	}
+static gboolean radio_ip_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+    struct sockaddr_in sa;
+    int len;
+    const char *cp;
+
+    cp = gtk_entry_get_text(GTK_ENTRY(tcpaddr));
+    len=strnlen(cp,IPADDR_LEN);
+    fprintf(stderr,">>>>%s<<<<\n", cp);
+    if (len == 0) return TRUE;
+    if (inet_pton(AF_INET, cp, &(sa.sin_addr)) != 1) return TRUE;
+
+    strncpy(ipaddr_radio, cp, IPADDR_LEN);
+    ipaddr_radio[IPADDR_LEN-1]=0;
+
+    // The new value is written upon each key stroke, so what?
+    // fprintf(stderr,"New TCP addr = %s.\n", ipaddr_radio);
+    FILE *fp = fopen("ip.addr", "w");
+    if (fp) {
+	fprintf(fp,"%s\n",ipaddr_radio);
+	fclose(fp);
+    }
+    return FALSE;
+}
 
 #ifdef CLIENT_SERVER
 static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -208,14 +203,14 @@ void discovery() {
   // Try to locate IP addr
   FILE *fp=fopen("ip.addr","r");
   if (fp) {
-    char *c=fgets(ipaddr_tcp, IPADDR_LEN,fp);
+    char *c=fgets(ipaddr_radio, IPADDR_LEN,fp);
     fclose(fp);
-    ipaddr_tcp[IPADDR_LEN-1]=0;
-    // remove possible trailing newline char in ipaddr_tcp
-    int len=strnlen(ipaddr_tcp,IPADDR_LEN);
+    ipaddr_radio[IPADDR_LEN-1]=0;
+    // remove possible trailing newline char in ipaddr_radio
+    int len=strnlen(ipaddr_radio,IPADDR_LEN);
     while (--len >= 0) {
-      if (ipaddr_tcp[len] != '\n') break;
-      ipaddr_tcp[len]=0;
+      if (ipaddr_radio[len] != '\n') break;
+      ipaddr_radio[len]=0;
     }
   }
 #ifdef USBOZY
@@ -238,7 +233,7 @@ void discovery() {
 #endif
 
 #ifdef STEMLAB_DISCOVERY
-  if(enable_stemlab && !discover_only_p1) {
+  if(enable_stemlab && !discover_only_stemlab) {
 #ifdef NO_AVAHI
     status_text("Looking for STEMlab WEB apps");
 #else
@@ -253,20 +248,20 @@ void discovery() {
     old_discovery();
   }
 
-  if(enable_protocol_2 && !discover_only_p1) {
+  if(enable_protocol_2 && !discover_only_stemlab) {
     status_text("Protocol 2 ... Discovering Devices");
     new_discovery();
   }
 
 #ifdef SOAPYSDR
-  if(enable_soapy_protocol && !discover_only_p1) {
+  if(enable_soapy_protocol && !discover_only_stemlab) {
     status_text("SoapySDR ... Discovering Devices");
     soapy_discovery();
   }
 #endif
 
   // subsequent discoveries check all protocols enabled.
-  discover_only_p1=0;
+  discover_only_stemlab=0;
 
   status_text("Discovery");
   
@@ -377,29 +372,27 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
         }
 
 #ifdef SOAPYSDR
-        if(d->device!=SOAPYSDR_USB_DEVICE) {
+        if(d->device!=SOAPYSDR_USB_DEVICE)
 #endif
-          // if not on the same subnet then cannot start it
-	  //
-          // NOTE: self-assigned IP  (a.k.a. APIPA) addresses
-          // these addresses are of the numerical form 169.254.xxx.yyy and used
-          // by many radios if they do not get a DHCP address. These addresses are valid even if outside the
-          // netmask of the (physical) interface making the connection - so do not complain in this case!
+	{
+	  int can_connect = 0;
           //
-          // If the radio has a valid IP address but the computer only has an APIPA address, this also
-          // leads to a radio address outside the netmask and can be ignored. So if either the radio
-          // or the interface address starts with 169.254., suppress "Subnet!" complaint.
+	  // We can connect if
+	  //  a) either the computer or the radio have a self-assigned IP 169.254.xxx.yyy address
+	  //  b) we have a "routed" (TCP or UDP) connection to the radio
+	  //  c) radio and network address are in the same subnet
           //
-          if (strncmp(inet_ntoa(d->info.network.address.sin_addr),"169.254.",8) &&
-              strncmp(inet_ntoa(d->info.network.interface_address.sin_addr),"169.254.",8)) {
-            if((d->info.network.interface_address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr) != (d->info.network.address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr)) {
+          if (!strncmp(inet_ntoa(d->info.network.address.sin_addr),"169.254.",8)) can_connect=1;
+          if (!strncmp(inet_ntoa(d->info.network.interface_address.sin_addr),"169.254.",8)) can_connect=1;
+	  if (d->use_routing) can_connect=1;
+          if((d->info.network.interface_address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr) ==
+             (d->info.network.address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr)) can_connect=1;
+
+	  if (!can_connect) {
               gtk_button_set_label(GTK_BUTTON(start_button),"Subnet!");
               gtk_widget_set_sensitive(start_button, FALSE);
-            }
           }
-#ifdef SOAPYSDR
         }
-#endif
 
 #ifdef STEMLAB_DISCOVERY
         if (d->protocol == STEMLAB_PROTOCOL) {
@@ -511,14 +504,14 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
     gtk_grid_attach(GTK_GRID(grid),gpio_b,0,row,1,1);
 #endif
 
-    GtkWidget *tcp_b=gtk_button_new_with_label("Use new TCP Addr:");
-    g_signal_connect (tcp_b, "button-press-event", G_CALLBACK(tcp_cb), NULL);
+    GtkWidget *tcp_b=gtk_label_new("Radio IP Addr:");
     gtk_grid_attach(GTK_GRID(grid),tcp_b,1,row,1,1);
 
     tcpaddr=gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(tcpaddr), 20);
     gtk_grid_attach(GTK_GRID(grid),tcpaddr,2,row,1,1);
-    gtk_entry_set_text(GTK_ENTRY(tcpaddr), ipaddr_tcp);
+    gtk_entry_set_text(GTK_ENTRY(tcpaddr), ipaddr_radio);
+    g_signal_connect (tcpaddr, "changed", G_CALLBACK(radio_ip_cb), NULL);
 
     GtkWidget *exit_b=gtk_button_new_with_label("Exit");
     g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);

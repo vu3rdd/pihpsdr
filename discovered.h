@@ -91,7 +91,8 @@
 struct _DISCOVERED {
     int protocol;
     int device;
-    int use_tcp;    // use TCP rather than UDP to connect to radio
+    int use_tcp;    	// Radio connection is via TCP
+    int use_routing;    // Radio connection is "routed" to some IP address
     char name[64];
     int software_version;
     int status;

@@ -37,6 +37,7 @@
 #include "discovered.h"
 #include "discovery.h"
 #include "old_discovery.h"
+#include "stemlab_discovery.h"
 
 static char interface_name[64];
 static struct sockaddr_in interface_addr={0};
@@ -50,7 +51,12 @@ static struct sockaddr_in discovery_addr;
 static GThread *discover_thread_id;
 static gpointer discover_receive_thread(gpointer data);
 
-static void discover(struct ifaddrs* iface) {
+//
+// discflag = 1:   discover by sending UDP broadcast packet
+// discflag = 2:   discover by sending UDP backet to Radio IP address
+// discflag = 3:   discover by connecting via TCP
+//
+static void discover(struct ifaddrs* iface, int discflag) {
     int rc;
     struct sockaddr_in *sa;
     struct sockaddr_in *mask;
@@ -63,19 +69,79 @@ static void discover(struct ifaddrs* iface) {
     unsigned char buffer[1032];
     int i, len;
 
-    if (iface == NULL) {
+    switch (discflag) {
+      case 1:
 	//
-	// This indicates that we want to connect to an SDR which
-	// cannot be reached by (UDP) broadcast packets, but that
-	// we know its fixed IP address
-	// Therefore we try to send a METIS detection packet via TCP 
-	// to a "fixed" ip address.
+	// Send METIS discovery packet to broadcast address on interface iface
 	//
-        fprintf(stderr,"Trying to detect at TCP addr %s\n", ipaddr_tcp);
+        strcpy(interface_name,iface->ifa_name);
+        fprintf(stderr,"discover: looking for HPSDR devices on %s\n", interface_name);
+
+        // send a broadcast to locate hpsdr boards on the network
+        discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
+        if(discovery_socket<0) {
+            perror("discover: create socket failed for discovery_socket:");
+            return;
+        }
+
+        sa = (struct sockaddr_in *) iface->ifa_addr;
+        mask = (struct sockaddr_in *) iface->ifa_netmask;
+        interface_netmask.sin_addr.s_addr = mask->sin_addr.s_addr;
+
+        // bind to this interface and the discovery port
+        interface_addr.sin_family = AF_INET;
+        interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
+        //interface_addr.sin_port = htons(DISCOVERY_PORT*2);
+        interface_addr.sin_port = htons(0); // system assigned port
+        if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
+            perror("discover: bind socket failed for discovery_socket:");
+            return;
+        }
+
+        fprintf(stderr,"discover: bound to %s\n",interface_name);
+
+        // allow broadcast on the socket
+        int on=1;
+        rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+        if(rc != 0) {
+            fprintf(stderr,"discover: cannot set SO_BROADCAST: rc=%d\n", rc);
+            return;
+        }
+
+        // setup to address
+        to_addr.sin_family=AF_INET;
+        to_addr.sin_port=htons(DISCOVERY_PORT);
+        to_addr.sin_addr.s_addr=htonl(INADDR_BROADCAST);
+        break;
+      case 2:
+	//
+	// Send METIS detection packet via UDP to ipaddr_radio
+	//
+	fprintf(stderr,"discover: looking for HPSDR device with IP %s\n", ipaddr_radio);
+
+        discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
+        if(discovery_socket<0) {
+            perror("discover: create socket failed for discovery_socket:");
+            return;
+        }
+        to_addr.sin_family=AF_INET;
+        to_addr.sin_port=htons(DISCOVERY_PORT);
+        if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
+          fprintf(stderr, "discover: Radio UDP addr %s is invalid!\n", ipaddr_radio);
+          return;
+        }
+	break;
+      case 3:
+	//
+	// Send METIS detection packet via TCP to ipaddr_radio
+	// This is rather tricky, one must avoid "hanging" when the
+	// connection does not succeed.
+	//
+        fprintf(stderr,"Trying to detect via TCP with IP %s\n", ipaddr_radio);
 	memset(&to_addr, 0, sizeof(to_addr));
 	to_addr.sin_family = AF_INET;
-	if (inet_aton(ipaddr_tcp, &to_addr.sin_addr) == 0) {
-	    fprintf(stderr,"discover: TCP addr %s is invalid!\n",ipaddr_tcp);
+	if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
+	    fprintf(stderr,"discover: TCP addr %s is invalid!\n",ipaddr_radio);
 	    return;
 	}
 	to_addr.sin_port=htons(DISCOVERY_PORT);
@@ -139,47 +205,12 @@ static void discover(struct ifaddrs* iface) {
 	}
 	// Step 4. reset the socket to normal (blocking) mode
 	fcntl(discovery_socket, F_SETFL, flags &  ~O_NONBLOCK);
-    } else {
-
-        strcpy(interface_name,iface->ifa_name);
-        fprintf(stderr,"discover: looking for HPSDR devices on %s\n", interface_name);
-
-        // send a broadcast to locate hpsdr boards on the network
-        discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
-        if(discovery_socket<0) {
-            perror("discover: create socket failed for discovery_socket:");
-            exit(-1);
-        }
-
-        sa = (struct sockaddr_in *) iface->ifa_addr;
-        mask = (struct sockaddr_in *) iface->ifa_netmask;
-        interface_netmask.sin_addr.s_addr = mask->sin_addr.s_addr;
-
-        // bind to this interface and the discovery port
-        interface_addr.sin_family = AF_INET;
-        interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
-        //interface_addr.sin_port = htons(DISCOVERY_PORT*2);
-        interface_addr.sin_port = htons(0); // system assigned port
-        if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
-            perror("discover: bind socket failed for discovery_socket:");
-            return;
-        }
-
-        fprintf(stderr,"discover: bound to %s\n",interface_name);
-
-        // allow broadcast on the socket
-        int on=1;
-        rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
-        if(rc != 0) {
-            fprintf(stderr,"discover: cannot set SO_BROADCAST: rc=%d\n", rc);
-            exit(-1);
-        }
-
-        // setup to address
-        to_addr.sin_family=AF_INET;
-        to_addr.sin_port=htons(DISCOVERY_PORT);
-        to_addr.sin_addr.s_addr=htonl(INADDR_BROADCAST);
+        break;
+      default:
+	return;
+	break;
     }
+
     optval = 1;
     setsockopt(discovery_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     setsockopt(discovery_socket, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
@@ -187,18 +218,18 @@ static void discover(struct ifaddrs* iface) {
     rc=devices;
     // start a receive thread to collect discovery response packets
     discover_thread_id = g_thread_new( "old discover receive", discover_receive_thread, NULL);
-    if( ! discover_thread_id )
-    {
-        fprintf(stderr,"g_thread_new failed on discover_receive_thread\n");
-        exit( -1 );
-    }
-
-
 
     // send discovery packet
     // If this is a TCP connection, send a "long" packet
-    len=63;
-    if (iface == NULL) len=1032;
+    switch (discflag) {
+      case 1:
+      case 2:
+	len=63;  // send UDP packet
+	break;
+      case 3:
+	len=1032;  // send TCP packet
+	break;  
+    }
     buffer[0]=0xEF;
     buffer[1]=0xFE;
     buffer[2]=0x02;
@@ -216,26 +247,41 @@ static void discover(struct ifaddrs* iface) {
 
     close(discovery_socket);
 
-    if (iface == NULL) {
-      fprintf(stderr,"discover: exiting TCP discover for %s\n",ipaddr_tcp);
-      if (devices == rc+1) {
-	//
-	// We have exactly found one TCP device
-	// and have to patch the TCP addr into the device field
-	// and set the "use TCP" flag.
-	//
-        memcpy((void*)&discovered[rc].info.network.address,(void*)&to_addr,sizeof(to_addr));
-        discovered[rc].info.network.address_length=sizeof(to_addr);
-        memcpy((void*)&discovered[rc].info.network.interface_address,(void*)&to_addr,sizeof(to_addr));
-        memcpy((void*)&discovered[rc].info.network.interface_netmask,(void*)&to_addr,sizeof(to_addr));
-        discovered[rc].info.network.interface_length=sizeof(to_addr);
-        strcpy(discovered[rc].info.network.interface_name,"TCP");
-	discovered[rc].use_tcp=1;
-      }
-    } else {
-      fprintf(stderr,"discover: exiting discover for %s\n",iface->ifa_name);
+    switch (discflag) {
+      case 1:
+	fprintf(stderr,"discover: exiting discover for %s\n",iface->ifa_name);
+ 	break;
+      case 2:
+	fprintf(stderr,"discover: exiting HPSDR discover for IP %s\n",ipaddr_radio);
+	if (devices == rc+1) {
+	  //
+	  // METIS detection UDP packet sent to fixed IP address got a valid response.
+	  //
+	  memcpy((void *)&discovered[rc].info.network.address, (void *)&to_addr,sizeof(to_addr));
+	  discovered[rc].info.network.address_length = sizeof(to_addr);
+          strcpy(discovered[rc].info.network.interface_name,"UDP");
+	  discovered[rc].use_routing=1;
+	}
+	break;
+      case 3:
+	fprintf(stderr,"discover: exiting TCP discover for IP %s\n",ipaddr_radio);
+	if (devices == rc+1) {
+	  //
+	  // METIS detection TCP packet sent to fixed IP address got a valid response.
+	  // Patch the IP addr into the device field
+	  // and set the "use TCP" flag.
+	  //
+          memcpy((void*)&discovered[rc].info.network.address,(void*)&to_addr,sizeof(to_addr));
+          discovered[rc].info.network.address_length=sizeof(to_addr);
+          memcpy((void*)&discovered[rc].info.network.interface_address,(void*)&to_addr,sizeof(to_addr));
+          memcpy((void*)&discovered[rc].info.network.interface_netmask,(void*)&to_addr,sizeof(to_addr));
+          discovered[rc].info.network.interface_length=sizeof(to_addr);
+          strcpy(discovered[rc].info.network.interface_name,"TCP");
+	  discovered[rc].use_routing=1;
+	  discovered[rc].use_tcp=1;
+        }
+	break;
     }
-
 }
 
 //static void *discover_receive_thread(void* arg) {
@@ -350,6 +396,7 @@ g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, disco
                     discovered[devices].info.network.interface_length=sizeof(interface_addr);
                     strcpy(discovered[devices].info.network.interface_name,interface_name);
 		    discovered[devices].use_tcp=0;
+		    discovered[devices].use_routing=0;
                     discovered[devices].supported_receivers=2;
 		    fprintf(stderr,"old_discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s min=%f max=%f\n",
                             discovered[devices].device,
@@ -380,23 +427,36 @@ void old_discovery() {
     struct ifaddrs *addrs,*ifa;
 
 fprintf(stderr,"old_discovery\n");
-    getifaddrs(&addrs);
-    ifa = addrs;
-    while (ifa) {
+    //
+    // In the second phase of the STEMlab (RedPitaya) discovery,
+    // we know that it can be reached by a specific IP address
+    // and do not need broadcast packets
+    //
+    if (!discover_only_stemlab) {
+      getifaddrs(&addrs);
+      ifa = addrs;
+      while (ifa) {
         g_main_context_iteration(NULL, 0);
         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
             if((ifa->ifa_flags&IFF_UP)==IFF_UP
                 && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING) {
                 //&& (ifa->ifa_flags&IFF_LOOPBACK)!=IFF_LOOPBACK) {
-                discover(ifa);
+                discover(ifa, 1);   // send UDP broadcast packet to interface
             }
         }
         ifa = ifa->ifa_next;
+      }
+      freeifaddrs(addrs);
     }
-    freeifaddrs(addrs);
 
-    // Do one additional "discover" for a fixed TCP address
-    discover(NULL);
+    //
+    // If a radio ip addr is given, try sending a UDP packet to that address
+    // and try connecting via TCP
+    //
+    if (strlen(ipaddr_radio) > 1) {
+      discover(NULL, 2);
+      discover(NULL, 3);
+    }
 
     fprintf(stderr, "discovery found %d devices\n",devices);
 
