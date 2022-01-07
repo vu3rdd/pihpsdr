@@ -117,18 +117,18 @@ static void discover(struct ifaddrs* iface, int discflag) {
 	//
 	// Send METIS detection packet via UDP to ipaddr_radio
 	//
+	memset(&to_addr, 0, sizeof(to_addr));
+        to_addr.sin_family=AF_INET;
+        to_addr.sin_port=htons(DISCOVERY_PORT);
+        if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
+          return;
+        }
 	fprintf(stderr,"discover: looking for HPSDR device with IP %s\n", ipaddr_radio);
 
         discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
         if(discovery_socket<0) {
             perror("discover: create socket failed for discovery_socket:");
             return;
-        }
-        to_addr.sin_family=AF_INET;
-        to_addr.sin_port=htons(DISCOVERY_PORT);
-        if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
-          fprintf(stderr, "discover: Radio UDP addr %s is invalid!\n", ipaddr_radio);
-          return;
         }
 	break;
       case 3:
@@ -137,14 +137,13 @@ static void discover(struct ifaddrs* iface, int discflag) {
 	// This is rather tricky, one must avoid "hanging" when the
 	// connection does not succeed.
 	//
-        fprintf(stderr,"Trying to detect via TCP with IP %s\n", ipaddr_radio);
 	memset(&to_addr, 0, sizeof(to_addr));
 	to_addr.sin_family = AF_INET;
+	to_addr.sin_port=htons(DISCOVERY_PORT);
 	if (inet_aton(ipaddr_radio, &to_addr.sin_addr) == 0) {
-	    fprintf(stderr,"discover: TCP addr %s is invalid!\n",ipaddr_radio);
 	    return;
 	}
-	to_addr.sin_port=htons(DISCOVERY_PORT);
+        fprintf(stderr,"Trying to detect via TCP with IP %s\n", ipaddr_radio);
 
         discovery_socket=socket(AF_INET, SOCK_STREAM, 0);
         if(discovery_socket<0) {
@@ -425,6 +424,7 @@ g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, disco
 
 void old_discovery() {
     struct ifaddrs *addrs,*ifa;
+    int i, is_local;
 
 fprintf(stderr,"old_discovery\n");
     //
@@ -450,17 +450,22 @@ fprintf(stderr,"old_discovery\n");
     }
 
     //
-    // If a radio ip addr is given, try sending a UDP packet to that address
-    // and try connecting via TCP
+    // If an IP address has already been "discovered" via a
+    // METIS broadcast package, it makes no sense to re-discover
+    // it via a routed UDP packet.
     //
-    if (strlen(ipaddr_radio) > 1) {
-      discover(NULL, 2);
-      discover(NULL, 3);
+    is_local=0;
+    for (i=0; i<devices; i++) {
+      fprintf(stderr,"DISCOVERED IP: %s\n",inet_ntoa(discovered[i].info.network.address.sin_addr));
+      if (!strncmp(inet_ntoa(discovered[i].info.network.address.sin_addr),ipaddr_radio,20)) {
+	is_local=1;
+      }
     }
+    if (!is_local) discover(NULL, 2);
+    discover(NULL, 3);
 
     fprintf(stderr, "discovery found %d devices\n",devices);
 
-    int i;
     for(i=0;i<devices;i++) {
                     fprintf(stderr,"discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
                             discovered[i].device,

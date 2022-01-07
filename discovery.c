@@ -149,7 +149,6 @@ static gboolean radio_ip_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
 
     cp = gtk_entry_get_text(GTK_ENTRY(tcpaddr));
     len=strnlen(cp,IPADDR_LEN);
-    fprintf(stderr,">>>>%s<<<<\n", cp);
     if (len == 0) return TRUE;
     if (inet_pton(AF_INET, cp, &(sa.sin_addr)) != 1) return TRUE;
 
