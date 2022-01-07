@@ -2130,7 +2130,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
           vfo[VFO_A].rit -= 10;
         } else {
-          vfo[VFO_A].rit -= 100;
+          vfo[VFO_A].rit -= 50;
         }
         vfo_update();
       } else if (command[9] == ';') {
@@ -2186,7 +2186,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
           vfo[VFO_A].rit += 10;
         } else {
-          vfo[VFO_A].rit += 100;
+          vfo[VFO_A].rit += 50;
         }
         vfo_update();
       } else if (command[9] == ';') {
