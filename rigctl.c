@@ -2819,8 +2819,11 @@ int parse_cmd(void *data) {
       implemented = FALSE;
       break;
     case 'S': // BS
-      // start bandstack
-      start_bandstack();
+        if (command[2] == ';') {
+            // start bandstack
+            start_bandstack();
+        }
+        break;
     default:
       implemented = FALSE;
       break;
