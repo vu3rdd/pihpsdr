@@ -37,6 +37,7 @@
 #include "filter_menu.h"
 #include "mode.h"
 #include "new_protocol.h"
+#include "new_menu.h"
 #include "noise_menu.h"
 #include "old_protocol.h"
 #include "radio.h"
@@ -2817,6 +2818,9 @@ int parse_cmd(void *data) {
       // read busy signal
       implemented = FALSE;
       break;
+    case 'S': // BS
+      // start bandstack
+      start_bandstack();
     default:
       implemented = FALSE;
       break;
