@@ -54,8 +54,6 @@
 #include <avahi-gobject/ga-service-resolver.h>
 #endif
 
-int discover_only_stemlab=0;
-
 // As we only run in the GTK+ main event loop, which is single-threaded and
 // non-preemptive, we shouldn't need any additional synchronisation mechanisms.
 static bool discovery_done = FALSE;

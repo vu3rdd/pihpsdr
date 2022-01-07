@@ -17,5 +17,7 @@
 *
 */
 
+extern int  discover_only_stemlab;
+
 extern void discovery(void);
 extern char *ipaddr_radio;

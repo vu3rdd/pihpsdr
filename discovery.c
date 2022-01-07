@@ -66,6 +66,8 @@ GtkWidget *tcpaddr;
 static char ipaddr_buf[IPADDR_LEN] = "";
 char *ipaddr_radio = &ipaddr_buf[0];
 
+int discover_only_stemlab=0;
+
 #ifdef CLIENT_SERVER
 GtkWidget *host_addr_entry;
 static char host_addr_buffer[128]="g0orx.ddns.net";
