@@ -95,6 +95,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
         interface_addr.sin_port = htons(0); // system assigned port
         if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
             perror("discover: bind socket failed for discovery_socket:");
+	    close (discovery_socket);
             return;
         }
 
@@ -105,6 +106,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
         rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
         if(rc != 0) {
             fprintf(stderr,"discover: cannot set SO_BROADCAST: rc=%d\n", rc);
+	    close (discovery_socket);
             return;
         }
 
@@ -238,6 +240,7 @@ static void discover(struct ifaddrs* iface, int discflag) {
 
     if(sendto(discovery_socket,buffer,len,0,(struct sockaddr*)&to_addr,sizeof(to_addr))<0) {
         perror("discover: sendto socket failed for discovery_socket:");
+	close (discovery_socket);
         return;
     }
 
@@ -272,9 +275,6 @@ static void discover(struct ifaddrs* iface, int discflag) {
 	  //
           memcpy((void*)&discovered[rc].info.network.address,(void*)&to_addr,sizeof(to_addr));
           discovered[rc].info.network.address_length=sizeof(to_addr);
-          memcpy((void*)&discovered[rc].info.network.interface_address,(void*)&to_addr,sizeof(to_addr));
-          memcpy((void*)&discovered[rc].info.network.interface_netmask,(void*)&to_addr,sizeof(to_addr));
-          discovered[rc].info.network.interface_length=sizeof(to_addr);
           strcpy(discovered[rc].info.network.interface_name,"TCP");
 	  discovered[rc].use_routing=1;
 	  discovered[rc].use_tcp=1;
@@ -456,8 +456,8 @@ fprintf(stderr,"old_discovery\n");
     //
     is_local=0;
     for (i=0; i<devices; i++) {
-      fprintf(stderr,"DISCOVERED IP: %s\n",inet_ntoa(discovered[i].info.network.address.sin_addr));
-      if (!strncmp(inet_ntoa(discovered[i].info.network.address.sin_addr),ipaddr_radio,20)) {
+      if (!strncmp(inet_ntoa(discovered[i].info.network.address.sin_addr),ipaddr_radio,20)
+             && discovered[i].protocol == ORIGINAL_PROTOCOL) {
 	is_local=1;
       }
     }
