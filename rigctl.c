@@ -955,7 +955,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         // send reply back
         sprintf(reply, "ZZAG%03d;", (int)(active_receiver->volume * 100.0));
         send_resp(client->fd, reply);
-      } else {
+      } else if (command[7] == ';') {
           command[7] = '\0';
           int gain = atoi(&command[4]);
           active_receiver->volume = (double)gain / 100.0;
