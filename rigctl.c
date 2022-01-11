@@ -1271,7 +1271,20 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       }
       break;
     case 'S': // ZZCS
-      implemented = FALSE;
+        if (command[4] == ';') {
+            sprintf(reply, "ZZCS%02d;", cw_keyer_speed);
+            send_resp(client->fd, reply);
+        } else if (command[6] == ';') {
+            command[6] = '\0';
+            int speed = atoi(&command[4]);
+            if (speed >= 1 && speed <= 60) {
+                cw_keyer_speed = speed;
+#ifdef LOCALCW
+                keyer_update();
+#endif
+                vfo_update();
+            }
+        }
       break;
     case 'T': // ZZCT
       implemented = FALSE;
