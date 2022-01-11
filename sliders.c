@@ -353,19 +353,16 @@ void set_af_gain(int rx,double value) {
   receiver[rx]->volume=value;
   SetRXAPanelGain1 (receiver[rx]->id, receiver[rx]->volume);
   if(display_sliders) {
-      printf("came here: 1\n");
     gtk_range_set_value (GTK_RANGE(af_gain_scale),receiver[rx]->volume*100.0);
   } else {
     if(scale_status!=AF_GAIN || scale_rx!=rx) {
       if(scale_status!=NO_FUNCTION) {
-          printf("came here: 2\n");
         g_source_remove(scale_timer);
         gtk_widget_destroy(scale_dialog);
         scale_status=NO_FUNCTION;
       }
     }
     if(scale_status==NO_FUNCTION) {
-        printf("came here: 3\n");
       scale_status=AF_GAIN;
       scale_rx=rx;
       char title[64];
@@ -381,13 +378,11 @@ void set_af_gain(int rx,double value) {
       //gtk_widget_show_all(scale_dialog);
       gtk_dialog_run(GTK_DIALOG(scale_dialog));
     } else {
-        printf("came here: 4\n");
       g_source_remove(scale_timer);
       gtk_range_set_value (GTK_RANGE(af_gain_scale),receiver[rx]->volume*100.0);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
   }
-  printf("new volume: %f\n", receiver[rx]->volume);
 }
 
 static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
