@@ -1822,7 +1822,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         if (command[4] == ';') {
             memset(reply, '\0', 9);
             printf("getting MIC GAIN: %f\n", mic_gain);
-            sprintf(reply, "ZZMG%03d;", (int) round((round(mic_gain + 12.0) * 100.0 / 62.0)));
+            sprintf(reply, "ZZMG%03d;", (int) round((mic_gain + 12.0) * 100.0) / 62);
             send_resp(client->fd, reply);
         } else if (command[7] == ';') {
             command[7] = '\0';
