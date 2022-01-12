@@ -1820,12 +1820,12 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         // set/read mic gain
         if (command[4] == ';') {
             memset(reply, '\0', 9);
-            sprintf(reply, "ZZMG%03d;", (int)(((mic_gain + 12.0) / 72.0) * 100.0));
+            sprintf(reply, "ZZMG%03d;", (int)(((mic_gain * 100.0) / 72.0) + 12));
             send_resp(client->fd, reply);
         } else if (command[7] == ';') {
             command[7] = '\0';
             double gain = (double)atoi(&command[4]);
-            gain = ((gain / 100.0) * 72.0) - 12.0;
+            gain = (((gain - 12) / 100.0) * 72.0);
             set_mic_gain(gain);
         }
         break;
