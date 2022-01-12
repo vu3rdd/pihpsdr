@@ -672,7 +672,7 @@ void radio_menu(GtkWidget *parent) {
 
   }
 
-//#ifdef GPIO
+#ifdef GPIO
   GtkWidget *vfo_divisor_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(vfo_divisor_label), "<b>VFO Encoder Divisor:</b>");
   gtk_grid_attach(GTK_GRID(grid),vfo_divisor_label,col,row,1,1);
@@ -683,10 +683,14 @@ void radio_menu(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),vfo_divisor,col,row,1,1);
   g_signal_connect(vfo_divisor,"value_changed",G_CALLBACK(vfo_divisor_value_changed_cb),NULL);
   row++;
-//#endif
+#endif
    
   if(row>temp_row) temp_row=row;
 
+  //
+  // The HPSDR machine-specific stuff is now put in the last column(s),
+  // either the ATLAS bits (METIS) or the Orion microphone settings
+  //
 #ifdef USBOZY
   if (protocol==ORIGINAL_PROTOCOL && (device == DEVICE_OZY || device == DEVICE_METIS))
 #else
