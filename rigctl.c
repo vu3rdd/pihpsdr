@@ -1817,14 +1817,17 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       }
       break;
     case 'G': // ZZMG
-      // set/read mic gain
-      if (command[4] == ';') {
-        sprintf(reply, "ZZMG%03d;", (int)mic_gain);
-        send_resp(client->fd, reply);
-      } else if (command[7] == ';') {
-        mic_gain = (double)atoi(&command[4]);
-      }
-      break;
+        // set/read mic gain
+        if (command[4] == ';') {
+            sprintf(reply, "ZZMG%03d;", (int)(((mic_gain + 12.0) / 72.0) * 100.0));
+            send_resp(client->fd, reply);
+        } else if (command[7] == ';') {
+            command[7] = '\0';
+            double gain = (double)atoi(&command[4]);
+            gain = ((gain / 100.0) * 72.0) - 12.0;
+            set_mic_gain(gain);
+        }
+        break;
     case 'L': // ZZML
       // read DSP modes and indexes
       if (command[4] == ';') {
