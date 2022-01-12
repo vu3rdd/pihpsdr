@@ -1821,6 +1821,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         // set/read mic gain
         if (command[4] == ';') {
             memset(reply, '\0', 9);
+            printf("getting MIC GAIN: %f\n", mic_gain);
             sprintf(reply, "ZZMG%03d;", (int)(((mic_gain + 12.0) * 100.0 / 62.0)));
             send_resp(client->fd, reply);
         } else if (command[7] == ';') {
