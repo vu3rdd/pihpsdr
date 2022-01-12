@@ -522,7 +522,6 @@ void set_mic_gain(double value) {
   g_print("%s\n",__FUNCTION__);
   if(can_transmit) {
     mic_gain=value;
-    printf("setting MIC GAIN to %f\n", mic_gain);
     SetTXAPanelGain1(transmitter->id,pow(10.0, mic_gain/20.0));
     if(display_sliders) {
       gtk_range_set_value (GTK_RANGE(mic_gain_scale),mic_gain);
