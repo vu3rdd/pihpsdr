@@ -1824,8 +1824,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
             send_resp(client->fd, reply);
         } else if (command[7] == ';') {
             command[7] = '\0';
-            double gain = (double)atoi(&command[4]);
-            gain = (((gain / 100.0) * 62.0) - 12.0);
+            double gain = (double)strtol(&command[4], NULL, 10);
+            gain = (gain * 62.0 / 100.0) - 12.0;
             set_mic_gain(gain);
         }
         break;
