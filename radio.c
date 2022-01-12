@@ -693,7 +693,6 @@ void start_radio() {
     // missing IQ scaling.
     //
     atlas_penelope = 1;
-    atlas_mic_source = 1;
   }
   // set the default power output and max drive value
   drive_max=100.0;
