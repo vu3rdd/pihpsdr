@@ -153,12 +153,11 @@ int PS_RX_FEEDBACK;
 int buffer_size=1024; // 64, 128, 256, 512, 1024, 2048
 int fft_size=2048; // 1024, 2048, 4096, 8192, 16384
 
-int atlas_penelope=0;  // 0: no penelope, 1: penelope, 2: unknown
+int atlas_penelope=0;  // 0: no TX, 1: Penelope TX, 2: PennyLane TX
 int atlas_clock_source_10mhz=0;
 int atlas_clock_source_128mhz=0;
 int atlas_config=0;
 int atlas_mic_source=0;
-int atlas_janus=0;
 
 int classE=0;
 
@@ -686,29 +685,15 @@ void start_radio() {
   protocol=radio->protocol;
   device=radio->device;
 
-  // init atlas_penelope flag
-  atlas_penelope = 0;  // default: no penelope
-  if (protocol == ORIGINAL_PROTOCOL && device == DEVICE_METIS) {
+  if ((protocol == ORIGINAL_PROTOCOL && device == DEVICE_METIS) ||
+      (protocol == NEW_PROTOCOL      && device == NEW_DEVICE_ATLAS)) {
     //
-    // VK4XV (Bob) suggested
-    //   to have some "protection" for penelope systems which
-    //   start from a virgin props file, namely to auto-detect a penelope
-    //   and set the atlas_penelope flag so that the IQ samples are properly
-    //   scaled (otherwise full PA output power results).
+    // by default, assume there is a penelope board (no PennyLane)
+    // when using an ATLAS bus system, to avoid TX overdrive due to
+    // missing IQ scaling.
     //
-    // So my implementation works as follows:
-    //   To guard against "false penelope detects", the atlas_penelope flag
-    //   is initialized with 2 ("unknown").
-    //
-    //   This has no effect if a props file is already there and the flag is
-    //   read from the props file. The value 2 "unknown" can be changed
-    //   to either 0 or 1 in two situations:
-    //     - P1 analyzing the control flags and finding the penelope software version
-    //       is 18: change "unknown" to "penelope"
-    //     - radio menu is opened and penelope checkbox is to be displayed: change
-    //       "unknown" to "no penelope"
-    //
-    atlas_penelope=2;
+    atlas_penelope = 1;
+    atlas_mic_source = 1;
   }
   // set the default power output and max drive value
   drive_max=100.0;

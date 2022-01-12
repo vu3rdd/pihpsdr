@@ -1219,24 +1219,14 @@ static void full_tx_buffer(TRANSMITTER *tx) {
          ) && atlas_penelope == 1) {
       //
       // Note that the atlas_penelope flag can have three values, namely
-      //   0 "no penelope"  : no scaling
+      //   0 "no penelope"  : no scaling 
       //   1 "penelope"     : scale
-      //   2 "unknown"      : no scaling
-      //
-      // Note "unknown" will be changed to "penelope" if P1 HPSDR packets are
-      // received and the penelope software version is 1.8. However, if it is a
-      // METIS system with a penelope software version different from 1.8, then
-      // the flag will remain in the "unknown" state.
-      //
-      // Note further, in the moment the radio menu is opened, "unknown" will be
-      // changed to "no penelope".
-      //
-      // This is so because some RedPitaya-based HPSDR servers identify as a
-      // METIS with penelope software version = 1.7
+      //   2 "pennylane"    : no scaling
       //
       // On Penelope boards, the TX drive level as reported by the P1 protocol has
       // no effect, and TX drive level changes are instead realized by
-      // scaling the TX IQ samples.
+      // scaling the TX IQ samples. Pennylane is a slightly updated Penelope board
+      // that has drive scaling just as Hermes and later.
       //
       // "The magic factor" 0.00392 is slightly less than 1/255.
       //

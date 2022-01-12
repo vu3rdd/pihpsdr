@@ -954,7 +954,7 @@ void process_ep2(uint8_t *frame)
 	case 0:
 	case 1:
 	  chk_data((frame[1] & 0x03) >> 0, rate, "SampleRate");
-	  chk_data((frame[1] & 0x0C) >> 3, ref10, "Ref10MHz");
+	  chk_data((frame[1] & 0x0C) >> 2, ref10, "Ref10MHz");
   	  chk_data((frame[1] & 0x10) >> 4, src122, "Source122MHz");
   	  chk_data((frame[1] & 0x60) >> 5, PMconfig, "Penelope/Mercury config");
   	  chk_data((frame[1] & 0x80) >> 7, MicSrc, "MicSource");

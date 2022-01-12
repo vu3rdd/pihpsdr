@@ -409,11 +409,7 @@ static void micsource_cb(GtkWidget *widget, gpointer data) {
 }
 
 static void penelopetx_cb(GtkWidget *widget, gpointer data) {
-  atlas_penelope=atlas_penelope==1?0:1;
-}
-
-static void janus_cb(GtkWidget *widget, gpointer data) {
-  atlas_janus=atlas_janus==1?0:1;
+  atlas_penelope=GPOINTER_TO_INT(data);
 }
 
 void radio_menu(GtkWidget *parent) {
@@ -743,6 +739,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),atlas_label,col,row,1,1);
     row++;
 
+    // Possibly "fuse" the 10Mhz Atlas buttons in one drop-down
     GtkWidget *ck10mhz_1=gtk_radio_button_new_with_label(NULL,"10MHz clock=Atlas");
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ck10mhz_1), atlas_clock_source_10mhz==0);
     gtk_grid_attach(GTK_GRID(grid),ck10mhz_1,col,row,1,1);
@@ -773,24 +770,23 @@ void radio_menu(GtkWidget *parent) {
     g_signal_connect(mic_src_b,"toggled",G_CALLBACK(micsource_cb),NULL);
     row++;
 
-    //
-    // If we arrive here and atlas_penelope is still "unknown", 
-    // set it to "no penelope" (from now on, it may only take
-    // the values 0 and 1).
-    //
-    if (atlas_penelope == 2) {
-      atlas_penelope = 0;
-    }
-    GtkWidget *pene_tx_b=gtk_check_button_new_with_label("Penelope TX");
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pene_tx_b), atlas_penelope);
-    gtk_grid_attach(GTK_GRID(grid),pene_tx_b,col,row,1,1);
-    g_signal_connect(pene_tx_b,"toggled",G_CALLBACK(penelopetx_cb),NULL);
+    // Possibly "fuse" the TX buttons in one drop-down
+    GtkWidget *penelopetx_1=gtk_radio_button_new_with_label(NULL,"No TX");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (penelopetx_1), atlas_penelope==0);
+    gtk_grid_attach(GTK_GRID(grid),penelopetx_1,col,row,1,1);
+    g_signal_connect(penelopetx_1,"toggled",G_CALLBACK(penelopetx_cb),(gpointer *)0);
     row++;
 
-    GtkWidget *janus_b=gtk_check_button_new_with_label("Janus");
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (janus_b), atlas_janus);
-    gtk_grid_attach(GTK_GRID(grid),janus_b,col,row,1,1);
-    g_signal_connect(janus_b,"toggled",G_CALLBACK(janus_cb),NULL);
+    GtkWidget *penelopetx_2=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(penelopetx_1),"Penelope TX");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (penelopetx_2), atlas_penelope==1);
+    gtk_grid_attach(GTK_GRID(grid),penelopetx_2,col,row,1,1);
+    g_signal_connect(penelopetx_2,"toggled",G_CALLBACK(penelopetx_cb),(gpointer *)1);
+    row++;
+
+    GtkWidget *penelopetx_3=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(penelopetx_1),"Pennylane TX");
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (penelopetx_3), atlas_penelope==2);
+    gtk_grid_attach(GTK_GRID(grid),penelopetx_3,col,row,1,1);
+    g_signal_connect(penelopetx_3,"toggled",G_CALLBACK(penelopetx_cb),(gpointer *)2);
     row++;
 
     if(row>temp_row) temp_row=row;

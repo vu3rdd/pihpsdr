@@ -904,16 +904,6 @@ static void process_control_bytes() {
           penelope_software_version=control_in[3];
           g_print("  Penelope Software version: %d (0x%0X)\n",penelope_software_version,penelope_software_version);
         }
-        //
-        // Set atlas_penelope flag to "penelope" if three conditions are met:
-        // a) it's a METIS device (no HERMES, ORION, etc.)
-        // b) penelope software version is 18
-        // c) atlas_penelope flag is "unknown"
-        //
-        if (device == DEVICE_METIS && penelope_software_version == 18 && atlas_penelope == 2) {
-          g_print("Adjusted settings for PENELOPE\n");
-	  atlas_penelope=1;
-        }
       }
       //
       //DEBUG code to monitor HL2 TX-FIFO filling and 
@@ -1348,7 +1338,7 @@ void ozy_send_buffer() {
   if(metis_offset==8) {
     //
     // Every second packet is a "C0=0" packet
-    // Unless USB device
+    // Note for USB devices metis_offest is ALWAYS 8 (!)
     //
     output_buffer[C0]=0x00;
     output_buffer[C1]=0x00;
@@ -1375,16 +1365,49 @@ void ozy_send_buffer() {
     if (device == DEVICE_METIS)
 #endif
     {
-      // atlas_mic_source is FALSE when using Janus
+      //
+      // A. Assume a mercury board is *always* present (set CONFIG_MERCURY)
+      //
+      // B. Set CONFIG_PENELOPE in either of the cases
+      // - a penelope or pennylane TX is selected (atlas_penelope != 0)
+      // - a penelope is specified as mic source (atlas_mic_source != 0)
+      // - the penelope is the source for the 122.88 Mhz clock (atlas_clock_source_128mhz == 0)
+      // - the penelope is the source for the 10 Mhz reference (atlas_clock_source_10mhz == 1)
+      //
+      // So if neither penelope nor pennylane is selected but referenced as clock or mic source,
+      // a pennylane is chosen implicitly (not no drive level adjustment via IQ scaling in this case!)
+      // and CONFIG_BOTH becomes effective.
+      //
       
-      if (atlas_mic_source) {
-        output_buffer[C1] |= PENELOPE_MIC;
-        output_buffer[C1] |= CONFIG_BOTH;
+      output_buffer[C1] |= CONFIG_MERCURY;
+
+      if (atlas_penelope) {
+        output_buffer[C1] |= CONFIG_PENELOPE;
       }
 
-      if (atlas_clock_source_128mhz)
-        output_buffer[C1] |= MERCURY_122_88MHZ_SOURCE;
-      output_buffer[C1] |= ((atlas_clock_source_10mhz & 3) << 2);
+      if (atlas_mic_source) {
+        output_buffer[C1] |= PENELOPE_MIC;
+        output_buffer[C1] |= CONFIG_PENELOPE;
+      }
+
+      if (atlas_clock_source_128mhz) {
+        output_buffer[C1] |= MERCURY_122_88MHZ_SOURCE;	// Mercury provides 122 Mhz
+      } else {
+        output_buffer[C1] |= PENELOPE_122_88MHZ_SOURCE;	// Penelope provides 122 Mhz
+        output_buffer[C1] |= CONFIG_PENELOPE;
+      }
+      switch (atlas_clock_source_10mhz) {
+	case 0:
+	  output_buffer[C1] |= ATLAS_10MHZ_SOURCE;	// ATLAS provides 10 Mhz
+	  break;
+	case 1:
+	  output_buffer[C1] |= PENELOPE_10MHZ_SOURCE;	// Penelope provides 10 Mhz
+	  output_buffer[C1] |= CONFIG_PENELOPE;
+	  break;
+	case 2:
+	  output_buffer[C1] |= MERCURY_10MHZ_SOURCE;	// Mercury provides 10 MHz
+	  break;
+      }
    }
 
 #ifdef USBOZY
