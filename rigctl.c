@@ -1819,7 +1819,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
     case 'G': // ZZMG
         // set/read mic gain
         if (command[4] == ';') {
-            memset(reply, \0, 9);
+            memset(reply, '\0', 9);
             sprintf(reply, "ZZMG%03d;", (int)(((mic_gain + 12.0) / 72.0) * 100.0));
             send_resp(client->fd, reply);
         } else if (command[7] == ';') {
