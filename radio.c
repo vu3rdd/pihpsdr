@@ -686,13 +686,21 @@ void start_radio() {
   device=radio->device;
 
   if ((protocol == ORIGINAL_PROTOCOL && device == DEVICE_METIS) ||
+#ifdef USBOZY
+      (protocol == ORIGINAL_PROTOCOL && device == DEVICE_OZY) ||
+#endif
       (protocol == NEW_PROTOCOL      && device == NEW_DEVICE_ATLAS)) {
     //
     // by default, assume there is a penelope board (no PennyLane)
     // when using an ATLAS bus system, to avoid TX overdrive due to
     // missing IQ scaling.
     //
-    atlas_penelope = 1;
+    atlas_penelope = 1;    // TX present, do IQ scaling
+#ifdef USBOZY
+    if (device == DEVICE_OZY) {
+      atlas_mic_source = 1;  // Defauolt: assume no "Janus"
+    }
+#endif
   }
   // set the default power output and max drive value
   drive_max=100.0;
