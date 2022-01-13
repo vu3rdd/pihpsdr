@@ -122,7 +122,6 @@ static int		TX_class_E = -1;
 static int		OpenCollectorOutputs=-1;
 static long		tx_freq=-1;
 static long		rx_freq[7] = {-1,-1,-1,-1,-1,-1,-1};
-static int		hermes_config=-1;
 static int		alex_lpf=-1;
 static int		alex_hpf=-1;
 static int		alex_manual=-1;
@@ -130,6 +129,15 @@ static int		alex_bypass=-1;
 static int		lna6m=-1;
 static int		alexTRdisable=-1;
 static int		vna=-1;
+static int		line_in=-1;
+static int		mic_boost=-1;
+static int		apollo_filter=-1;
+static int		apollo_tuner=-1;
+static int		apollo_auto_tune=-1;
+static int		alex_apollo=-1;
+static int		hl2_q5=-1;
+static int		hl2_tune=-1;
+static int		hl2_pa=-1;
 static int		c25_ext_board_i2c_data=-1;
 static int		rx_adc[7]={-1,-1,-1,-1,-1,-1,-1};
 static int		cw_hang = -1;
@@ -141,6 +149,7 @@ static int		cw_spacing = -1;
 static int		cw_delay = -1;
 static int		CommonMercuryFreq = -1;
 static int              freq=-1;
+static int		rx2gnd=-1;
 
 
 struct hl2word {
@@ -1067,12 +1076,20 @@ void process_ep2(uint8_t *frame)
 
 	case 18:
 	case 19:
-           if (OLDDEVICE == DEVICE_METIS) {
-             txdrive=255;   // penelope's cannnot adjust TX amplitude 
+	   chk_data(frame[1],txdrive,"TX DRIVE");
+	   if (OLDDEVICE == DEVICE_HERMES_LITE2) {
+             chk_data((frame[2] >> 2) & 0x01, hl2_q5,"HermesLite2 Q5 switch");
+             chk_data((frame[2] >> 3) & 0x01, hl2_pa,"HermesLite2 PA enable");
+             chk_data((frame[2] >> 4) & 0x01, hl2_tune,"HermesLite2 Tune");
            } else {
-	     chk_data(frame[1],txdrive,"TX DRIVE");
-           }
-	   chk_data(frame[2] & 0x3F,hermes_config,"HERMES CONFIG");
+             chk_data(frame[2] & 0x01, mic_boost,"MIC BOOST");
+             chk_data((frame[2] >> 1)  & 0x01, line_in,"LINE IN");
+             chk_data((frame[2] >> 2)  & 0x01, apollo_filter,"ApolloFilter");
+             chk_data((frame[2] >> 3)  & 0x01, apollo_tuner,"ApolloTuner");
+             chk_data((frame[2] >> 4)  & 0x01, apollo_auto_tune,"ApolloAutoTune");
+             chk_data((frame[2] >> 5)  & 0x01, alex_apollo,"SelectAlexApollo");
+          }
+
 	   chk_data((frame[2] >> 6) & 0x01, alex_manual,"ALEX manual HPF/LPF");
 	   chk_data((frame[2] >> 7) & 0x01, vna     ,"VNA mode");
 	   chk_data(frame[3] & 0x1F,alex_hpf,"ALEX HPF");
@@ -1189,7 +1206,8 @@ void process_ep2(uint8_t *frame)
         
 	case 36:
 	case 37:
-	    chk_data(frame[1], adc2bpf,"ADC2 BPF settings");
+	    chk_data(frame[1] & 0x7f, adc2bpf,"ADC2 BPF settings");
+	    chk_data((frame[1] >> 7) & 0x01, rx2gnd, "Ground-RX2-Input");
             chk_data(frame[2] & 0x02, anan7kxvtr, "Anan7k/8k XVTR enable");  
 	    chk_data(frame[2] & 0x40, anan7kps,  "Anan7k PureSignal flag");
 	    chk_data(frame[3] << 8 | frame[4], envgain, "Firmware EnvGain");
