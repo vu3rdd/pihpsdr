@@ -225,11 +225,23 @@ void discovery() {
     discovered[devices].protocol = ORIGINAL_PROTOCOL;
     discovered[devices].device = DEVICE_OZY;
     discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
-    discovered[devices].status = STATE_AVAILABLE;
     strcpy(discovered[devices].name,"Ozy on USB");
     discovered[devices].frequency_min=0.0;
     discovered[devices].frequency_max=61440000.0;
+    for(int i=0;i<6;i++) {
+      discovered[devices].info.network.mac_address[i]=0x10+i;
+    }
+    discovered[devices].status = STATE_AVAILABLE;
+    discovered[devices].info.network.address_length=0;
+    discovered[devices].info.network.interface_length=0;
     strcpy(discovered[devices].info.network.interface_name,"USB");
+    discovered[devices].use_tcp=0;
+    discovered[devices].use_routing=0;
+    discovered[devices].supported_receivers=2;
+    fprintf(stderr,"discovery: found USB OZY device min=%f max=%f\n",
+                            discovered[devices].frequency_min,
+                            discovered[devices].frequency_max);
+
     devices++;
   }
 #endif
