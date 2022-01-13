@@ -455,27 +455,10 @@ void radio_menu(GtkWidget *parent) {
   g_signal_connect (close_b, "button_press_event", G_CALLBACK(close_cb), NULL);
   gtk_grid_attach(GTK_GRID(grid),close_b,col,row,1,1);
 
-  col++;
-
-  GtkWidget *region_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(region_label), "<b>Region:</b>");
-  gtk_grid_attach(GTK_GRID(grid),region_label,col,row,1,1);
   
-  col++;
-
-  GtkWidget *region_combo=gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"Other");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"UK");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"WRC15");
-  gtk_combo_box_set_active(GTK_COMBO_BOX(region_combo),region);
-  gtk_grid_attach(GTK_GRID(grid),region_combo,col,row,1,1);
-  g_signal_connect(region_combo,"changed",G_CALLBACK(region_cb),NULL);
-
-  col++;
-
-
-  row++;
+  temp_row=1;
   col=0;
+  row=1;
 
   GtkWidget *receivers_label=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(receivers_label), "<b>Receivers:</b>");
@@ -494,26 +477,23 @@ void radio_menu(GtkWidget *parent) {
   
   row++;
 
-  GtkWidget *sample_rate_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");
-  gtk_grid_attach(GTK_GRID(grid),sample_rate_label,col,row,1,1);
-  row++;
 
-  GtkWidget *sample_rate_combo_box=gtk_combo_box_text_new();
   switch(protocol) {
-    case ORIGINAL_PROTOCOL:
     case NEW_PROTOCOL:
+      // Each RX has its own sample rate, this is handled in the RX MENU
+      break;
+    case ORIGINAL_PROTOCOL:
+      {
+      GtkWidget *sample_rate_label=gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");
+      gtk_grid_attach(GTK_GRID(grid),sample_rate_label,col,row,1,1);
+      row++;
+
+      GtkWidget *sample_rate_combo_box=gtk_combo_box_text_new();
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"48000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"96000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"192000");
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"384000");
-      if(protocol==NEW_PROTOCOL) {
-#ifndef GPIO
-        // seems that these very high sample rates cannot be handled if using GPIO
-        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"768000");
-        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"1536000");
-#endif
-      }
       switch (active_receiver->sample_rate) {
          case 48000:
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
@@ -525,25 +505,24 @@ void radio_menu(GtkWidget *parent) {
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),2);
 	    break;
          case 384000:
-#ifdef GPIO
-         case 768000:
-         case 1536000:
-#endif
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
 	    break;
-#ifndef GPIO
-         case 768000:
-            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),4);
-	    break;
-         case 1536000:
-            gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),5);
-	    break;
-#endif
+      }
+      gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
+      g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
+      row++;
       }
       break;
 
 #ifdef SOAPYSDR
     case SOAPYSDR_PROTOCOL:
+      {
+      GtkWidget *sample_rate_label=gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate:</b>");
+      gtk_grid_attach(GTK_GRID(grid),sample_rate_label,col,row,1,1);
+      row++;
+
+      GtkWidget *sample_rate_combo_box=gtk_combo_box_text_new();
       if(strcmp(radio->name,"sdrplay")==0) {
         // It seems that only one does work ?
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,"768000");
@@ -576,16 +555,16 @@ void radio_menu(GtkWidget *parent) {
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate);
         gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
       }
+      gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
+      g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
+      row++;
+      }
       break;
 #endif
-
   }
-  gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
-  g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
-  row++;
+
+
   if(row>temp_row) temp_row=row;
-
-
   col++,
   row=1;
 
@@ -633,9 +612,23 @@ void radio_menu(GtkWidget *parent) {
   row++;
 
   if(row>temp_row) temp_row=row;
-  
   col++;
   row=1;
+
+  GtkWidget *region_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(region_label), "<b>Region:</b>");
+  gtk_grid_attach(GTK_GRID(grid),region_label,col,row,1,1);
+  row++;
+
+  GtkWidget *region_combo=gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"Other");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"UK");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"WRC15");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(region_combo),region);
+  gtk_grid_attach(GTK_GRID(grid),region_combo,col,row,1,1);
+  g_signal_connect(region_combo,"changed",G_CALLBACK(region_cb),NULL);
+  row++;
+
 
   if(protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL) {
 
@@ -689,7 +682,7 @@ void radio_menu(GtkWidget *parent) {
 
   //
   // The HPSDR machine-specific stuff is now put in the last column(s),
-  // either the ATLAS bits (METIS) or the Orion microphone settings
+  // either the ATLAS bits (METIS) or the ORION microphone settings
   //
 #ifdef USBOZY
   if (protocol==ORIGINAL_PROTOCOL && (device == DEVICE_OZY || device == DEVICE_METIS))
@@ -761,6 +754,7 @@ void radio_menu(GtkWidget *parent) {
 
     if(row>temp_row) temp_row=row;
   }
+
   if((protocol==NEW_PROTOCOL && device==NEW_DEVICE_ORION) ||
      (protocol==NEW_PROTOCOL && device==NEW_DEVICE_ORION2) ||
      (protocol==ORIGINAL_PROTOCOL && device==DEVICE_ORION) ||
@@ -770,7 +764,7 @@ void radio_menu(GtkWidget *parent) {
       row=1;
 
       GtkWidget *orion_label=gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(orion_label), "<b>Orion(2) Mic jack:</b>");
+      gtk_label_set_markup(GTK_LABEL(orion_label), "<b>ORION Mic jack:</b>");
       gtk_grid_attach(GTK_GRID(grid),orion_label,col,row,2,1);
       row++;
 
@@ -803,6 +797,12 @@ void radio_menu(GtkWidget *parent) {
 
   row=temp_row;
   col=0;
+  //
+  // Insert small separation between top columns and bottom rows
+  //
+  GtkWidget *Separator=gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_grid_attach(GTK_GRID(grid), Separator, col, row, 5, 1);
+  row++;
 
   GtkWidget *split_b=gtk_check_button_new_with_label("Split");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (split_b), split);
