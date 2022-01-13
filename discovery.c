@@ -227,7 +227,8 @@ void discovery() {
     discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
     discovered[devices].status = STATE_AVAILABLE;
     strcpy(discovered[devices].name,"Ozy on USB");
-
+    discovered[devices].frequency_min=0.0;
+    discovered[devices].frequency_max=61440000.0;
     strcpy(discovered[devices].info.network.interface_name,"USB");
     devices++;
   }
