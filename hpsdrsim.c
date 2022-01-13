@@ -138,6 +138,8 @@ static int		alex_apollo=-1;
 static int		hl2_q5=-1;
 static int		hl2_tune=-1;
 static int		hl2_pa=-1;
+static int		hl2_tx_latency=1;
+static int		hl2_ptt_hang=-1;
 static int		c25_ext_board_i2c_data=-1;
 static int		rx_adc[7]={-1,-1,-1,-1,-1,-1,-1};
 static int		cw_hang = -1;
@@ -1212,6 +1214,11 @@ void process_ep2(uint8_t *frame)
 	    chk_data(frame[2] & 0x40, anan7kps,  "Anan7k PureSignal flag");
 	    chk_data(frame[3] << 8 | frame[4], envgain, "Firmware EnvGain");
 	    break;
+        case 46:
+	case 47:
+	    chk_data(frame[3] & 0x1f, hl2_ptt_hang, "HL2 PTT HANG");
+	    chk_data(frame[4] & 0x7f, hl2_tx_latency,"HL2 TX LATENCY");
+	    break;
         default:
             //
             // The HermesLite2 has an extended address range so we just
@@ -1222,7 +1229,7 @@ void process_ep2(uint8_t *frame)
             rc=frame[0] >> 1;
             if (hl2addr[rc].c1 != frame[1] || hl2addr[rc].c2 != frame[2] ||
                 hl2addr[rc].c3 != frame[3] || hl2addr[rc].c4 != frame[4]) {
-              printf("ADDR=0x%2x C1=0x%2x C2=0x%2x C3=0x%2x C4=0x%2x\n",
+              printf("        HL2 AHL2 DDR=0x%2x C1=0x%2x C2=0x%2x C3=0x%2x C4=0x%2x\n",
                 rc, frame[1], frame[2], frame[3], frame[4]);
               hl2addr[rc].c1=frame[1];
               hl2addr[rc].c2=frame[2];
@@ -1313,22 +1320,19 @@ void *handler_ep6(void *arg)
 
 		    switch (header_offset) {
 			case 0:
-			    // do not set PTT and CW in C0
-			    // do not set ADC overflow in C1
                             if (OLDDEVICE == DEVICE_HERMES_LITE2) {
+			      *(pointer+4) = 0;
 			      // C2/C3 is TX FIFO count
-			      tx_fifo_count=txptr - rxptr;
-			      if (tx_fifo_count < 0) tx_fifo_count += OLDRTXLEN;
-			      *(pointer+5) = (tx_fifo_count >> 8) & 0x7F;
-			      *(pointer+6) = tx_fifo_count & 0xFF;
+			      *(pointer+5) = 0;
+			      *(pointer+6) = 0;
                             }
 			    header_offset=8;
 			    break;
 			case 8:
                             if (OLDDEVICE == DEVICE_HERMES_LITE2) {
 			      // HL2: temperature
-			      *(pointer+4)=0;
-			      *(pointer+5) = tx_fifo_count & 0x7F;  // pseudo random number
+			      *(pointer+4) =  3;
+			      *(pointer+5) =112;  // 3*256 + 112 = 880 ==> 20.0 degrees centigrade
                             } else {
 			      // AIN5: Exciter power
 			      *(pointer+4)=0;		// about 500 mW
@@ -1341,8 +1345,8 @@ void *handler_ep6(void *arg)
 			    header_offset=16;
 			    break;
 			case 16:
-			    // AIN2: Reverse power
-			    // AIN3:
+			    // AIN2: Reverse power; stays at zero
+			    // AIN3: stays at zero (PA current for HL2)
 			    header_offset=24;
 			    break;
 			case 24:
