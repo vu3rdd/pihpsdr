@@ -134,6 +134,7 @@ extern int atlas_clock_source_10mhz;
 extern int atlas_clock_source_128mhz;
 extern int atlas_config;
 extern int atlas_mic_source;
+extern int atlas_janus;
 
 extern int classE;
 

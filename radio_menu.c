@@ -647,10 +647,13 @@ void radio_menu(GtkWidget *parent) {
     switch (filter_board) {
       case NONE:
 	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),0);
+	break;
       case ALEX:
 	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),1);
+	break;
       case APOLLO:
 	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),2);
+	break;
       case CHARLY25:
 	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),3);
         break;
