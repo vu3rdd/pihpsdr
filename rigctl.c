@@ -3465,7 +3465,7 @@ int parse_cmd(void *data) {
         if (have_rx_gain) {
           att = adc[active_receiver->adc].attenuation + 12.0;
           printf("after stage 1: %f\n", att);
-          att = round(att / 60.0) * 99.0;
+          att = round((att * (99.0 / 60.0));
           printf("after stage 2: %f\n", att);
         } else {
           att = adc[active_receiver->adc].attenuation;
