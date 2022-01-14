@@ -64,6 +64,7 @@ typedef struct _adc {
   gboolean random;
   gboolean preamp;
   gint attenuation;
+  gdouble attenuation_orig;
   gboolean enable_step_attenuation;
   gdouble gain;
   gdouble min_gain;
