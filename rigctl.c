@@ -3463,7 +3463,7 @@ int parse_cmd(void *data) {
       if (command[2] == ';') {
         int att = 0;
         if (have_rx_gain) {
-          att = (int)(adc[active_receiver->adc].attenuation + 12);
+          att = (int)round(adc[active_receiver->adc].attenuation + 12);
           att = (int)round((att * 99.0) / 60.0);
         } else {
           att = (int)(adc[active_receiver->adc].attenuation);
@@ -3475,7 +3475,7 @@ int parse_cmd(void *data) {
           command[4] = '\0';
           int att = strtol(&command[2], NULL, 10);
           if (have_rx_gain) {
-              att = (int)round(((att * 60.0) / 99.0)) - 12;
+              att = (int)round(((att * 60.0) / 99.0) - 12.0);
           } else {
               att = (int)round((att * 31.0) / 99.0);
           }
