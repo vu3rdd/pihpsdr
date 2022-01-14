@@ -2592,9 +2592,6 @@ void radioSaveState() {
     setProperty("radio.adc[0].random", value);
     sprintf(value, "%d", adc[0].preamp);
     setProperty("radio.adc[0].preamp", value);
-
-    printf("saving adc attenuation values: %d\n", adc[0].attenuation);
-
     sprintf(value, "%d", adc[0].attenuation);
     setProperty("radio.adc[0].attenuation", value);
     sprintf(value, "%d", adc[0].enable_step_attenuation);
