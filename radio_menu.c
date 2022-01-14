@@ -423,6 +423,10 @@ static void tx_cb(GtkWidget *widget, gpointer data) {
   atlas_penelope=gtk_combo_box_get_active (GTK_COMBO_BOX(widget));
 }
 
+static void janus_cb(GtkWidget *widget, gpointer data) {
+  atlas_janus=atlas_janus==1?0:1;
+}
+
 void radio_menu(GtkWidget *parent) {
   parent_window=parent;
 
@@ -754,6 +758,22 @@ void radio_menu(GtkWidget *parent) {
     g_signal_connect(tx_combo,"changed",G_CALLBACK(tx_cb),NULL);
 
     row++;
+
+#ifdef USBOZY
+    //
+    // This option is for ATLAS systems which *only* have an OZY
+    // and a JANUS board (the RF front end then is either SDR-1000 or SoftRock)
+    //
+    // It is assumed that the SDR-1000 is controlled outside piHPSDR
+    //
+    if (protocol == ORIGINAL_PROTOCOL && device == DEVICE_OZY) {
+      GtkWidget *janus_b=gtk_check_button_new_with_label("Janus Only");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (janus_b), atlas_janus);
+      gtk_grid_attach(GTK_GRID(grid),janus_b,col+1,row,1,1);
+      g_signal_connect(janus_b,"toggled",G_CALLBACK(janus_cb),NULL);
+      row++;
+    }
+#endif
 
     if(row>temp_row) temp_row=row;
   }

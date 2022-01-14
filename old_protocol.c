@@ -1413,19 +1413,13 @@ void ozy_send_buffer() {
 #ifdef USBOZY
     if (device == DEVICE_OZY && atlas_janus) {
       //
-      // The JANUS is not a radio but a sound card.
-      // pihpsdr should do RX and TX but all the frequency,
-      // RX frontend, TX filters, etc. settings are
-      // not respected (and not sent).
+      // Why is this shortcut needed?
       //
       output_buffer[C2]=0x00;
       output_buffer[C3]=0x00;
       output_buffer[C4]=0x00;
       ozyusb_write(output_buffer,OZY_BUFFER_SIZE);
-      //
-      // Take care we also send a C0=0 packet next time
-      //
-      metis_offset=8;
+      metis_offset=8;  // take care next packet is a C0=0 packet
       return;
     }
 #endif
