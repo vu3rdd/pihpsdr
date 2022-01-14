@@ -3463,11 +3463,10 @@ int parse_cmd(void *data) {
       if (command[2] == ';') {
         double att = 0.0;
         if (have_rx_gain) {
-          att = adc[active_receiver->adc].attenuation + 12.0;
+          att = adc[active_receiver->adc].attenuation;
           printf("after stage 1: %f\n", att);
-          att = round((att * 99.0) / 60.0);
+          att = round((att * 99.0) / 60.0)  + 12.0;
           printf("after stage 2: %f\n", att);
-          printf("RA1: realAttn = %f, attn i = %d\n", adc[active_receiver->adc].attenuation, (int)att);
         } else {
           att = adc[active_receiver->adc].attenuation;
           att = round((att * 99.0) / 31.0);
