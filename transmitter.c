@@ -1215,7 +1215,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   if (isTransmitting()) {
 
     if(  (    (protocol == NEW_PROTOCOL && radio->device==NEW_DEVICE_ATLAS) 
+#ifdef USBOZY
            || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_OZY)
+#endif
            || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_METIS)
          ) && atlas_penelope == 1) {
       //
