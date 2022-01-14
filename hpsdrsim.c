@@ -245,6 +245,7 @@ int main(int argc, char *argv[])
 
         for (i=1; i<argc; i++) {
             if (!strncmp(argv[i],"-atlas"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11;}
+            if (!strncmp(argv[i],"-metis"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11;}
             if (!strncmp(argv[i],"-hermes" ,      7))  {OLDDEVICE=DEVICE_HERMES;      NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x22;}
             if (!strncmp(argv[i],"-griffin" ,     8))  {OLDDEVICE=DEVICE_GRIFFIN;     NEWDEVICE=NEW_DEVICE_HERMES2;       MAC5=0x33;}
             if (!strncmp(argv[i],"-angelia" ,     8))  {OLDDEVICE=DEVICE_ANGELIA;     NEWDEVICE=NEW_DEVICE_ANGELIA;       MAC5=0x44;}
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
         }
 
         switch (OLDDEVICE) {
-            case   DEVICE_METIS:        fprintf(stderr,"DEVICE is METIS\n");         c1=3.3; c2=0.090; break;
+            case   DEVICE_METIS:        fprintf(stderr,"DEVICE is ATLAS/METIS\n");   c1=3.3; c2=0.090; break;
             case   DEVICE_HERMES:       fprintf(stderr,"DEVICE is HERMES\n");        c1=3.3; c2=0.095; break;
             case   DEVICE_GRIFFIN:      fprintf(stderr,"DEVICE is GRIFFIN\n");       c1=3.3; c2=0.095; break;
             case   DEVICE_ANGELIA:      fprintf(stderr,"DEVICE is ANGELIA\n");       c1=3.3; c2=0.095; break;
