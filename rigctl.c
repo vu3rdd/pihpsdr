@@ -3465,23 +3465,26 @@ int parse_cmd(void *data) {
         if (have_rx_gain) {
           att = adc[active_receiver->adc].attenuation + 12.0;
           att = round((att * 99.0) / 60.0);
-          printf("RA1: attn f = %f, attn i = %d\n", att, (int)att);
+          printf("RA1: realAttn = %f, attn f = %f, attn i = %d\n", adc[active_receiver->adc].attenuation, att, (int)att);
         } else {
           att = adc[active_receiver->adc].attenuation;
           att = round((att * 99.0) / 31.0);
-          printf("RA2: attn f = %f, attn i = %d\n", att, (int)att);
         }
         sprintf(reply, "RA%02d00;", (int)att);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
           command[4] = '\0';
-          int att = strtol(&command[2], NULL, 10);
+          int attI = strtol(&command[2], NULL, 10);
+          double att = 0.0;
+          printf("setting attn level [0..99]: %d\n", attI);
+
           if (have_rx_gain) {
-              att = (int)round(((att * 60.0) / 99.0) - 12.0);
+              att = ((attI * 60.0) / 99.0) - 12.0;
           } else {
-              att = (int)round((att * 31.0) / 99.0);
+              att = (attI * 31.0) / 99.0;
           }
-          set_attenuation_value((double)att);
+          printf("setting attn val [-12..48]: %f\n", att);
+          set_attenuation_value(att);
       }
       break;
     case 'C': // RC
