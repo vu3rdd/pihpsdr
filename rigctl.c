@@ -3464,20 +3464,20 @@ int parse_cmd(void *data) {
         int att = 0;
         if (have_rx_gain) {
           att = (int)(adc[active_receiver->adc].attenuation + 12);
-          att = (int)(((double)att / 60.0) * 99.0);
+          att = (int)round((att * 99.0) / 60.0);
         } else {
           att = (int)(adc[active_receiver->adc].attenuation);
-          att = (int)(((double)att / 31.0) * 99.0);
+          att = (int)round((att * 99.0) / 31.0);
         }
         sprintf(reply, "RA%02d00;", att);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
           command[4] = '\0';
-          int att = atoi(&command[2]);
+          int att = strtol(&command[2], NULL, 10);
           if (have_rx_gain) {
-              att = (int)((((double)att / 99.0) * 60.0) - 12.0);
+              att = (int)round(((att * 60.0) / 99.0)) - 12;
           } else {
-              att = (int)(((double)att / 99.0) * 31.0);
+              att = (int)round((att * 31.0) / 99.0);
           }
           set_attenuation_value((double)att);
       }
