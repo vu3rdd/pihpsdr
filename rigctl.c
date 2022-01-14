@@ -3480,7 +3480,7 @@ int parse_cmd(void *data) {
           printf("setting attn level [0..99]: %d\n", attI);
 
           if (have_rx_gain) {
-              att = round((attI * 60.0) / 99.0) - 12.0;
+              att = round(((attI * 60.0) / 99.0) - 12.0);
           } else {
               att = (attI * 31.0) / 99.0;
           }
