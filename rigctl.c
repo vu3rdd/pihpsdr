@@ -3480,12 +3480,12 @@ int parse_cmd(void *data) {
           printf("setting attn level [0..99]: %d\n", attI);
 
           if (have_rx_gain) {
-              att = ((attI * 60.0) / 99.0) - 12.0;
+              att = round((attI * 60.0) / 99.0) - 12.0;
           } else {
               att = (attI * 31.0) / 99.0;
           }
-          printf("setting attn val [-12..48]: %f\n", round(att));
-          set_attenuation_value(round(att));
+          printf("setting attn val [-12..48]: %f\n", att);
+          set_attenuation_value(att);
       }
       break;
     case 'C': // RC
