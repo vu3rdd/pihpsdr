@@ -67,6 +67,7 @@
 #include "toolbar.h"
 #include "rigctl.h"
 #include "ext.h"
+#include "radio_menu.h"
 #ifdef LOCALCW
 #include "iambic.h"
 #endif
@@ -158,6 +159,7 @@ int atlas_clock_source_10mhz=0;
 int atlas_clock_source_128mhz=0;
 int atlas_config=0;
 int atlas_mic_source=0;
+int atlas_janus=0;
 
 int classE=0;
 
@@ -693,14 +695,14 @@ void start_radio() {
     //
     // by default, assume there is a penelope board (no PennyLane)
     // when using an ATLAS bus system, to avoid TX overdrive due to
-    // missing IQ scaling.
+    // missing IQ scaling. Furthermore, piHPSDR assumes the presence
+    // of a Mercury board, so use that as the default clock source
+    // (until changed in the RADIO menu)
     //
-    atlas_penelope = 1;    // TX present, do IQ scaling
-#ifdef USBOZY
-    if (device == DEVICE_OZY) {
-      atlas_mic_source = 1;  // Defauolt: assume no "Janus"
-    }
-#endif
+    atlas_penelope = 1;    		// TX present, do IQ scaling
+    atlas_clock_source_10mhz = 2;	// default: Mercury
+    atlas_clock_source_128mhz = 1;	// default: Mercury
+    atlas_mic_source = 1;               // default: Mic source = Penelope
   }
   // set the default power output and max drive value
   drive_max=100.0;
@@ -1128,6 +1130,7 @@ void start_radio() {
   if ((protocol == ORIGINAL_PROTOCOL && device == DEVICE_HERMES_LITE2) ||
       (protocol == NEW_PROTOCOL && device == NEW_DEVICE_HERMES_LITE2))  {
     filter_board = N2ADR;
+    load_filters();  // Apply default OC settings for N2ADR board
   }
 
   if (protocol == ORIGINAL_PROTOCOL && device == DEVICE_STEMLAB) {
@@ -2072,6 +2075,12 @@ g_print("radioRestoreState: %s\n",property_path);
     if(value) fft_size=atoi(value);
     value=getProperty("atlas_penelope");
     if(value) atlas_penelope=atoi(value);
+    value=getProperty("atlas_clock_source_10mhz");
+    if(value) atlas_clock_source_10mhz=atoi(value);
+    value=getProperty("atlas_clock_source_128mhz");
+    if(value) atlas_clock_source_128mhz=atoi(value);
+    value=getProperty("atlas_mic_source");
+    if(value) atlas_mic_source=atoi(value);
     value=getProperty("tx_out_of_band");
     if(value) tx_out_of_band=atoi(value);
     value=getProperty("filter_board");
@@ -2432,6 +2441,12 @@ g_print("radioSaveState: %s\n",property_path);
     setProperty("fft_size",value);
     sprintf(value,"%d",atlas_penelope);
     setProperty("atlas_penelope",value);
+    sprintf(value,"%d",atlas_clock_source_10mhz);
+    setProperty("atlas_clock_source_10mhz",value);
+    sprintf(value,"%d",atlas_clock_source_128mhz);
+    setProperty("atlas_clock_source_128mhz",value);
+    sprintf(value,"%d",atlas_mic_source);
+    setProperty("atlas_mic_source",value);
     sprintf(value,"%d",filter_board);
     setProperty("filter_board",value);
     sprintf(value,"%d",tx_out_of_band);
