@@ -331,14 +331,14 @@ void old_protocol_init(int rx,int pixels,int rate) {
       exit( -1 );
     }
     g_print( "receive_thread: id=%p\n",receive_thread_id);
-
-    g_print("old_protocol_init: prime radio\n");
-    for(i=8;i<OZY_BUFFER_SIZE;i++) {
-      output_buffer[i]=0;
-    }
-
-    metis_restart();
   }
+
+  g_print("old_protocol_init: prime radio\n");
+  for(i=8;i<OZY_BUFFER_SIZE;i++) {
+    output_buffer[i]=0;
+  }
+
+  metis_restart();
 
 }
 
@@ -1338,6 +1338,7 @@ void ozy_send_buffer() {
   if(metis_offset==8) {
     //
     // Every second packet is a "C0=0" packet
+    // (for JANUS, *every* packet is a "C0=0" packet
     //
     output_buffer[C0]=0x00;
     output_buffer[C1]=0x00;
@@ -1410,12 +1411,21 @@ void ozy_send_buffer() {
    }
 
 #ifdef USBOZY
-    // check for Janus
-    if (device == DEVICE_OZY && !atlas_mic_source) {
+    if (device == DEVICE_OZY && atlas_janus) {
+      //
+      // The JANUS is not a radio but a sound card.
+      // pihpsdr should do RX and TX but all the frequency,
+      // RX frontend, TX filters, etc. settings are
+      // not respected (and not sent).
+      //
       output_buffer[C2]=0x00;
       output_buffer[C3]=0x00;
       output_buffer[C4]=0x00;
       ozyusb_write(output_buffer,OZY_BUFFER_SIZE);
+      //
+      // Take care we also send a C0=0 packet next time
+      //
+      metis_offset=8;
       return;
     }
 #endif

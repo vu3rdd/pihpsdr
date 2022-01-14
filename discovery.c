@@ -229,7 +229,7 @@ void discovery() {
     discovered[devices].frequency_min=0.0;
     discovered[devices].frequency_max=61440000.0;
     for(int i=0;i<6;i++) {
-      discovered[devices].info.network.mac_address[i]=0x10+i;
+      discovered[devices].info.network.mac_address[i]=0;
     }
     discovered[devices].status = STATE_AVAILABLE;
     discovered[devices].info.network.address_length=0;
