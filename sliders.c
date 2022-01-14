@@ -153,8 +153,6 @@ static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 void set_attenuation_value(double value) {
   g_print("%s\n",__FUNCTION__);
-  printf("last attn value: %d, setting it to: %f\n", adc[active_receiver->adc].attenuation, value);
-  adc[active_receiver->adc].attenuation_orig = value;
   adc[active_receiver->adc].attenuation = (int)value;
   set_attenuation(adc[active_receiver->adc].attenuation);
   if(display_sliders) {
@@ -182,7 +180,6 @@ void set_attenuation_value(double value) {
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
       if (have_rx_gain) {
-          printf("************** set attenuation scale [-12, 48] \n");
         attenuation_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-12.0, 48.0, 1.00);
       } else {
         attenuation_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 31.0, 1.00);

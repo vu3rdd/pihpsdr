@@ -3463,10 +3463,7 @@ int parse_cmd(void *data) {
       if (command[2] == ';') {
         double att = 0.0;
         if (have_rx_gain) {
-          att = adc[active_receiver->adc].attenuation_orig + 12.0;
-          printf("after stage 1: %f\n", att);
-          att = round(att * (99.0 / 60.0));
-          printf("after stage 2: %f\n", att);
+          att = adc[active_receiver->adc].attenuation + 12.0;
         } else {
           att = adc[active_receiver->adc].attenuation;
           att = round((att * 99.0) / 31.0);
@@ -3477,14 +3474,12 @@ int parse_cmd(void *data) {
           command[4] = '\0';
           int attI = strtol(&command[2], NULL, 10);
           double att = 0.0;
-          printf("setting attn level [0..99]: %d\n", attI);
 
           if (have_rx_gain) {
-              att = ((attI * 60.0) / 99.0) - 12.0;
+              att = attI - 12.0;
           } else {
               att = (attI * 31.0) / 99.0;
           }
-          printf("setting attn val [-12..48]: %f\n", att);
           set_attenuation_value(att);
       }
       break;
