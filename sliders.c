@@ -153,7 +153,7 @@ static void attenuation_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 void set_attenuation_value(double value) {
   g_print("%s\n",__FUNCTION__);
-  printf("last attn value: %f, setting it to: %f\n", adc[active_receiver->adc].attenuation, value);
+  printf("last attn value: %d, setting it to: %f\n", adc[active_receiver->adc].attenuation, value);
   adc[active_receiver->adc].attenuation=(int)value;
   set_attenuation(adc[active_receiver->adc].attenuation);
   if(display_sliders) {
