@@ -3463,7 +3463,7 @@ int parse_cmd(void *data) {
       if (command[2] == ';') {
         double att = 0.0;
         if (have_rx_gain) {
-          att = adc[active_receiver->adc].attenuation + 12.0);
+          att = adc[active_receiver->adc].attenuation + 12.0;
           att = round((att * 99.0) / 60.0);
         } else {
           att = adc[active_receiver->adc].attenuation;
