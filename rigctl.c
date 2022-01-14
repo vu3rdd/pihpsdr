@@ -3483,8 +3483,8 @@ int parse_cmd(void *data) {
           } else {
               att = (attI * 31.0) / 99.0;
           }
-          printf("setting attn val [-12..48]: %f\n", att);
-          set_attenuation_value(att);
+          printf("setting attn val [-12..48]: %f\n", round(att));
+          set_attenuation_value(round(att));
       }
       break;
     case 'C': // RC
