@@ -3461,15 +3461,15 @@ int parse_cmd(void *data) {
     case 'A': // RA
       // set/read Attenuator function
       if (command[2] == ';') {
-        int att = 0;
+        double att = 0.0;
         if (have_rx_gain) {
-          att = (int)round(adc[active_receiver->adc].attenuation + 12);
-          att = (int)round((att * 99.0) / 60.0);
+          att = adc[active_receiver->adc].attenuation + 12.0);
+          att = round((att * 99.0) / 60.0);
         } else {
-          att = (int)(adc[active_receiver->adc].attenuation);
-          att = (int)round((att * 99.0) / 31.0);
+          att = adc[active_receiver->adc].attenuation;
+          att = round((att * 99.0) / 31.0);
         }
-        sprintf(reply, "RA%02d00;", att);
+        sprintf(reply, "RA%02d00;", (int)att);
         send_resp(client->fd, reply);
       } else if (command[4] == ';') {
           command[4] = '\0';
