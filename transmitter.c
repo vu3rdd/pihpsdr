@@ -849,7 +849,7 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
 
   tx->displaying=0;
   
-  tx->alex_antenna=ALEX_TX_ANTENNA_1;
+  tx->alex_antenna=0;  // default: ANT1
 
 fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_dsp_rate=%d iq_output_rate=%d output_samples=%d fps=%d width=%d height=%d\n",tx->id, tx->buffer_size, tx->mic_sample_rate, tx->mic_dsp_rate, tx->iq_output_rate, tx->output_samples,tx->fps,tx->width,tx->height);
 
@@ -1215,6 +1215,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   if (isTransmitting()) {
 
     if(  (    (protocol == NEW_PROTOCOL && radio->device==NEW_DEVICE_ATLAS) 
+           || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_OZY)
            || (protocol==ORIGINAL_PROTOCOL && radio->device==DEVICE_METIS)
          ) && atlas_penelope == 1) {
       //
