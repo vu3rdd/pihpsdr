@@ -659,6 +659,9 @@ static int rx_feedback_channel() {
   switch (device) {
     case DEVICE_METIS:
     case DEVICE_HERMES_LITE:
+#ifdef USBOZY
+    case DEVICE_OZY:
+#endif
       ret=0;
       break;
     case DEVICE_HERMES:
@@ -690,6 +693,9 @@ static int tx_feedback_channel() {
   switch (device) {
     case DEVICE_METIS:
     case DEVICE_HERMES_LITE:
+#ifdef USBOZY
+    case DEVICE_OZY:
+#endif
       ret=1;
       break;
     case DEVICE_HERMES:
@@ -813,6 +819,9 @@ static int how_many_receivers() {
     switch (device) {
       case DEVICE_METIS:
       case DEVICE_HERMES_LITE:
+#ifdef USBOZY
+      case DEVICE_OZY:
+#endif
 	ret=2;  // TX feedback hard-wired to RX2
 	break;
       case DEVICE_HERMES:

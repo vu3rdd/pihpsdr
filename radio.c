@@ -710,6 +710,9 @@ void start_radio() {
     case ORIGINAL_PROTOCOL:
       switch(device) {
         case DEVICE_METIS:
+#ifdef USBOZY
+	case DEVICE_OZY:
+#endif
           pa_power=PA_1W;
           break;
         case DEVICE_HERMES:
@@ -1072,6 +1075,9 @@ void start_radio() {
     case ORIGINAL_PROTOCOL:
       switch(device) {
         case DEVICE_METIS: // No support for multiple MERCURY cards on a single ATLAS bus.
+#ifdef USBOZY
+       case DEVICE_OZY:    // No support for multiple MERCURY cards on a single ATLAS bus.
+#endif
         case DEVICE_HERMES:
         case DEVICE_HERMES_LITE:
         case DEVICE_HERMES_LITE2:

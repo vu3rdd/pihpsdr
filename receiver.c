@@ -1011,6 +1011,10 @@ g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,i
         case ORIGINAL_PROTOCOL:
           switch(device) {
             case DEVICE_METIS:
+#ifdef USBOZY
+	    case DEVICE_OZY:
+#endif
+
             case DEVICE_HERMES:
             case DEVICE_HERMES_LITE:			
             case DEVICE_HERMES_LITE2:			

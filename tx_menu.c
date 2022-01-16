@@ -308,6 +308,10 @@ void tx_menu(GtkWidget *parent) {
     case ORIGINAL_PROTOCOL:
       switch(device) {
         case DEVICE_METIS:
+#ifdef USBOZY
+	case DEVICE_OZY:
+#endif
+
         case DEVICE_HERMES:
         case DEVICE_GRIFFIN:
         case DEVICE_ANGELIA:

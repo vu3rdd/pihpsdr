@@ -505,6 +505,9 @@ static gboolean update_display(gpointer data) {
       case ORIGINAL_PROTOCOL:
         switch(device) {
           case DEVICE_METIS:
+#ifdef USBOZY
+	  case DEVICE_OZY:
+#endif
             constant1=3.3;
             constant2=0.09;
             break;
