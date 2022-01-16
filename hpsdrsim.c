@@ -1170,21 +1170,22 @@ void process_ep2(uint8_t *frame)
 
 	case 28:
 	case 29:
+	    if (OLDDEVICE == DEVICE_C25) {
+		// RedPitaya: Hard-wired ADC settings.
+		rx_adc[0]=0;
+		rx_adc[1]=1;
+		rx_adc[2]=1;
+	    } else {
             chk_data((frame[1] & 0x03) >> 0, rx_adc[0], "RX1 ADC");
             chk_data((frame[1] & 0x0C) >> 2, rx_adc[1], "RX2 ADC");
             chk_data((frame[1] & 0x30) >> 4, rx_adc[2], "RX3 ADC");
+	    }
             chk_data((frame[1] & 0xC0) >> 6, rx_adc[3], "RX4 ADC");
             chk_data((frame[2] & 0x03) >> 0, rx_adc[4], "RX5 ADC");
             chk_data((frame[2] & 0x0C) >> 2, rx_adc[5], "RX6 ADC");
             chk_data((frame[2] & 0x30) >> 4, rx_adc[6], "RX7 ADC");
 	    chk_data((frame[3] & 0x1f), txatt, "TX ATT");
 	    txatt_dbl=pow(10.0, -0.05*(double) txatt);
-	    if (OLDDEVICE == DEVICE_C25) {
-		// RedPitaya: Hard-wired ADC settings.
-		rx_adc[0]=0;
-		rx_adc[1]=1;
-		rx_adc[2]=1;
-	    }
 	    break;
 
 	case 30:
