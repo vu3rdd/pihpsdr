@@ -218,7 +218,7 @@ static pthread_mutex_t send_audio_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
 //
 // This mutex "protects" ozy_send_buffer. This is necessary only for
-// TCP and USB-OZY connections.
+// TCP and USB-OZY since here the communication is a byte stream.
 //
 static pthread_mutex_t send_ozy_mutex   = PTHREAD_MUTEX_INITIALIZER;
 
@@ -1443,10 +1443,10 @@ void ozy_send_buffer() {
    }
 
 #ifdef USBOZY
+    //
+    // This is for "Janus only" operation
+    //
     if (device == DEVICE_OZY && atlas_janus) {
-      //
-      // Why is this shortcut needed?
-      //
       output_buffer[C2]=0x00;
       output_buffer[C3]=0x00;
       output_buffer[C4]=0x00;

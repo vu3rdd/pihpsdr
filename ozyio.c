@@ -438,7 +438,7 @@ void ozy_i2c_readpwr(int addr) {
 		case I2C_PENNY_ALC:
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_ALC);	
 		if(rc<0) {
-			perror("ozy_i2c_init4: failed");
+			perror("ozy_i2c_readpwr alc: failed");
 			//exit(1);
 		}
 		penny_alc = (buffer[0] << 8) + buffer[1];
@@ -447,7 +447,7 @@ void ozy_i2c_readpwr(int addr) {
 		case I2C_PENNY_FWD:
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_FWD);	
 		if(rc<0) {
-			perror("ozy_i2c_init5: failed");
+			perror("ozy_i2c_readpwr fwd: failed");
 			//exit(1);
 		}
 		penny_fp = (buffer[0] << 8) + buffer[1];
@@ -456,17 +456,17 @@ void ozy_i2c_readpwr(int addr) {
 		case I2C_PENNY_REV:
 		rc = ozy_i2c_read(buffer,2,I2C_PENNY_REV);	
 		if(rc<0) {
-			perror("ozy_i2c_init6: failed");
+			perror("ozy_i2c_readpwr rev: failed");
 			//exit(1);
 		}
 		penny_rp = (buffer[0] << 8) + buffer[1];
 		break;
 
-		case I2C_ADC_OFS:
+		case I2C_MERC1_ADC_OFS:
 		// adc overload
-		rc = ozy_i2c_read(buffer,2,I2C_ADC_OFS);	// adc1 overflow status
+		rc = ozy_i2c_read(buffer,2,I2C_MERC1_ADC_OFS);	// adc1 overflow status
 		if(rc<0) {
-			perror("ozy_i2c_init6: failed");
+			perror("ozy_i2c_readpwr adc: failed");
 			//exit(1);
 		}
 		if (buffer[0] == 0) {		// its overloaded
@@ -488,16 +488,24 @@ void ozy_i2c_readvars() {
 
 	rc = ozy_i2c_read(buffer,2,I2C_MERC1_FW);	
 	if(rc<0) {
-		perror("ozy_i2c_init2: failed");
-		//exit(1);
+		perror("ozy_i2c_readvars MercFW: failed");
+		//
+		// quickly return: if this fails, probably the I2C jumpers are not set
+		// correctly and it is not worth to continue
+		//
+		return;
 	}
 	mercury_fw = buffer[1];
 	fprintf(stderr,"mercury firmware=%d\n",(int)buffer[1]);
 
 	rc = ozy_i2c_read(buffer,2,I2C_PENNY_FW);	
 	if(rc<0) {
-		perror("ozy_i2c_init3: failed");
-		//exit(1);
+		perror("ozy_i2c_readvars PennyFW: failed");
+		//
+		// If this fails, writing the TLV320 data to Penny
+		// need not be attempted
+		//
+		return;
 	}
 	penny_fw = buffer[1];
 	fprintf(stderr,"penny firmware=%d\n",(int)buffer[1]);	
@@ -508,42 +516,41 @@ void ozy_i2c_readvars() {
 void writepenny(unsigned char mode)
 {
 	unsigned char Penny_TLV320[2];
-	unsigned char *Penny_TLV320_data;	// 16 byte
+	unsigned char Penny_TLV320_data[]= { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 };	// 16 byte
+
 	int x;
+
 	// This is used to set the MicGain and Line in when Ozy/Magister is used
 	// The I2C settings are as follows:
 
-	//    For mic input and boost on/off
+	//
 	//    1E 00 - Reset chip
 	//    12 01 - set digital interface active
-	//    08 15 - D/A on, mic input, mic 20dB boost
+	//    08 XX - D/A on. See below for mic settings
 	//    08 14 - ditto but no mic boost
 	//    0C 00 - All chip power on
 	//    0E 02 - Slave, 16 bit, I2S
 	//    10 00 - 48k, Normal mode
 	//    0A 00 - turn D/A mute off
 	//    00 00 - set Line in gain to 0
+	//
+	//    Microphone settings (6th byte):
+	//
+	//    XX=0x15: Use Mic in, apply 20dB Mic boost
+	//    XX=0x14: Use Mic in, no Mic boost
+	//    XX=0x10: Use Line in
 
-	//    For line input
-	//    1E 00 - Reset chip
-	//    12 01 - set digital interface active
-	//    08 10 - D/A on, line input
-	//    0C 00 - All chip power on
-	//    0E 02 - Slave, 16 bit, I2S
-	//    10 00 - 48k, Normal mode
-	//    0A 00 - turn D/A mute off
-	//    00 00 - set Line in gain to 0
 	fprintf(stderr,"write Penny\n");
 
+	//
 	// update mic gain on Penny or PennyLane TLV320
-
-	// need to select the config data depending on the Mic Gain (20dB) selected
+	//
 	if (mode == 0x01)
-		Penny_TLV320_data = (unsigned char []) { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x15, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 };		// mic in 20db gain
-	else if (mode & 2)	// line in
-		Penny_TLV320_data = (unsigned char []) { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x10, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 };		// line in
+		Penny_TLV320_data[5]  = 0x15;	// mic in, mic boost 20db
+	else if (mode & 2)
+		Penny_TLV320_data[5]  = 0x10;	// line in
 	else
-		Penny_TLV320_data = (unsigned char []) { 0x1e, 0x00, 0x12, 0x01, 0x08, 0x14, 0x0c, 0x00, 0x0e, 0x02, 0x10, 0x00, 0x0a, 0x00, 0x00, 0x00 };		// mic in not 20db gain
+		Penny_TLV320_data[5]  = 0x14;	// mic in, no mic boost
 
 	//		// set the I2C interface speed to 400kHZ
 	//		if (!(OZY.Set_I2C_Speed(hdev, 1)))
@@ -556,8 +563,7 @@ void writepenny(unsigned char mode)
 	{
 		// copy two bytes to buffer and send via I2C
 		Penny_TLV320[0] = Penny_TLV320_data[x]; Penny_TLV320[1] = Penny_TLV320_data[x + 1];
-		//int ozy_write_i2c(int ep,unsigned char* buffer,int buffer_size); 
-		if (!(ozy_i2c_write(Penny_TLV320,2, 0x1b)))
+		if (ozy_i2c_write(Penny_TLV320,2, I2C_PENNY_TLV320) < 0)
 		{
 			fprintf(stderr,"Unable to configure TLV320 on Penelope via I2C\n");
 			// break out of the configuration loop
