@@ -554,8 +554,9 @@ void writepenny(unsigned char mode)
 	// send the configuration data to the TLV320 on Penelope or PennyLane
 	for (x = 0; x < 16; x += 2)
 	{
+		// copy two bytes to buffer and send via I2C
 		Penny_TLV320[0] = Penny_TLV320_data[x]; Penny_TLV320[1] = Penny_TLV320_data[x + 1];
-		int ozy_write_i2c(int ep,unsigned char* buffer,int buffer_size); 
+		//int ozy_write_i2c(int ep,unsigned char* buffer,int buffer_size); 
 		if (!(ozy_i2c_write(Penny_TLV320,2, 0x1b)))
 		{
 			fprintf(stderr,"Unable to configure TLV320 on Penelope via I2C\n");
@@ -655,7 +656,12 @@ int ozy_initialise()
 	ozy_get_firmware_string(ozy_firmware_version,8);
 	fprintf(stderr,"Ozy FX2 version: %s\n",ozy_firmware_version);
 		
-	//ozy_i2c_readvars();
+	//
+	// NOTE (thanks Rick): For I2C to work you need to place jumpers on SCL and SDA on
+	// the OZY/Magister board. This enables firmware detection on adjacent cards
+	// and microphone settings on Penny.
+	//
+	ozy_i2c_readvars();
 	ozy_close();
 	sleep(1);
 	ozy_open();		
