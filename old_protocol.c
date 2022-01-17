@@ -2088,6 +2088,17 @@ static void ozyusb_write(unsigned char* buffer,int length)
       break;
   }
 */
+  //
+  // DL1YCF:
+  // Although the METIS offset is not used for OZY, we have to maintain it
+  // since it triggers the "alternating" sending of C0=0 and C0!=0
+  // C+C packets in ozy_send_buffer().
+  //
+  if (metis_offset == 8) {
+    metis_offset = 520;
+  } else {
+    metis_offset = 8;
+  }
 }
 #endif
 
