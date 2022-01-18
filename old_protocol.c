@@ -828,6 +828,19 @@ static int how_many_receivers() {
   int ret = receivers;   	// 1 or 2
   if (diversity_enabled) ret=2; // need both RX channels, even if there is only one RX
 
+#ifdef USBOZY
+  //
+  // Always return 2 so the number of HPSDR-RX is NEVER changed.
+  // With 2 RX you can do 1RX or 2RX modes, and it is
+  // also OK for doing PURESIGNAL on OZY.
+  // Rationale: Rick reported that OZY's tend to hang if the
+  //            number of receivers is changed while running.
+  // OK it wastes bandwidth and this might be a problem at higher
+  //    sample rates but this is simply safer.
+  //
+  if (device == DEVICE_OZY) return 2;
+#endif
+
 #ifdef PURESIGNAL
     // for PureSignal, the number of receivers needed is hard-coded below.
     // we need at least 2, and up to 5 for Orion2 boards. This is so because
