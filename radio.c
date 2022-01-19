@@ -1427,6 +1427,12 @@ g_print("radio_change_receivers: from %d to %d\n",receivers,r);
 	gtk_fixed_put(GTK_FIXED(fixed),receiver[1]->panel,0,0);
 	set_displaying(receiver[1],1);
 	receivers=2;
+	//
+	// Make sure RX1 shares the sample rate  with RX0 when running P1.
+	//
+	if (protocol == ORIGINAL_PROTOCOL && receiver[1]->sample_rate != receiver[0]->sample_rate) {
+	    receiver_change_sample_rate(receiver[1],receiver[0]->sample_rate);
+	}
 	break;
   }
   reconfigure_radio();
