@@ -220,7 +220,6 @@ static OLD_MAPPING OLD_Mapping[] = {
 	{ CTUN,  		"CTUN"			},
 	{ VFO,			"CURRVFO"		},
 	{ CW_LEFT,		"CWL"			},
-	{ CW_KEYER,		"CW(Keyer)"		},
 	{ CW_RIGHT,		"CWR"			},
 	{ CW_SPEED,		"CWSPEED"		},
 	{ DIV_GAIN_COARSE,	"DIVCOARSEGAIN"		},
@@ -284,6 +283,9 @@ static OLD_MAPPING OLD_Mapping[] = {
 	{ ZOOM,			"ZOOM"			},
 	{ ZOOM_MINUS,		"ZOOMDOWN"		},
 	{ ZOOM_PLUS,		"ZOOMUP"		},
+        { CW_KEYER_KEYDOWN,     "KEYER-CW"              },
+        { CW_KEYER_SPEED,       "KEYER-SPEED"           },
+        { CW_KEYER_SIDETONE,    "KEYER-SIDETONE"        },
         { NO_ACTION,  		"NONE"			}
 };
 

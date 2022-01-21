@@ -43,7 +43,6 @@ enum ACTION {
   COMPRESSION,
   CTUN,
   CW_FREQUENCY,
-  CW_KEYER,
   CW_LEFT,
   CW_RIGHT,
   CW_SPEED,
@@ -146,6 +145,12 @@ enum ACTION {
   ZOOM,
   ZOOM_MINUS,
   ZOOM_PLUS,
+//
+// Support for external CW keyers
+//
+  CW_KEYER_KEYDOWN,
+  CW_KEYER_SPEED,
+  CW_KEYER_SIDETONE,
   ACTIONS
 };
 

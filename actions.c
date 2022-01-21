@@ -78,7 +78,6 @@ ACTION_TABLE ActionTable[] = {
   {COMPRESSION,		"COMPRESSION",		NULL,		MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
   {CTUN,		"CTUN",			"CTUN",		MIDI_KEY | CONTROLLER_SWITCH},
   {CW_FREQUENCY,	"CW FREQUENCY",		NULL,		MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
-  {CW_KEYER,            "CW(keyer)",            NULL,           MIDI_KEY | CONTROLLER_SWITCH},
   {CW_LEFT,		"CW LEFT",		"CWL",		MIDI_KEY | CONTROLLER_SWITCH},
   {CW_RIGHT,		"CW RIGHT",		"CWR",		MIDI_KEY | CONTROLLER_SWITCH},
   {CW_SPEED,		"CW SPEED",		NULL,		MIDI_KNOB | MIDI_WHEEL | CONTROLLER_ENCODER},
@@ -181,6 +180,17 @@ ACTION_TABLE ActionTable[] = {
   {ZOOM,		"ZOOM",			NULL,		MIDI_WHEEL | CONTROLLER_ENCODER},
   {ZOOM_MINUS,		"ZOOM -",		"ZOOM-",	MIDI_KEY | CONTROLLER_SWITCH},
   {ZOOM_PLUS,		"ZOOM +",		"ZOOM+",	MIDI_KEY | CONTROLLER_SWITCH},
+//
+// The following actions support external CW keyers generating
+// the following messages:
+//
+// CW Keydown (MIDI and GPIO)
+// CW speed   (only MIDI)
+// CW side tone frequency (only MIDI)
+//
+  {CW_KEYER_KEYDOWN,    "KeyDown\n(keyer)",     NULL,           MIDI_KEY | CONTROLLER_SWITCH},
+  {CW_KEYER_SPEED,      "Speed\n(keyer)",       NULL,           MIDI_KNOB},
+  {CW_KEYER_SIDETONE,   "ST freq\n(keyer)",     NULL,           MIDI_KNOB},
   {ACTIONS,		"",			NULL,		TYPE_NONE}
 };
 
@@ -242,7 +252,7 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
       g_print("CW_Left/Right but compiled without LOCALCW\n");
 #endif
       break;
-    case CW_KEYER:
+    case CW_KEYER_KEYDOWN:
       //
       // hard "key-up/down" action WITHOUT break-in
       // intended for external keyers (MIDI or GPIO connected)
@@ -1207,6 +1217,31 @@ int process_action(void *data) {
     case ZOOM_PLUS:
       if(a->mode==PRESSED) {
         update_zoom(+1);
+      }
+      break;
+
+    case CW_KEYER_SPEED:
+      if (a->mode==ABSOLUTE) {
+        //
+        // The MIDI keyer reports the speed as a value between 1 and 127,
+        // however the range 0-127 is internally converted to 0-100 upstream
+        //
+        cw_keyer_speed=(127*a->val + 50)/100;
+	if (cw_keyer_speed <  1) cw_keyer_speed=1;
+	if (cw_keyer_speed > 99) cw_keyer_speed=99;
+        g_idle_add(ext_vfo_update,NULL);
+      }
+      break;
+
+    case CW_KEYER_SIDETONE:
+      if (a->mode==ABSOLUTE) {
+        //
+        // The MIDI keyer encodes the frequency as a value between 0 and 127,
+	// freq = 250 + 8*val
+        // however the range 0-127 is internally converted to 0-100 upstream
+	//
+        cw_keyer_sidetone_frequency=250 + (254*a->val + 12)/25;
+        g_idle_add(ext_vfo_update,NULL);
       }
       break;
 
