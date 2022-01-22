@@ -192,7 +192,7 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
-          double offset = with_gain ? 0 : adc[rx->adc].attenuation;
+        double offset = with_gain ? adc[rx->adc].attenuation : 0;
           if(have_rx_gain) {
               level = value + rx_gain_calibration - offset;
           } else {
