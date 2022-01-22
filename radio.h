@@ -272,6 +272,7 @@ extern int OCmemory_tune_time;
 extern long long tune_timeout;
 
 extern int analog_meter;
+extern int with_gain;
 extern int smeter;
 extern int alc;
 

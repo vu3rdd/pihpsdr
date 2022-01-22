@@ -301,6 +301,7 @@ int OCmemory_tune_time = 550; // ms
 long long tune_timeout;
 
 int analog_meter = 0;
+gboolean with_gain = FALSE;
 int smeter = RXA_S_AV;
 
 int local_audio = 0;

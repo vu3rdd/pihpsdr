@@ -192,11 +192,12 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
-      if(have_rx_gain) {
-        level=value+rx_gain_calibration-adc[rx->adc].attenuation;
-      } else {
-        level=value+(double)adc[rx->adc].attenuation;
-      }
+          double offset = with_gain ? 0 : adc[rx->adc].gain;
+          if(have_rx_gain) {
+              level = value + rx_gain_calibration - adc[rx->adc].attenuation - offset;
+          } else {
+              level=value + (double)adc[rx->adc].attenuation;
+          }
 #ifdef SOAPYSDR
       if(protocol==SOAPYSDR_PROTOCOL) {
         //level-=rx->rf_gain;

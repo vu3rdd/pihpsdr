@@ -66,6 +66,10 @@ static void analog_cb(GtkToggleButton *widget, gpointer data) {
   analog_meter=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
+static void with_gain_cb(GtkToggleButton *widget, gpointer data) {
+  with_gain = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 void meter_menu (GtkWidget *parent) {
   parent_window=parent;
 
@@ -138,6 +142,11 @@ void meter_menu (GtkWidget *parent) {
 
   row++;
   col=0;
+
+  GtkWidget *with_gain_b=gtk_check_button_new_with_label("With Gain");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (with_gain_b), with_gain);
+  gtk_grid_attach(GTK_GRID(grid),with_gain_b,col,row,1,1);
+  g_signal_connect(with_gain_b,"toggled",G_CALLBACK(with_gain_cb),NULL);
 
   col++;
   GtkWidget *alc_gain=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(alc_peak),"ALC Gain");
