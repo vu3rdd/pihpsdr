@@ -98,7 +98,6 @@ void i2c_interrupt() {
     ints=read_word_data(0x10);       // input lines at time of interrupt
                                      // only those bits set in "flags" are meaningful!
 //g_print("%s: flags=%04X ints=%04X\n",__FUNCTION__,flags,ints);
-    if(t<debounce) break;
     for(i=0; i<16 && flags; i++) {   // leave loop if no bits left in flags.
         if(i2c_sw[i] & flags) {
           // The input line associated with switch #i has triggered an interrupt
