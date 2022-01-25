@@ -75,6 +75,8 @@ static int running=0;
 #define INFO_SIZE 16
 
 static GtkWidget *entry[INFO_SIZE];
+static GtkWidget *ATT_lbl;
+static GtkWidget *ATT_spin;
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {
   running=0;
@@ -105,6 +107,10 @@ static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer dat
 static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
   cleanup();
   return FALSE;
+}
+
+static void ATT_spin_cb(GtkWidget *widget, gpointer data) {
+  transmitter->attenuation=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
 static void setpk_cb(GtkWidget *widget, gpointer data) {
@@ -314,9 +320,23 @@ static void enable_cb(GtkWidget *widget, gpointer data) {
 
 static void auto_cb(GtkWidget *widget, gpointer data) {
   transmitter->auto_on=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-  // switching OFF auto sets the attenuation to zero
-  if(!transmitter->auto_on) {
-    transmitter->attenuation=0;
+
+  if (transmitter->auto_on) {
+    //
+    // automatic attenuation switched on:
+    // hide label and spin-box for manual attenuation
+    //
+    gtk_widget_hide(ATT_lbl);
+    gtk_widget_hide(ATT_spin);
+  } else {
+    //
+    // automatic attenuation switched off:
+    // show label and spin-box for manual attenuation
+    // set attenuation to the spin-box value
+    //
+    gtk_widget_show(ATT_lbl);
+    gtk_widget_show(ATT_spin);
+    transmitter->attenuation=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ATT_spin));
   }
 
 }
@@ -490,6 +510,16 @@ void ps_menu(GtkWidget *parent) {
   g_signal_connect(ps_ant_ext2,"toggled", G_CALLBACK(ps_ant_cb), (gpointer) (long) 7);
   col++;
 
+  ATT_lbl=gtk_label_new("ManualATT:");
+  gtk_grid_attach(GTK_GRID(grid),ATT_lbl,col,row,1,1);
+  col++;
+
+  ATT_spin=gtk_spin_button_new_with_range(0.0, 31.0, 1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(ATT_spin), (double) transmitter->attenuation);
+  gtk_grid_attach(GTK_GRID(grid), ATT_spin, col,row,1,1);
+  g_signal_connect(ATT_spin,"value-changed",G_CALLBACK(ATT_spin_cb), NULL);
+  col++;
+
   row++;
 
   col=0;
@@ -595,5 +625,17 @@ void ps_menu(GtkWidget *parent) {
   g_timeout_add((guint) 100, info_thread, NULL);
 
   gtk_widget_show_all(dialog);
+
+  //
+  // If using auto-attenuattion, hide the
+  // "manual attenuation" label and spin button
+  //
+  if (transmitter->auto_on) {
+    gtk_widget_hide(ATT_lbl);
+    gtk_widget_hide(ATT_spin);
+  } else {
+    gtk_widget_show(ATT_lbl);
+    gtk_widget_show(ATT_spin);
+  }
 
 }
