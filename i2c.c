@@ -78,27 +78,6 @@ static void frequencyStep(int pos) {
   vfo_step(pos);
 }
 
-static uint64_t epochMilli;
-
-static void initialiseEpoch() {
-  struct timespec ts ;
-
-  clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
-  epochMilli = (uint64_t)ts.tv_sec * (uint64_t)1000    + (uint64_t)(ts.tv_nsec / 1000000L) ;
-}
-
-static uint32_t millis () {
-  uint64_t now ;
-  struct  timespec ts ;
-  clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
-  now  = (uint64_t)ts.tv_sec * (uint64_t)1000 + (uint64_t)(ts.tv_nsec / 1000000L) ;
-  return (uint32_t)(now - epochMilli) ;
-}
-
-static uint32_t debounce_time=50; // 50ms
-static uint32_t t;
-static uint32_t debounce=0;
-
 void i2c_interrupt() {
   unsigned int flags;
   unsigned int ints;
@@ -111,7 +90,6 @@ void i2c_interrupt() {
   // Perhaps we should determine the lock status and simply return if it is locked.
   //
   g_mutex_lock(&i2c_mutex);
-  t=millis();
   for (;;) {
     flags=read_word_data(0x0E);      // indicates which switch caused the interrupt
                                      // More than one bit may be set if two input lines
@@ -119,16 +97,17 @@ void i2c_interrupt() {
     if (flags == 0) break;           // "forever" loop is left if no interrups pending
     ints=read_word_data(0x10);       // input lines at time of interrupt
                                      // only those bits set in "flags" are meaningful!
+//g_print("%s: flags=%04X ints=%04X\n",__FUNCTION__,flags,ints);
     if(t<debounce) break;
     for(i=0; i<16 && flags; i++) {   // leave loop if no bits left in flags.
         if(i2c_sw[i] & flags) {
           // The input line associated with switch #i has triggered an interrupt
+//g_print("%s: switches=%p sw=%d action=%d\n",__FUNCTION__,switches,i,switches[i].switch_function);
           flags &= ~i2c_sw[i];       // clear *this* bit in flags
           schedule_action(switches[i].switch_function, (ints & i2c_sw[i]) ? PRESSED : RELEASED, 0);
 	}
       }
   }
-  debounce=t+debounce_time;
   g_mutex_unlock(&i2c_mutex);
 }
 
@@ -192,7 +171,6 @@ void i2c_init() {
     flags=read_word_data(0x0E);
     if(flags) {
       ints=read_word_data(0x10);
-      fprintf(stderr,"flush interrupt: flags=%04X ints=%04X\n",flags,ints);
       count++;
       if(count==10) {
         return;
@@ -200,7 +178,5 @@ void i2c_init() {
     }
   } while(flags!=0);
 
-  initialiseEpoch();
-  
 }
 #endif
