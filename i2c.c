@@ -26,6 +26,13 @@ unsigned int i2c_address_1=0X20;
 unsigned int i2c_address_2=0X23;
 
 static int fd;
+//
+// When reading the flags and ints registers of the
+// MCP23017, it is important that no other thread
+// (e.g., another instance of the interrupt service
+// routine), does this concurrently.
+// i2c_mutex guarantees this.
+//
 static GMutex i2c_mutex;
 
 #define SW_2  0X8000
@@ -83,29 +90,29 @@ void i2c_interrupt() {
   unsigned int ints;
   int i;
 
-  //
-  // The mutex guarantees that no MCP23017 registers are read by
-  // another instance of this function between reading "flags"
-  // and "ints".
-  // Perhaps we should determine the lock status and simply return if it is locked.
-  //
   g_mutex_lock(&i2c_mutex);
   for (;;) {
-    flags=read_word_data(0x0E);      // indicates which switch caused the interrupt
-                                     // More than one bit may be set if two input lines
-				     // changed state at the very same moment
-    if (flags == 0) break;           // "forever" loop is left if no interrups pending
-    ints=read_word_data(0x10);       // input lines at time of interrupt
-                                     // only those bits set in "flags" are meaningful!
+    flags=read_word_data(0x0E);
+    // bits in "flags" indicate which input lines triggered an interrupt
+    // Two interrupts occuring at about the same time can lead to multiple bits
+    // set in "flags" (or no bit set if interrupt has already been processed
+    // by another interrupt service routine). If we enter here (protected by
+    // the mutex), we handle all interrupts until no one is left (flags==0)
+    if (flags == 0) break;
+    ints=read_word_data(0x10);
 //g_print("%s: flags=%04X ints=%04X\n",__FUNCTION__,flags,ints);
-    for(i=0; i<16 && flags; i++) {   // leave loop if no bits left in flags.
-        if(i2c_sw[i] & flags) {
-          // The input line associated with switch #i has triggered an interrupt
+    // only those bits in "ints" matter where the corresponding position
+    // in "flags" is set. We have a PRESSED or RELEASED event depending on
+    // whether the bit in "ints" is set or clear.
+    for (i=0; i<16 && flags; i++) {  // leave loop if no bits left in "flags"
+      if(i2c_sw[i] & flags) {
 //g_print("%s: switches=%p sw=%d action=%d\n",__FUNCTION__,switches,i,switches[i].switch_function);
-          flags &= ~i2c_sw[i];       // clear *this* bit in flags
-          schedule_action(switches[i].switch_function, (ints & i2c_sw[i]) ? PRESSED : RELEASED, 0);
-	}
+        // The input line associated with switch #i has triggered an interrupt
+        // clear *this* bit in flags
+        flags &= ~i2c_sw[i];
+        schedule_action(switches[i].switch_function, (ints & i2c_sw[i]) ? PRESSED : RELEASED, 0);
       }
+    }
   }
   g_mutex_unlock(&i2c_mutex);
 }
@@ -165,6 +172,7 @@ void i2c_init() {
   if(write_byte_data(0x05,0xFF)<0) return;
 
   // flush any interrupts
+  g_mutex_lock(&i2c_mutex);
   int count=0;
   do {
     flags=read_word_data(0x0E);
@@ -176,6 +184,7 @@ void i2c_init() {
       }
     }
   } while(flags!=0);
+  g_mutex_unlock(&i2c_mutex);
 
 }
 #endif

@@ -349,7 +349,7 @@ static void initialiseEpoch() {
   epochMilli = (uint64_t)ts.tv_sec * (uint64_t)1000    + (uint64_t)(ts.tv_nsec / 1000000L) ;
 }
 
-static uint32_t millis () {
+static unsigned int millis () {
   uint64_t now ;
   struct  timespec ts ;
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
@@ -510,7 +510,7 @@ static void process_encoder(int e,int l,int addr,int val) {
   g_mutex_unlock(&encoder_mutex);
 }
 
-static void process_edge(int offset, enum ACTION_MODE value) {
+static void process_edge(int offset,int value) {
   gint i;
   unsigned int t;
   gboolean found;
@@ -552,6 +552,7 @@ static void process_edge(int offset, enum ACTION_MODE value) {
       found=TRUE;
       break;
     } else if(encoders[i].switch_enabled && encoders[i].switch_address==offset) {
+      //g_print("%s: found %d encoder %d switch\n",__FUNCTION__,offset,i);
       t=millis();
       //g_print("%s: found %d encoder %d switch value=%d t=%u\n",__FUNCTION__,offset,i,value,t);
       if (t<encoders[i].switch_debounce) {

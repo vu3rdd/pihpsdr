@@ -188,9 +188,9 @@ ACTION_TABLE ActionTable[] = {
 // CW speed   (only MIDI)
 // CW side tone frequency (only MIDI)
 //
-  {CW_KEYER_KEYDOWN,    "KeyDown\n(keyer)",     NULL,           MIDI_KEY | CONTROLLER_SWITCH},
-  {CW_KEYER_SPEED,      "Speed\n(keyer)",       NULL,           MIDI_KNOB},
-  {CW_KEYER_SIDETONE,   "ST freq\n(keyer)",     NULL,           MIDI_KNOB},
+  {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",     NULL,           MIDI_KEY | CONTROLLER_SWITCH},
+  {CW_KEYER_SPEED,      "CW Speed\n(keyer)",       NULL,           MIDI_KNOB},
+  {CW_KEYER_SIDETONE,   "CW pitch\n(keyer)",     NULL,           MIDI_KNOB},
   {ACTIONS,		"",			NULL,		TYPE_NONE}
 };
 
@@ -568,7 +568,7 @@ int process_action(void *data) {
       }
       break;
     case CW_FREQUENCY:
-      value=KnobOrWheel(a, (double)cw_keyer_sidetone_frequency, 400.0, 1000.0, 10.0);
+      value=KnobOrWheel(a, (double)cw_keyer_sidetone_frequency, 300.0, 1000.0, 10.0);
       cw_keyer_sidetone_frequency=(int)value;
       g_idle_add(ext_vfo_update,NULL);
       break;
@@ -1227,8 +1227,8 @@ int process_action(void *data) {
         // however the range 0-127 is internally converted to 0-100 upstream
         //
         cw_keyer_speed=(127*a->val + 50)/100;
-	if (cw_keyer_speed <  1) cw_keyer_speed=1;
-	if (cw_keyer_speed > 99) cw_keyer_speed=99;
+        if (cw_keyer_speed <  1) cw_keyer_speed=1;
+        if (cw_keyer_speed > 99) cw_keyer_speed=99;
         g_idle_add(ext_vfo_update,NULL);
       }
       break;
@@ -1237,9 +1237,9 @@ int process_action(void *data) {
       if (a->mode==ABSOLUTE) {
         //
         // The MIDI keyer encodes the frequency as a value between 0 and 127,
-	// freq = 250 + 8*val
+        // freq = 250 + 8*val
         // however the range 0-127 is internally converted to 0-100 upstream
-	//
+        //
         cw_keyer_sidetone_frequency=250 + (254*a->val + 12)/25;
         g_idle_add(ext_vfo_update,NULL);
       }
