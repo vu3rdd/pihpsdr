@@ -1434,6 +1434,7 @@ void midi_save_state() {
   struct desc *cmd;
   gint entry;
   int i;
+  char *cp;
 
   entry=0;
   for (i=0; i<n_midi_devices; i++) {
@@ -1461,6 +1462,14 @@ void midi_save_state() {
         setProperty(name,value);
         sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,cmd->channel);
         sprintf(value,"%s",ActionTable[cmd->action].str);
+        //
+        // ActionTable strings may contain '\n', convert this to '$'
+        //
+        cp=value;
+        while (*cp ) {
+          if (*cp == '\n') *cp='$';
+          cp++;
+        }
         setProperty(name,value);
         sprintf(name,"midi[%d].entry[%d].channel[%d].type",i,entry,cmd->channel);
         sprintf(value,"%s",midi_types[cmd->type]);
@@ -1552,6 +1561,7 @@ void midi_restore_state() {
   gint fr1, fr2;
   gint vfr1, vfr2;
   int i,j;
+  char *cp;
 
   get_midi_devices();
   MidiReleaseCommands();
@@ -1612,6 +1622,12 @@ void midi_restore_state() {
 	  }
           sprintf(name,"midi[%d].entry[%d].channel[%d].action",i,entry,channel);
           value=getProperty(name);
+          // convert '$' back to '\n' in action name before comparing
+          cp=value;
+          while (*cp) {
+            if (*cp == '$') *cp='\n';
+            cp++;
+          }
 	  action=NO_ACTION;
           if(value) {
 	    for(j=0;j<ACTIONS;j++) {
