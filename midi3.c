@@ -12,20 +12,8 @@
  */
 #include <gtk/gtk.h>
 
-#include "radio.h"
-#include "vfo.h"
-#include "filter.h"
-#include "band.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "sliders.h"
-#include "ext.h"
-#include "agc.h"
 #include "actions.h"
 #include "midi.h"
-#ifdef LOCALCW
-#include "iambic.h"
-#endif
 
 void DoTheMidi(int action, enum ACTIONtype type, int val) {
 
@@ -33,7 +21,7 @@ void DoTheMidi(int action, enum ACTIONtype type, int val) {
 
     switch(type) {
       case MIDI_KEY:
-        schedule_action(action, val?PRESSED:RELEASED, val);
+        schedule_action(action, val?PRESSED:RELEASED, 0);
 	break;
       case MIDI_KNOB:
         schedule_action(action, ABSOLUTE, val);
