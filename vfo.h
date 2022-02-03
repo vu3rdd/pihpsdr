@@ -56,18 +56,20 @@ extern struct _vfo vfo[MAX_VFOS];
 // all elements are "on/off"
 //
 struct _mode_settings {
-  int filter;
-  int nb;            // Noise blanker #1
-  int nb2;           // Noise blanker #2
-  int nr;            // Noise reduction #1
-  int nr2;           // Noise reduction #2
-  int anf;           // Automatic notch filter
-  int snb;           // Spectral noise blanker
-  int en_txeq;       // TX equalizer on/off
-  int en_rxeq;       // RX equalizer on/off
-  int txeq[4];       // TX equalizer settings
-  int rxeq[4];       // RX equalizer settings
-  long long step;    // VFO step size
+  int filter;               // actual filter used
+  int nb;                   // Noise blanker #1
+  int nb2;                  // Noise blanker #2
+  int nr;                   // Noise reduction #1
+  int nr2;                  // Noise reduction #2
+  int anf;                  // Automatic notch filter
+  int snb;                  // Spectral noise blanker
+  int en_txeq;              // TX equalizer on/off
+  int en_rxeq;              // RX equalizer on/off
+  int txeq[4];              // TX equalizer settings
+  int rxeq[4];              // RX equalizer settings
+  long long step;           // VFO step size
+  int compressor;           // TX compressor on/off
+  double compressor_level;  // TX compressor level
 };
 
 extern struct _mode_settings mode_settings[];

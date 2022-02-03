@@ -147,6 +147,12 @@ void modesettings_save_state() {
     sprintf(name,"modeset.%d.step", i);
     sprintf(value,"%lld", mode_settings[i].step);
     setProperty(name,value);
+    sprintf(name,"modeset.%d.compressor_level", i);
+    sprintf(value,"%f", mode_settings[i].compressor_level);
+    setProperty(name,value);
+    sprintf(name,"modeset.%d.compressor", i);
+    sprintf(value,"%d", mode_settings[i].compressor);
+    setProperty(name,value);
   }
 }
 
@@ -176,6 +182,8 @@ void modesettings_restore_state() {
     mode_settings[i].rxeq[2]=0;
     mode_settings[i].rxeq[3]=0;
     mode_settings[i].step=100;
+    mode_settings[i].compressor=0;
+    mode_settings[i].compressor_level=0.0;
 
     sprintf(name,"modeset.%d.filter",i);
     value=getProperty(name);
@@ -231,6 +239,12 @@ void modesettings_restore_state() {
     sprintf(name,"modeset.%d.step",i);
     value=getProperty(name);
     if(value) mode_settings[i].step=atoll(value);
+    sprintf(name,"modeset.%d.compressor_level",i);
+    value=getProperty(name);
+    if (value) mode_settings[i].compressor_level=atof(value);
+    sprintf(name,"modeset.%d.compressor",i);
+    value=getProperty(name);
+    if (value) mode_settings[i].compressor=atoi(value);
   }
 }
 
@@ -357,28 +371,37 @@ void vfo_apply_mode_settings(int id) {
 
   m=vfo[id].mode;
 
-  vfo[id].filter      =mode_settings[m].filter;
-  active_receiver->nr =mode_settings[m].nr;
-  active_receiver->nr2=mode_settings[m].nr2;
-  active_receiver->nb =mode_settings[m].nb;
-  active_receiver->nb2=mode_settings[m].nb2;
-  active_receiver->anf=mode_settings[m].anf;
-  active_receiver->snb=mode_settings[m].snb;
-  enable_rx_equalizer =mode_settings[m].en_rxeq;
-  rx_equalizer[0]     =mode_settings[m].rxeq[0];
-  rx_equalizer[1]     =mode_settings[m].rxeq[1];
-  rx_equalizer[2]     =mode_settings[m].rxeq[2];
-  rx_equalizer[3]     =mode_settings[m].rxeq[3];
-  enable_tx_equalizer =mode_settings[m].en_txeq;
-  tx_equalizer[0]     =mode_settings[m].txeq[0];
-  tx_equalizer[1]     =mode_settings[m].txeq[1];
-  tx_equalizer[2]     =mode_settings[m].txeq[2];
-  tx_equalizer[3]     =mode_settings[m].txeq[3];
-  step                =mode_settings[m].step;
+  vfo[id].filter                = mode_settings[m].filter;
+  active_receiver->nr           = mode_settings[m].nr;
+  active_receiver->nr2          = mode_settings[m].nr2;
+  active_receiver->nb           = mode_settings[m].nb;
+  active_receiver->nb2          = mode_settings[m].nb2;
+  active_receiver->anf          = mode_settings[m].anf;
+  active_receiver->snb          = mode_settings[m].snb;
+  enable_rx_equalizer           = mode_settings[m].en_rxeq;
+  rx_equalizer[0]               = mode_settings[m].rxeq[0];
+  rx_equalizer[1]               = mode_settings[m].rxeq[1];
+  rx_equalizer[2]               = mode_settings[m].rxeq[2];
+  rx_equalizer[3]               = mode_settings[m].rxeq[3];
+  enable_tx_equalizer           = mode_settings[m].en_txeq;
+  tx_equalizer[0]               = mode_settings[m].txeq[0];
+  tx_equalizer[1]               = mode_settings[m].txeq[1];
+  tx_equalizer[2]               = mode_settings[m].txeq[2];
+  tx_equalizer[3]               = mode_settings[m].txeq[3];
+  step                          = mode_settings[m].step;
 
-  // make changes effective
+  transmitter_set_compressor_level(transmitter, mode_settings[m].compressor_level);
+  transmitter_set_compressor      (transmitter, mode_settings[m].compressor      );
+
+  //
+  // Note that the caller invokes receiver_vfo_changed and tx_vfo_changed
+  // *after* we have changed the settings
+  //
+  // make changes effective and put them on the VFO display
+  //
   g_idle_add(ext_update_noise, NULL);
   g_idle_add(ext_update_eq   , NULL);
+  g_idle_add(ext_vfo_update  , NULL);
 
 }
 

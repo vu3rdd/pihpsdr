@@ -61,12 +61,14 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void comp_enable_cb(GtkWidget *widget, gpointer data) {
-  transmitter->compressor=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+  transmitter_set_compressor(transmitter,gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
+  mode_settings[transmitter->mode].compressor=transmitter->compressor;
   g_idle_add(ext_vfo_update, NULL);
 }
 
 static void comp_cb(GtkWidget *widget, gpointer data) {
   transmitter_set_compressor_level(transmitter,gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget)));
+  mode_settings[transmitter->mode].compressor_level=transmitter->compressor_level;
   g_idle_add(ext_vfo_update, NULL);
 }
 
