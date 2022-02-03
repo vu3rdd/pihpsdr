@@ -17,18 +17,6 @@
 *
 */
 
-//
-// DL1YCF:
-// uncomment the #define line following, then you will get
-// a "TX compression" slider with an enabling checkbox
-// in the bottom right of the sliders area, instead of the
-// sequelch slider and checkbox.
-// This option can also be passed to the compiler with "-D"
-// and thus be activated through the Makefile.
-//
-//#define COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH 1
-//
-
 #include <gtk/gtk.h>
 #include <semaphore.h>
 #include <stdio.h>
@@ -678,19 +666,6 @@ static void squelch_enable_cb(GtkWidget *widget, gpointer data) {
 #endif
 }
 
-static void compressor_value_changed_cb(GtkWidget *widget, gpointer data) {
-  transmitter_set_compressor_level(transmitter,gtk_range_get_value(GTK_RANGE(widget)));
-  // This value is now also reflected in the VFO panel
-  g_idle_add(ext_vfo_update, NULL);
-
-}
-
-static void compressor_enable_cb(GtkWidget *widget, gpointer data) {
-  transmitter_set_compressor(transmitter,gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
-  // This value is now also reflected in the VFO panel
-  g_idle_add(ext_vfo_update, NULL);
-}
-
 void set_squelch(RECEIVER *rx) {
   g_print("%s\n",__FUNCTION__);
   //
@@ -701,12 +676,10 @@ void set_squelch(RECEIVER *rx) {
   //
   rx->squelch_enable = (rx->squelch > 0.5);
   setSquelch(rx);
-#ifndef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
   if(display_sliders && rx->id == active_receiver->id) {
     gtk_range_set_value (GTK_RANGE(squelch_scale),rx->squelch);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(squelch_enable),rx->squelch_enable);
   } else {
-#endif
     if(scale_status!=SQUELCH) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -733,20 +706,13 @@ void set_squelch(RECEIVER *rx) {
       gtk_range_set_value (GTK_RANGE(squelch_scale),rx->squelch);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
-#ifndef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
   }
-#endif
 }
 
 void set_compression(TRANSMITTER* tx) {
   g_print("%s\n",__FUNCTION__);
   // Update VFO panel to reflect changed value
   g_idle_add(ext_vfo_update, NULL);
-#ifdef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
-  if(display_sliders) {
-    gtk_range_set_value (GTK_RANGE(comp_scale),tx->compressor_level);
-  } else {
-#endif
     if(scale_status!=COMPRESSION) {
       if(scale_status!=NO_ACTION) {
         g_source_remove(scale_timer);
@@ -771,9 +737,6 @@ void set_compression(TRANSMITTER* tx) {
       gtk_range_set_value (GTK_RANGE(comp_scale),tx->compressor_level);
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
-#ifdef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
-  }
-#endif
 }
 
 void show_diversity_gain() {
@@ -945,7 +908,6 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     g_signal_connect(G_OBJECT(drive_scale),"value_changed",G_CALLBACK(drive_value_changed_cb),NULL);
   }
 
-#ifndef COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH
   squelch_label=gtk_label_new("Squelch:");
   gtk_widget_override_font(squelch_label, pango_font_description_from_string(SLIDERS_FONT));
   gtk_widget_show(squelch_label);
@@ -964,28 +926,6 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_widget_show(squelch_enable);
   gtk_grid_attach(GTK_GRID(sliders),squelch_enable,9,1,1,1);
   g_signal_connect(squelch_enable,"toggled",G_CALLBACK(squelch_enable_cb),NULL);
-#else
-  if(can_transmit) {
-    comp_label=gtk_label_new("COMP:");
-    gtk_widget_override_font(comp_label, pango_font_description_from_string(SLIDERS_FONT));
-    gtk_widget_show(comp_label);
-    gtk_grid_attach(GTK_GRID(sliders),comp_label,6,1,1,1);
-
-    comp_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 20.0, 1.0);
-    gtk_widget_override_font(comp_scale, pango_font_description_from_string(SLIDERS_FONT));
-    gtk_range_set_increments (GTK_RANGE(comp_scale),1.0,1.0);
-    gtk_range_set_value (GTK_RANGE(comp_scale),transmitter->compressor_level);
-    gtk_widget_show(comp_scale);
-    gtk_grid_attach(GTK_GRID(sliders),comp_scale,7,1,2,1);
-    g_signal_connect(G_OBJECT(comp_scale),"value_changed",G_CALLBACK(compressor_value_changed_cb),NULL);
-  
-    comp_enable=gtk_check_button_new();
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(comp_enable),transmitter->compressor);
-    gtk_widget_show(comp_enable);
-    gtk_grid_attach(GTK_GRID(sliders),comp_enable,9,1,1,1);
-    g_signal_connect(comp_enable,"toggled",G_CALLBACK(compressor_enable_cb),NULL);
-  }
-#endif
 
   return sliders;
 }
