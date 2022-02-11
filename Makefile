@@ -20,7 +20,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #PURESIGNAL_INCLUDE=PURESIGNAL
 
 # uncomment the line below to include MIDI support
-MIDI_INCLUDE=MIDI
+# MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include USB Ozy support
 # USBOZY_INCLUDE=USBOZY

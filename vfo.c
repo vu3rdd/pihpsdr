@@ -953,7 +953,7 @@ void vfo_update() {
         cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
         cairo_paint (cr);
 
-        cairo_select_font_face(cr, "FreeSans",
+        cairo_select_font_face(cr, "Cantarell",
             CAIRO_FONT_SLANT_NORMAL,
             CAIRO_FONT_WEIGHT_BOLD);
 
@@ -967,7 +967,7 @@ void vfo_update() {
             break;
           case modeCWL:
           case modeCWU:
-            sprintf(temp_text,"%s %s %d wpm %d Hz",mode_string[vfo[id].mode],band_filter->title,cw_keyer_speed,cw_keyer_sidetone_frequency);
+            sprintf(temp_text,"%s %s %d wpm",mode_string[vfo[id].mode],band_filter->title,cw_keyer_speed);
             break;
           case modeLSB:
           case modeUSB:
@@ -979,9 +979,10 @@ void vfo_update() {
             sprintf(temp_text,"%s %s",mode_string[vfo[id].mode],band_filter->title);
             break;
         }
-        cairo_set_font_size(cr, 12);
+        // draw mode
+        cairo_set_font_size(cr, 30);
         cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        cairo_move_to(cr, 5, 15);
+        cairo_move_to(cr, 70, 50);
         cairo_show_text(cr, temp_text);
 
 	// In what follows, we want to display the VFO frequency
@@ -1013,7 +1014,7 @@ void vfo_update() {
 	if(s >= STEPS)
             s=0;
 
-        sprintf(temp_text,"VFO A: %0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
+        sprintf(temp_text,"A: %0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
         char **vfo_texts = draw_vfo_val(temp_text, s);
 
         if(txvfo == 0 && (isTransmitting() || oob)) {
@@ -1028,8 +1029,8 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 5, 38);  
-        cairo_set_font_size(cr, 22); 
+        cairo_move_to(cr, 330, 60);
+        cairo_set_font_size(cr, 40);
         // cairo_show_text(cr, temp_text);
 
         // try to show VFO text according to step value
@@ -1047,7 +1048,7 @@ void vfo_update() {
         free(vfo_texts[2]);
         free(vfo_texts);
 
-        sprintf(temp_text,"VFO B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
+        sprintf(temp_text,"B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
         if(txvfo == 1 && (isTransmitting() || oob)) {
             if (oob) sprintf(temp_text,"VFO B: Out of band");
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
@@ -1062,7 +1063,8 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 300, 38);  
+        cairo_move_to(cr, 600, 50);
+        cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
@@ -1078,14 +1080,14 @@ void vfo_update() {
         }
 #endif
         
-        cairo_move_to(cr, 55, 50);
+        cairo_move_to(cr, 600, 85);
         if(active_receiver->zoom>1) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
-        cairo_set_font_size(cr, 12);
-        sprintf(temp_text,"Zoom x%d",active_receiver->zoom);
+        cairo_set_font_size(cr, 18);
+        sprintf(temp_text,"ZOOM x%d",active_receiver->zoom);
         cairo_show_text(cr, temp_text);
 
         if(vfo[id].rit_enabled==0) {
@@ -1093,9 +1095,9 @@ void vfo_update() {
         } else {
             cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         }
-        sprintf(temp_text,"RIT: %lldHz",vfo[id].rit);
-        cairo_move_to(cr, 170, 15);
-        cairo_set_font_size(cr, 12);
+        sprintf(temp_text,"RIT: %lld",vfo[id].rit);
+        cairo_move_to(cr, 330, 20);
+        cairo_set_font_size(cr, 16);
         cairo_show_text(cr, temp_text);
 
 
@@ -1105,16 +1107,17 @@ void vfo_update() {
           } else {
               cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           }
-          sprintf(temp_text,"XIT: %lldHz",transmitter->xit);
-          cairo_move_to(cr, 310, 15);
-          cairo_set_font_size(cr, 12);
+          sprintf(temp_text,"XIT: %lld",transmitter->xit);
+          cairo_move_to(cr, 600, 18);
+          cairo_set_font_size(cr, 16);
           cairo_show_text(cr, temp_text);
         }
 
 	// NB and NB2 are mutually exclusive, therefore
 	// they are put to the same place in order to save
 	// some space
-        cairo_move_to(cr, 155, 50);
+        cairo_move_to(cr, 155, 85);
+        cairo_set_font_size(cr, 16);
         if(active_receiver->nb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NB");
@@ -1127,7 +1130,7 @@ void vfo_update() {
         }
 
 	// NR and NR2 are mutually exclusive
-        cairo_move_to(cr, 180, 50);  
+        cairo_move_to(cr, 190, 85);
         if(active_receiver->nr) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NR");
@@ -1139,7 +1142,7 @@ void vfo_update() {
           cairo_show_text(cr, "NR");
         }
 
-        cairo_move_to(cr, 210, 50);  
+        cairo_move_to(cr, 225, 85);
         if(active_receiver->anf) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1147,7 +1150,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, 240, 50);  
+        cairo_move_to(cr, 270, 85);
         if(active_receiver->snb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1155,27 +1158,27 @@ void vfo_update() {
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, 270, 50);  
+        cairo_move_to(cr, 330, 85);
         switch(active_receiver->agc) {
           case AGC_OFF:
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-            cairo_show_text(cr, "AGC OFF");
+            cairo_show_text(cr, "AGC");
             break;
           case AGC_LONG:
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, "AGC LONG");
+            cairo_show_text(cr, "AGC L");
             break;
           case AGC_SLOW:
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, "AGC SLOW");
+            cairo_show_text(cr, "AGC S");
             break;
           case AGC_MEDIUM:
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, "AGC MED");
+            cairo_show_text(cr, "AGC M");
             break;
           case AGC_FAST:
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, "AGC FAST");
+            cairo_show_text(cr, "AGC F");
             break;
         }
 
@@ -1184,7 +1187,7 @@ void vfo_update() {
 	// we should display the compressor (level)
 	//
         if(can_transmit) {
-          cairo_move_to(cr, 330, 50);  
+          cairo_move_to(cr, 395, 85);
   	  if (transmitter->compressor) {
   	    sprintf(temp_text,"CMPR %ddB",(int) transmitter->compressor_level);
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
@@ -1195,20 +1198,20 @@ void vfo_update() {
 	  }
         }
 
-        cairo_move_to(cr, 505, 50);  
-        if(diversity_enabled) {
-          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        } else {
-          cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-        }
-        cairo_show_text(cr, "DIV");
+        /* cairo_move_to(cr, 505, 80);   */
+        /* if(diversity_enabled) { */
+        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /* } else { */
+        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /* } */
+        /* cairo_show_text(cr, "DIV"); */
 
         /* sprintf(temp_text,"Step %s",step_labels[s]); */
         /* cairo_move_to(cr, 400, 15); */
         /* cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
         /* cairo_show_text(cr, temp_text); */
 
-        cairo_move_to(cr, 405, 50);  
+        cairo_move_to(cr, 450, 85);
         if(vfo[id].ctun) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1217,7 +1220,7 @@ void vfo_update() {
         cairo_show_text(cr, "CTUN");
 
 #ifdef MIDI
-        cairo_move_to(cr, 445, 50);  
+        cairo_move_to(cr, 480, 85);
         if(midi_enabled) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1226,16 +1229,16 @@ void vfo_update() {
         cairo_show_text(cr, "MIDI");
 #endif
 
-        cairo_move_to(cr, 475, 50);  
-        if(cat_control>0) {
-          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        } else {
-          cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-        }
-        cairo_show_text(cr, "CAT");
+        /* cairo_move_to(cr, 475, 90);   */
+        /* if(cat_control>0) { */
+        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /* } else { */
+        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /* } */
+        /* cairo_show_text(cr, "CAT"); */
 
         if(can_transmit) {
-          cairo_move_to(cr, 505, 15);  
+          cairo_move_to(cr, 680, 18);
           if(vox_enabled) {
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           } else {
@@ -1244,28 +1247,30 @@ void vfo_update() {
           cairo_show_text(cr, "VOX");
         }
 
-        cairo_move_to(cr, 5, 50);
+        cairo_move_to(cr, 5, 90);
         if(locked) {
           cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
-        cairo_show_text(cr, "Locked");
+        cairo_show_text(cr, "LOCK");
 
-        cairo_move_to(cr, 260, 18);
+        cairo_move_to(cr, 5, 30);
         if(split) {
           cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
+        cairo_set_font_size(cr, 18);
         cairo_show_text(cr, "SPLIT");
 
-        cairo_move_to(cr, 260, 28);
+        cairo_move_to(cr, 5, 50);
         if(sat_mode!=SAT_NONE) {
           cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
+        cairo_set_font_size(cr, 18);
         if(sat_mode==SAT_NONE || sat_mode==SAT_MODE) {
           cairo_show_text(cr, "SAT");
         } else {
@@ -1279,8 +1284,8 @@ void vfo_update() {
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
         sprintf(temp_text,"DUP");
-        cairo_move_to(cr, 260, 38);
-        cairo_set_font_size(cr, 12);
+        cairo_move_to(cr, 5, 70);
+        cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
 
         cairo_destroy (cr);
