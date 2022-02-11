@@ -1096,7 +1096,7 @@ void vfo_update() {
             cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         }
         sprintf(temp_text,"RIT: %lld",vfo[id].rit);
-        cairo_move_to(cr, 215, 40);
+        cairo_move_to(cr, 220, 40);
         cairo_set_font_size(cr, 16);
         cairo_show_text(cr, temp_text);
 
@@ -1108,7 +1108,7 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           }
           sprintf(temp_text,"XIT: %lld",transmitter->xit);
-          cairo_move_to(cr, 215, 20);
+          cairo_move_to(cr, 220, 20);
           cairo_set_font_size(cr, 16);
           cairo_show_text(cr, temp_text);
         }
