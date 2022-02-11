@@ -1014,7 +1014,7 @@ void vfo_update() {
 	if(s >= STEPS)
             s=0;
 
-        sprintf(temp_text,"A: %0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
+        sprintf(temp_text,"%0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
         char **vfo_texts = draw_vfo_val(temp_text, s);
 
         if(txvfo == 0 && (isTransmitting() || oob)) {
@@ -1029,7 +1029,7 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 330, 75);
+        cairo_move_to(cr, 300, 95);
         cairo_set_font_size(cr, 70);
         // cairo_show_text(cr, temp_text);
 
@@ -1063,7 +1063,7 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 580, 20);
+        cairo_move_to(cr, 300, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
 
