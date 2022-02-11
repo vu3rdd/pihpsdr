@@ -516,6 +516,14 @@ static void create_visual() {
   gtk_fixed_put(GTK_FIXED(fixed), menu_b, VFO_WIDTH + METER_WIDTH, y);
   y += MENU_HEIGHT;
 
+  GdkColor color_bg;
+  gdk_color_parse("black", &color_bg);
+  gtk_widget_modify_bg(GTK_WIDGET(minimize_b), GTK_STATE_NORMAL, &color_bg);
+  gtk_widget_modify_bg(GTK_WIDGET(menu_b), GTK_STATE_NORMAL, &color_bg);
+
+  gtk_button_set_relief(GTK_BUTTON(minimize_b), GTK_RELIEF_NONE);
+  gtk_button_set_relief(GTK_BUTTON(menu_b), GTK_RELIEF_NONE);
+
   rx_height = display_height - VFO_HEIGHT;
   if (display_zoompan) {
     rx_height -= ZOOMPAN_HEIGHT;
