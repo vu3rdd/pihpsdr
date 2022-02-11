@@ -1029,7 +1029,7 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 300, 95);
+        cairo_move_to(cr, 280, 95);
         cairo_set_font_size(cr, 70);
         // cairo_show_text(cr, temp_text);
 
@@ -1063,7 +1063,7 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 1.0, 1.0);
             }
         }
-        cairo_move_to(cr, 300, 20);
+        cairo_move_to(cr, 280, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
 
