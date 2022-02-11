@@ -1029,8 +1029,8 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 395, 90);
-        cairo_set_font_size(cr, 50);
+        cairo_move_to(cr, 330, 75);
+        cairo_set_font_size(cr, 70);
         // cairo_show_text(cr, temp_text);
 
         // try to show VFO text according to step value
@@ -1063,7 +1063,7 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
             }
         }
-        cairo_move_to(cr, 580, 40);
+        cairo_move_to(cr, 580, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
 
@@ -1080,15 +1080,15 @@ void vfo_update() {
         }
 #endif
         
-        cairo_move_to(cr, 580, 20);
-        if(active_receiver->zoom>1) {
-          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        } else {
-          cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-        }
-        cairo_set_font_size(cr, 18);
-        sprintf(temp_text,"ZOOM x%d",active_receiver->zoom);
-        cairo_show_text(cr, temp_text);
+        /* cairo_move_to(cr, 580, 20); */
+        /* if(active_receiver->zoom>1) { */
+        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /* } else { */
+        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /* } */
+        /* cairo_set_font_size(cr, 18); */
+        /* sprintf(temp_text,"ZOOM x%d",active_receiver->zoom); */
+        /* cairo_show_text(cr, temp_text); */
 
         if(vfo[id].rit_enabled==0) {
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
@@ -1096,7 +1096,7 @@ void vfo_update() {
             cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         }
         sprintf(temp_text,"RIT: %lld",vfo[id].rit);
-        cairo_move_to(cr, 450, 40);
+        cairo_move_to(cr, 215, 40);
         cairo_set_font_size(cr, 16);
         cairo_show_text(cr, temp_text);
 
@@ -1108,7 +1108,7 @@ void vfo_update() {
               cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           }
           sprintf(temp_text,"XIT: %lld",transmitter->xit);
-          cairo_move_to(cr, 450, 20);
+          cairo_move_to(cr, 215, 20);
           cairo_set_font_size(cr, 16);
           cairo_show_text(cr, temp_text);
         }
@@ -1116,7 +1116,7 @@ void vfo_update() {
 	// NB and NB2 are mutually exclusive, therefore
 	// they are put to the same place in order to save
 	// some space
-        cairo_move_to(cr, 270, 40);
+        cairo_move_to(cr, 115, 40);
         cairo_set_font_size(cr, 16);
         if(active_receiver->nb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
@@ -1130,7 +1130,7 @@ void vfo_update() {
         }
 
 	// NR and NR2 are mutually exclusive
-        cairo_move_to(cr, 225, 40);
+        cairo_move_to(cr, 70, 40);
         if(active_receiver->nr) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NR");
@@ -1142,7 +1142,7 @@ void vfo_update() {
           cairo_show_text(cr, "NR");
         }
 
-        cairo_move_to(cr, 225, 20);
+        cairo_move_to(cr, 70, 20);
         if(active_receiver->anf) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1150,7 +1150,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, 270, 20);
+        cairo_move_to(cr, 115, 20);
         if(active_receiver->snb) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
@@ -1158,7 +1158,7 @@ void vfo_update() {
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, 330, 20);
+        cairo_move_to(cr, 160, 20);
         switch(active_receiver->agc) {
           case AGC_OFF:
             cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
@@ -1186,17 +1186,17 @@ void vfo_update() {
 	// Since we can now change it by a MIDI controller,
 	// we should display the compressor (level)
 	//
-        if(can_transmit) {
-          cairo_move_to(cr, 395, 20);
-  	  if (transmitter->compressor) {
-  	    sprintf(temp_text,"CMPR %ddB",(int) transmitter->compressor_level);
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, temp_text);
-	  } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-            cairo_show_text(cr, "CMPR");
-	  }
-        }
+        /* if(can_transmit) { */
+        /*   cairo_move_to(cr, 395, 20); */
+  	/*   if (transmitter->compressor) { */
+  	/*     sprintf(temp_text,"CMPR %ddB",(int) transmitter->compressor_level); */
+        /*     cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /*     cairo_show_text(cr, temp_text); */
+	/*   } else { */
+        /*     cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /*     cairo_show_text(cr, "CMPR"); */
+	/*   } */
+        /* } */
 
         /* cairo_move_to(cr, 505, 80);   */
         /* if(diversity_enabled) { */
@@ -1211,13 +1211,13 @@ void vfo_update() {
         /* cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
         /* cairo_show_text(cr, temp_text); */
 
-        cairo_move_to(cr, 395, 40);
-        if(vfo[id].ctun) {
-          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        } else {
-          cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
-        }
-        cairo_show_text(cr, "CTUN");
+        /* cairo_move_to(cr, 395, 40); */
+        /* if(vfo[id].ctun) { */
+        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /* } else { */
+        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /* } */
+        /* cairo_show_text(cr, "CTUN"); */
 
 #ifdef MIDI
         cairo_move_to(cr, 480, 20);
@@ -1238,7 +1238,7 @@ void vfo_update() {
         /* cairo_show_text(cr, "CAT"); */
 
         if(can_transmit) {
-          cairo_move_to(cr, 330, 40);
+          cairo_move_to(cr, 160, 40);
           if(vox_enabled) {
             cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
           } else {
