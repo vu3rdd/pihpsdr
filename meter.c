@@ -518,15 +518,15 @@ if(analog_meter) {
 
   if(can_transmit) {
     cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_move_to(cr, 5.0, 15.0);
+    cairo_move_to(cr, 5.0, 20.0);
     cairo_line_to(cr, 5.0, 5.0);
-    cairo_move_to(cr, 5.0+25.0, 15.0);
+    cairo_move_to(cr, 5.0+25.0, 20.0);
     cairo_line_to(cr, 5.0+25.0, 10.0);
-    cairo_move_to(cr, 5.0+50.0, 15.0);
+    cairo_move_to(cr, 5.0+50.0, 20.0);
     cairo_line_to(cr, 5.0+50.0, 5.0);
-    cairo_move_to(cr, 5.0+75.0, 15.0);
+    cairo_move_to(cr, 5.0+75.0, 20.0);
     cairo_line_to(cr, 5.0+75.0, 10.0);
-    cairo_move_to(cr, 5.0+100.0, 15.0);
+    cairo_move_to(cr, 5.0+100.0, 20.0);
     cairo_line_to(cr, 5.0+100.0, 5.0);
     cairo_stroke(cr);
 
@@ -544,7 +544,7 @@ if(analog_meter) {
     }
 
     cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-    cairo_move_to(cr, 115.0, 15.0);
+    cairo_move_to(cr, 115.0, 20.0);
     cairo_show_text(cr, "Mic Level");
   }
 

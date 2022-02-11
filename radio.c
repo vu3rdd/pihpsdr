@@ -106,7 +106,7 @@
 #define VFO_HEIGHT (100) // edit default = 60
 #define VFO_WIDTH (display_width - METER_WIDTH - MENU_WIDTH)
 #define METER_HEIGHT (100) // edit default = 60
-#define METER_WIDTH (260)
+#define METER_WIDTH (250)
 #define PANADAPTER_HEIGHT (105)
 #define ZOOMPAN_HEIGHT (50)
 #define SLIDERS_HEIGHT (100)
