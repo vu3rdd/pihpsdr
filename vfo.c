@@ -1060,7 +1060,7 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
             } else {
                 // vfo B
-                cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
+                cairo_set_source_rgb(cr, 0.0, 1.0, 1.0);
             }
         }
         cairo_move_to(cr, 300, 20);
