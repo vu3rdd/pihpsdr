@@ -985,17 +985,18 @@ void vfo_update() {
         cairo_move_to(cr, 70, 80);
         cairo_show_text(cr, temp_text);
 
-        // draw CW (wpm)
-        switch(vfo[id].mode) {
-        case modeCWU:
-        case modeCWL:
-            cairo_set_font_size(cr, 16);
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-            cairo_show_text(cr, " wpm");
-            break;
-        default:
-            break;
-        }
+        /* // draw CW (wpm) */
+        /* switch(vfo[id].mode) { */
+        /* case modeCWU: */
+        /* case modeCWL: */
+        /*     cairo_set_font_size(cr, 16); */
+        /*     cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
+        /*     cairo_show_text(cr, " wpm"); */
+        /*     break; */
+        /* default: */
+        /*     break; */
+        /* } */
+
 	// In what follows, we want to display the VFO frequency
 	// on which we currently transmit a signal with red colour.
 	// If it is out-of-band, we display "Out of band" in red.
