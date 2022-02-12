@@ -955,7 +955,7 @@ void vfo_update() {
 
         cairo_select_font_face(cr, "Cantarell",
             CAIRO_FONT_SLANT_NORMAL,
-            CAIRO_FONT_WEIGHT_BOLD);
+            CAIRO_FONT_WEIGHT_NORMAL);
 
         switch(vfo[id].mode) {
           case modeFMN:
