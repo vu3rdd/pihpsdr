@@ -989,7 +989,7 @@ void vfo_update() {
         switch(vfo[id].mode) {
         case modeCWU:
         case modeCWL:
-            cairo_set_font_size(cr, 18);
+            cairo_set_font_size(cr, 16);
             cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
             cairo_show_text(cr, " wpm");
             break;
