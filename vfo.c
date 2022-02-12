@@ -955,7 +955,7 @@ void vfo_update() {
 
         cairo_select_font_face(cr, "Cantarell",
             CAIRO_FONT_SLANT_NORMAL,
-            CAIRO_FONT_WEIGHT_NORMAL);
+            CAIRO_FONT_WEIGHT_BOLD);
 
         switch(vfo[id].mode) {
           case modeFMN:
@@ -1027,6 +1027,10 @@ void vfo_update() {
             s=0;
 
         // draw VFO A
+        cairo_select_font_face(cr, "Cantarell",
+                               CAIRO_FONT_SLANT_NORMAL,
+                               CAIRO_FONT_WEIGHT_NORMAL);
+
         sprintf(temp_text,"%0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
         char **vfo_texts = draw_vfo_val(temp_text, s);
 
@@ -1080,6 +1084,10 @@ void vfo_update() {
         cairo_move_to(cr, 285, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
+
+        cairo_select_font_face(cr, "Cantarell",
+                               CAIRO_FONT_SLANT_NORMAL,
+                               CAIRO_FONT_WEIGHT_BOLD);
 
 #ifdef PURESIGNAL
         if(can_transmit) {
