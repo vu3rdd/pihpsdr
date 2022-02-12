@@ -1014,6 +1014,7 @@ void vfo_update() {
 	if(s >= STEPS)
             s=0;
 
+        // draw VFO A
         sprintf(temp_text,"%0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
         char **vfo_texts = draw_vfo_val(temp_text, s);
 
@@ -1048,6 +1049,7 @@ void vfo_update() {
         free(vfo_texts[2]);
         free(vfo_texts);
 
+        // draw VFO B
         sprintf(temp_text,"B: %0lld.%06lld",bf/(long long)1000000,bf%(long long)1000000);
         if(txvfo == 1 && (isTransmitting() || oob)) {
             if (oob) sprintf(temp_text,"VFO B: Out of band");
@@ -1300,8 +1302,19 @@ vfo_press_event_cb (GtkWidget *widget,
                GdkEventButton *event,
                gpointer        data)
 {
-  start_vfo(event->x<300?VFO_A:VFO_B);
-  return TRUE;
+    // vfo a and b are drawn at x = 280, so it is the y coordinate
+    // that matters.
+    if (event->x > 260 && event->y < 80) {
+        // vfo B
+        start_vfo(VFO_B);
+        return TRUE;
+    } else if (event->x > 260 && event->y > 80) {
+        // vfo A
+        start_vfo(VFO_A);
+        return TRUE;
+    }
+
+  return FALSE;
 }
 
 GtkWidget* vfo_init(int width,int height,GtkWidget *parent) {
