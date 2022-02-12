@@ -1059,6 +1059,10 @@ void vfo_update() {
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         cairo_show_text(cr, vfo_texts[2]);
 
+        cairo_select_font_face(cr, "Cantarell",
+                               CAIRO_FONT_SLANT_NORMAL,
+                               CAIRO_FONT_WEIGHT_BOLD);
+
         // free the memory
         free(vfo_texts[0]);
         free(vfo_texts[1]);
@@ -1084,10 +1088,6 @@ void vfo_update() {
         cairo_move_to(cr, 285, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
-
-        cairo_select_font_face(cr, "Cantarell",
-                               CAIRO_FONT_SLANT_NORMAL,
-                               CAIRO_FONT_WEIGHT_BOLD);
 
 #ifdef PURESIGNAL
         if(can_transmit) {
