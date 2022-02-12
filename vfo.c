@@ -1304,11 +1304,11 @@ vfo_press_event_cb (GtkWidget *widget,
 {
     // vfo a and b are drawn at x = 280, so it is the y coordinate
     // that matters.
-    if (event->x > 260 && event->y < 80) {
+    if (event->x >= 260 && event->y <= 50) {
         // vfo B
         start_vfo(VFO_B);
         return TRUE;
-    } else if (event->x > 260 && event->y > 80) {
+    } else if (event->x >= 260 && event->y > 50) {
         // vfo A
         start_vfo(VFO_A);
         return TRUE;
