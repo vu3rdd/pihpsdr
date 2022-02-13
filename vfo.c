@@ -953,7 +953,7 @@ void vfo_update() {
         cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
         cairo_paint (cr);
 
-        cairo_select_font_face(cr, "Cantarell",
+        cairo_select_font_face(cr, "mononoki",
             CAIRO_FONT_SLANT_NORMAL,
             CAIRO_FONT_WEIGHT_BOLD);
 
@@ -1027,7 +1027,7 @@ void vfo_update() {
             s=0;
 
         // draw VFO A
-        cairo_select_font_face(cr, "Cantarell",
+        cairo_select_font_face(cr, "mononoki",
                                CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_NORMAL);
 
@@ -1059,7 +1059,7 @@ void vfo_update() {
         cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
         cairo_show_text(cr, vfo_texts[2]);
 
-        cairo_select_font_face(cr, "Cantarell",
+        cairo_select_font_face(cr, "mononoki",
                                CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_BOLD);
 
