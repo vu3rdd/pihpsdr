@@ -1497,7 +1497,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
 //
 	cw_not_ready=1;
 	cw_key_up=0;
-	cw_key_down=0;
+	if (cw_key_down > 0) cw_key_down--;  // in case it occured before the RX/TX transition
 	cw_shape=0;
         // insert "silence" in CW audio and TX IQ buffers
   	cw_shape_buffer48[tx->samples]=0.0;
