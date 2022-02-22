@@ -86,7 +86,7 @@ void protocols_restore_state() {
   value=getProperty("enable_stemlab");
   if(value) enable_stemlab=atoi(value);
 #endif
-  autostart=TRUE;
+  autostart=FALSE;
   value=getProperty("autostart");
   if(value) autostart=atoi(value);
 
