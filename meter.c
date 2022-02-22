@@ -290,7 +290,7 @@ if(analog_meter) {
       cairo_stroke(cr);
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-      sprintf(sf,"%d dBm",(int)level);
+      sprintf(sf,"%d dBm",(int)(level+0.5));
       cairo_move_to(cr, 80, meter_height-2);
       cairo_show_text(cr, sf);
 
@@ -432,7 +432,7 @@ if(analog_meter) {
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
       //sprintf(sf,"%0.1f%s",max_level,units);
-      sprintf(sf,"%d%s",(int)max_level,units);
+      sprintf(sf,"%d%s",(int)(max_level+0.5),units);
       cairo_move_to(cr, 80, meter_height-22);
       cairo_show_text(cr, sf);
 
@@ -636,7 +636,7 @@ if(analog_meter) {
       }
 
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-      sprintf(sf,"%d dBm",(int)level);
+      sprintf(sf,"%d dBm",(int)(level+0.5));
       cairo_move_to(cr, text_location, meter_height-12);
       cairo_show_text(cr, sf);
       break;
@@ -656,7 +656,7 @@ if(analog_meter) {
         }
         max_count++;
 
-        sprintf(sf,"FWD: %d%s",(int)max_level,units);
+        sprintf(sf,"FWD: %d%s",(int)(max_level+0.5),units);
         cairo_move_to(cr, 10, 35);
         cairo_show_text(cr, sf);
 
