@@ -14,7 +14,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
 #
-#GPIO_INCLUDE=GPIO
+GPIO_INCLUDE=GPIO
 
 # uncomment the line below to include Pure Signal support
 #PURESIGNAL_INCLUDE=PURESIGNAL
@@ -26,7 +26,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 # USBOZY_INCLUDE=USBOZY
 
 # uncomment the line to below include support local CW keyer
-#LOCALCW_INCLUDE=LOCALCW
+LOCALCW_INCLUDE=LOCALCW
 
 # uncomment the line below for SoapySDR
 #SOAPYSDR_INCLUDE=SOAPYSDR
