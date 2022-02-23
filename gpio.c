@@ -173,7 +173,7 @@ ENCODER encoders_controller2_v1[MAX_ENCODERS]={
   };
 
 ENCODER encoders_controller2_v2[MAX_ENCODERS]={
-  {TRUE,TRUE,5,1,6,1,0,RF_GAIN,R_START,TRUE,TRUE,26,1,20,1,0,AF_GAIN,R_START,TRUE,TRUE,22,MENU_BAND,0L},
+  {TRUE,TRUE,5,1,6,1,0,DRIVE,R_START,TRUE,TRUE,26,1,20,1,0,AF_GAIN,R_START,TRUE,TRUE,22,MENU_BAND,0L},
   {TRUE,TRUE,9,1,7,1,0,ATTENUATION,R_START,TRUE,TRUE,21,1,4,1,0,AGC_GAIN,R_START,TRUE,TRUE,27,MENU_MODE,0L},
   {TRUE,TRUE,11,1,10,1,0,IF_WIDTH,R_START,TRUE,TRUE,19,1,16,1,0,IF_SHIFT,R_START,TRUE,TRUE,23,MENU_FILTER,0L},
   {TRUE,TRUE,13,1,12,1,0,XIT,R_START,TRUE,TRUE,8,1,25,1,0,RIT,R_START,TRUE,TRUE,24,MENU_FREQUENCY,0L},
@@ -237,7 +237,7 @@ SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES]={
   {{TRUE,TRUE,27,MOX,0L},
    {TRUE,TRUE,13,MENU_FREQUENCY,0L},
    {TRUE,TRUE,12,MENU_MEMORY,0L},
-   {TRUE,TRUE,6,RIT,0L},
+   {TRUE,TRUE,6,RIT_ENABLE,0L},
    {TRUE,TRUE,5,RIT_PLUS,0L},
    {TRUE,TRUE,24,RIT_MINUS,0L},
    {TRUE,TRUE,23,RIT_CLEAR,0L},
@@ -253,7 +253,7 @@ SWITCH switches_controller1[MAX_FUNCTIONS][MAX_SWITCHES]={
   {{TRUE,TRUE,27,MOX,0L},
    {TRUE,TRUE,13,MENU_FREQUENCY,0L},
    {TRUE,TRUE,12,MENU_MEMORY,0L},
-   {TRUE,TRUE,6,XIT,0L},
+   {TRUE,TRUE,6,XIT_ENABLE,0L},
    {TRUE,TRUE,5,XIT_PLUS,0L},
    {TRUE,TRUE,24,XIT_MINUS,0L},
    {TRUE,TRUE,23,XIT_CLEAR,0L},
@@ -376,18 +376,28 @@ static gpointer rotary_encoder_thread(gpointer data) {
         a=g_new(PROCESS_ACTION,1);
         a->action=encoders[i].bottom_encoder_function;
         a->mode=RELATIVE;
-        a->val=encoders[i].bottom_encoder_pos;
-        g_idle_add(process_action,a);
-        encoders[i].bottom_encoder_pos=0;
+	if(a->action==VFO && vfo_encoder_divisor>1) {
+          a->val=encoders[i].bottom_encoder_pos/vfo_encoder_divisor;
+          encoders[i].bottom_encoder_pos=encoders[i].bottom_encoder_pos-(a->val*vfo_encoder_divisor);
+        } else {
+          a->val=encoders[i].bottom_encoder_pos;
+          encoders[i].bottom_encoder_pos=0;
+	}
+	if(a->val!=0) g_idle_add(process_action,a); else g_free(a);
       }
       if(encoders[i].top_encoder_enabled && encoders[i].top_encoder_pos!=0) {
         //g_print("%s: TOP encoder %d pos=%d\n",__FUNCTION__,i,encoders[i].top_encoder_pos);
         a=g_new(PROCESS_ACTION,1);
         a->action=encoders[i].top_encoder_function;
         a->mode=RELATIVE;
-        a->val=encoders[i].top_encoder_pos;
-        g_idle_add(process_action,a);
-        encoders[i].top_encoder_pos=0;
+	if(a->action==VFO && vfo_encoder_divisor>1) {
+          a->val=encoders[i].top_encoder_pos/vfo_encoder_divisor;
+          encoders[i].top_encoder_pos=encoders[i].top_encoder_pos-(a->val*vfo_encoder_divisor);
+        } else {
+          a->val=encoders[i].top_encoder_pos;
+          encoders[i].top_encoder_pos=0;
+	}
+	if(a->val!=0) g_idle_add(process_action,a); else g_free(a);
       }
     }
     g_mutex_unlock(&encoder_mutex);
@@ -406,11 +416,10 @@ int process_function_switch(void *data) {
 }
 
 #ifdef GPIO
-static unsigned long switch_debounce;
 
 static void process_encoder(int e,int l,int addr,int val) {
   guchar pinstate;
-  g_print("%s: encoder=%d level=%d addr=0x%02X val=%d\n",__FUNCTION__,e,l,addr,val);
+  //g_print("%s: encoder=%d level=%d addr=0x%02X val=%d\n",__FUNCTION__,e,l,addr,val);
   g_mutex_lock(&encoder_mutex);
   switch(l) {
     case BOTTOM_ENCODER:
@@ -419,7 +428,7 @@ static void process_encoder(int e,int l,int addr,int val) {
           encoders[e].bottom_encoder_a_value=val;
           pinstate=(encoders[e].bottom_encoder_b_value<<1) | encoders[e].bottom_encoder_a_value;
           encoders[e].bottom_encoder_state=encoder_state_table[encoders[e].bottom_encoder_state&0xf][pinstate];
-          g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].bottom_encoder_state);
+          //g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].bottom_encoder_state);
           switch(encoders[e].bottom_encoder_state&0x30) {
             case DIR_NONE:
               break;
@@ -433,13 +442,13 @@ static void process_encoder(int e,int l,int addr,int val) {
               break;
           }
 
-          g_print("%s: %d BOTTOM pos=%d\n",__FUNCTION__,e,encoders[e].bottom_encoder_pos);
+          //g_print("%s: %d BOTTOM pos=%d\n",__FUNCTION__,e,encoders[e].bottom_encoder_pos);
           break;
         case B:
           encoders[e].bottom_encoder_b_value=val;
           pinstate=(encoders[e].bottom_encoder_b_value<<1) | encoders[e].bottom_encoder_a_value;
           encoders[e].bottom_encoder_state=encoder_state_table[encoders[e].bottom_encoder_state&0xf][pinstate];
-          g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].bottom_encoder_state);
+          //g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].bottom_encoder_state);
           switch(encoders[e].bottom_encoder_state&0x30) {
             case DIR_NONE:
               break;
@@ -453,7 +462,7 @@ static void process_encoder(int e,int l,int addr,int val) {
               break;
           }
 
-          g_print("%s: %d BOTTOM pos=%d\n",__FUNCTION__,e,encoders[e].bottom_encoder_pos);
+          //g_print("%s: %d BOTTOM pos=%d\n",__FUNCTION__,e,encoders[e].bottom_encoder_pos);
 
           break;
       }
@@ -464,7 +473,7 @@ static void process_encoder(int e,int l,int addr,int val) {
           encoders[e].top_encoder_a_value=val;
           pinstate=(encoders[e].top_encoder_b_value<<1) | encoders[e].top_encoder_a_value;
           encoders[e].top_encoder_state=encoder_state_table[encoders[e].top_encoder_state&0xf][pinstate];
-          g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].top_encoder_state);
+          //g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].top_encoder_state);
           switch(encoders[e].top_encoder_state&0x30) {
             case DIR_NONE:
               break;
@@ -477,13 +486,13 @@ static void process_encoder(int e,int l,int addr,int val) {
             default:
               break;
           }
-          g_print("%s: %d TOP pos=%d\n",__FUNCTION__,e,encoders[e].top_encoder_pos);
+          //g_print("%s: %d TOP pos=%d\n",__FUNCTION__,e,encoders[e].top_encoder_pos);
           break;
         case B:
           encoders[e].top_encoder_b_value=val;
           pinstate=(encoders[e].top_encoder_b_value<<1) | encoders[e].top_encoder_a_value;
           encoders[e].top_encoder_state=encoder_state_table[encoders[e].top_encoder_state&0xf][pinstate];
-          g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].top_encoder_state);
+          //g_print("%s: state=%02X\n",__FUNCTION__,encoders[e].top_encoder_state);
           switch(encoders[e].top_encoder_state&0x30) {
             case DIR_NONE:
               break;
@@ -496,7 +505,7 @@ static void process_encoder(int e,int l,int addr,int val) {
             default:
               break;
           }
-          g_print("%s: %d TOP pos=%d\n",__FUNCTION__,e,encoders[e].top_encoder_pos);
+          //g_print("%s: %d TOP pos=%d\n",__FUNCTION__,e,encoders[e].top_encoder_pos);
 
           break;
       }
@@ -507,7 +516,7 @@ static void process_encoder(int e,int l,int addr,int val) {
 
 static void process_edge(int offset,int value) {
   gint i;
-  gint t;
+  unsigned int t;
   gboolean found;
 
   //g_print("%s: offset=%d value=%d\n",__FUNCTION__,offset,value);
@@ -548,9 +557,15 @@ static void process_edge(int offset,int value) {
       break;
     } else if(encoders[i].switch_enabled && encoders[i].switch_address==offset) {
       //g_print("%s: found %d encoder %d switch\n",__FUNCTION__,offset,i);
+      t=millis();
+      //g_print("%s: found %d encoder %d switch value=%d t=%u\n",__FUNCTION__,offset,i,value,t);
+      if (t<encoders[i].switch_debounce) {
+        return;
+      }
+      encoders[i].switch_debounce=t+settle_time;
       PROCESS_ACTION *a=g_new(PROCESS_ACTION,1);
       a->action=encoders[i].switch_function;
-      a->mode=value?PRESSED:RELEASED;
+      a->mode=value;
       g_idle_add(process_action,a);
       found=TRUE;
       break;
@@ -570,7 +585,7 @@ static void process_edge(int offset,int value) {
     for(i=0;i<MAX_SWITCHES;i++) {
       if(switches[i].switch_enabled && switches[i].switch_address==offset) {
         t=millis();
-        //g_print("%s: found %d switch %d value=%d t=%d\n",__FUNCTION__,offset,i,value,t);
+        //g_print("%s: found %d switch %d value=%d t=%u\n",__FUNCTION__,offset,i,value,t);
         found=TRUE;
         if(t<switches[i].switch_debounce) {
           return;
@@ -579,7 +594,7 @@ static void process_edge(int offset,int value) {
         switches[i].switch_debounce=t+settle_time;
         PROCESS_ACTION *a=g_new(PROCESS_ACTION,1);
         a->action=switches[i].switch_function;
-        a->mode=value?PRESSED:RELEASED;
+        a->mode=value;
         g_idle_add(process_action,a);
         break;
       }
@@ -629,6 +644,16 @@ void gpio_set_defaults(int ctrlr) {
       switches=switches_controller2_v1;
       break;
     case CONTROLLER2_V2:
+#ifdef LOCALCW
+      //
+      // This controller uses nearly all GPIO lines,
+      // so lines 9, 10, 11 are not available for
+      // CW keys and producing a side tone
+      //
+      ENABLE_GPIO_SIDETONE=0;
+      ENABLE_CW_BUTTONS=0;
+#endif
+
       encoders=encoders_controller2_v2;
       switches=switches_controller2_v2;
       break;
@@ -961,7 +986,6 @@ int gpio_init() {
 
 #ifdef GPIO
   initialiseEpoch();
-  switch_debounce=millis();
 
   g_mutex_init(&encoder_mutex);
 
@@ -976,13 +1000,12 @@ int gpio_init() {
     ret=-1;
     goto err;
   }
-
-
-#ifdef LOCALCW
+  
+#ifdef LOCALCW  
 	if(controller == NO_CONTROLLER) {
 		// radioberry plugged into the RPI
 		// GPIO is on only for LOCALCW.
-		// Users do have to choose for no controller;
+		// Users do have to choose for no controller; 
 		// for local CW the following pins are set.
 		CWL_BUTTON=17;
 		CWR_BUTTON=21;
@@ -991,6 +1014,7 @@ int gpio_init() {
 	// Radioberry device driver uses GPIO ports.
 	if(controller != NO_CONTROLLER) {
 #endif
+
   // setup encoders
   g_print("%s: setup encoders\n",__FUNCTION__);
   for(int i=0;i<MAX_ENCODERS;i++) {
@@ -1028,7 +1052,7 @@ int gpio_init() {
       }
     }
   }
-#ifdef LOCALCW
+#ifdef LOCALCW 
 }
 #endif
 
@@ -1105,6 +1129,7 @@ void gpio_close() {
 void gpio_cw_sidetone_set(int level) {
   int rc;
   if (ENABLE_GPIO_SIDETONE) {
+#ifdef GPIO
 #ifdef OLD_GPIOD
     if((rc=gpiod_ctxless_set_value(gpio_device,SIDETONE_GPIO,level,FALSE,consumer,NULL,NULL))<0) {
 #else
@@ -1112,13 +1137,8 @@ void gpio_cw_sidetone_set(int level) {
 #endif
       g_print("%s: err=%d\n",__FUNCTION__,rc);
     }
+#endif
   }
-}
-
-int  gpio_left_cw_key() {
-}
-
-int  gpio_right_cw_key() {
 }
 
 int  gpio_cw_sidetone_enabled() {
