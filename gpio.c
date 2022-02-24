@@ -71,8 +71,8 @@
 // by Controller1 and Controller2_V1
 // (and keep #2,3 reserved for I2C extensions)
 //
-int CWL_BUTTON=9;
-int CWR_BUTTON=11;
+int CWL_BUTTON=17; // was 9
+int CWR_BUTTON=21;  //was 11
 int SIDETONE_GPIO=10;
 int ENABLE_GPIO_SIDETONE=0;
 int ENABLE_CW_BUTTONS=1;
