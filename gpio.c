@@ -1126,6 +1126,7 @@ void gpio_close() {
 }
 
 #ifdef LOCALCW
+#ifdef GPIO
 void gpio_cw_sidetone_set(int level) {
   int rc;
   if (ENABLE_GPIO_SIDETONE) {
@@ -1144,5 +1145,5 @@ void gpio_cw_sidetone_set(int level) {
 int  gpio_cw_sidetone_enabled() {
   return ENABLE_GPIO_SIDETONE;
 }
-
+#endif
 #endif
