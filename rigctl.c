@@ -3924,9 +3924,11 @@ int parse_cmd(void *data) {
       implemented = FALSE;
       break;
     case 'X': // TX
-      // set transceiver to TX mode
+      // set transceiver to TX mode if VOX is not enabled
       if (command[2] == ';') {
-        mox_update(1);
+          if (vox_enabled == 0) {
+              mox_update(1);
+          }
       }
       break;
     case 'Y': // TY
