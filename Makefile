@@ -14,7 +14,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
 #
-GPIO_INCLUDE=GPIO
+# GPIO_INCLUDE=GPIO
 
 # uncomment the line below to include Pure Signal support
 #PURESIGNAL_INCLUDE=PURESIGNAL
