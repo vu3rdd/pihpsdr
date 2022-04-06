@@ -723,8 +723,8 @@ static void init_analyzer(TRANSMITTER *tx) {
     double kaiser_pi = 14.0;
     int overlap = 2048;
     int clip = 0;
-    int span_clip_l = 0;
-    int span_clip_h = 0;
+    double span_clip_l = 0;
+    double span_clip_h = 0;
     int pixels=tx->pixels;
     int stitches = 1;
     int calibration_data_set = 0;
