@@ -298,7 +298,7 @@ void tx_menu(GtkWidget *parent) {
       strcpy(transmitter->microphone_name,input_devices[0].name);
     }
 
-    gtk_grid_attach(GTK_GRID(grid),input,col,row,3,1);
+    my_combo_attach(GTK_GRID(grid),input,col,row,3,1);
     g_signal_connect(input,"changed",G_CALLBACK(local_input_changed_cb),NULL);
   }
 
@@ -508,7 +508,7 @@ void tx_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ctcss_frequency_b),NULL,temp);
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(ctcss_frequency_b),transmitter->ctcss);
-  gtk_grid_attach(GTK_GRID(grid),ctcss_frequency_b,col,row,1,1);
+  my_combo_attach(GTK_GRID(grid),ctcss_frequency_b,col,row,1,1);
   g_signal_connect(ctcss_frequency_b,"changed",G_CALLBACK(ctcss_frequency_cb),NULL);
 
 /*

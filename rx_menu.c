@@ -385,7 +385,7 @@ void rx_menu(GtkWidget *parent) {
       }
     }
 
-    gtk_grid_attach(GTK_GRID(grid),output,x,++row,1,1);
+    my_combo_attach(GTK_GRID(grid),output,x,++row,1,1);
     g_signal_connect(output,"changed",G_CALLBACK(local_output_changed_cb),NULL);
 
     row=0;

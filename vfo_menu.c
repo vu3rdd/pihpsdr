@@ -278,7 +278,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
       break;
   }
   g_signal_connect(rit_b,"changed",G_CALLBACK(rit_cb),NULL);
-  gtk_grid_attach(GTK_GRID(grid),rit_b,4,2,1,1);
+  my_combo_attach(GTK_GRID(grid),rit_b,4,2,1,1);
 
   GtkWidget *vfo_label=gtk_label_new("VFO step: ");
   gtk_grid_attach(GTK_GRID(grid),vfo_label,3,3,1,1);
@@ -292,7 +292,7 @@ void vfo_menu(GtkWidget *parent,int vfo) {
     }
   }
   g_signal_connect(vfo_b,"changed",G_CALLBACK(vfo_cb),NULL);
-  gtk_grid_attach(GTK_GRID(grid),vfo_b,4,3,1,1);
+  my_combo_attach(GTK_GRID(grid),vfo_b,4,3,1,1);
 
 
   if (!display_sliders) {

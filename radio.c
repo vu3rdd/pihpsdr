@@ -350,6 +350,7 @@ double meter_calibration=0.0;
 double display_calibration=0.0;
 
 int can_transmit=0;
+int optimize_for_touchscreen=1;
 
 gboolean duplex=FALSE;
 gboolean mute_rx_while_transmitting=FALSE;
@@ -2257,6 +2258,9 @@ g_print("radioRestoreState: %s\n",property_path);
       if(value) rx_gain_calibration=atoi(value);
     }
 
+    value=getProperty("optimize_touchscreen");
+    if (value) optimize_for_touchscreen=atoi(value);
+
 
     filterRestoreState();
     bandRestoreState();
@@ -2701,6 +2705,9 @@ g_print("radioSaveState: %s\n",property_path);
     sprintf(value,"%d",iqswap);
     setProperty("iqswap",value);
 	
+    sprintf(value,"%d",optimize_for_touchscreen);
+    setProperty("optimize_touchscreen", value);
+
 #ifdef CLIENT_SERVER
     sprintf(value,"%d",hpsdr_server);
     setProperty("radio.hpsdr_server",value);
@@ -2864,3 +2871,29 @@ int remote_start(void *data) {
   return 0;
 }
 #endif
+
+static gboolean eventbox_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  if (event->type == GDK_BUTTON_RELEASE) {
+    gtk_combo_box_popup(GTK_COMBO_BOX(data));
+    return TRUE;
+  }
+  return FALSE;
+}
+
+//
+// This function replaces gtk_grid_attach for a newly created combo-box
+//
+void my_combo_attach(GtkGrid *grid, GtkWidget *combo, int row, int col, int spanrow, int spancol)
+{
+    if (optimize_for_touchscreen) {
+      GtkWidget *eventbox = gtk_event_box_new();
+      g_signal_connect( eventbox, "event",   G_CALLBACK(eventbox_callback),   combo);
+      gtk_container_add(GTK_CONTAINER(eventbox), combo);
+      gtk_event_box_set_above_child(GTK_EVENT_BOX(eventbox), TRUE);
+      gtk_grid_attach(GTK_GRID(grid),eventbox,row,col,spanrow,spancol);
+    } else {
+      gtk_grid_attach(GTK_GRID(grid),combo,row,col,spanrow,spancol);
+    }
+}
+

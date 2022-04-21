@@ -215,6 +215,10 @@ static void iqswap_cb(GtkWidget *widget, gpointer data) {
   iqswap=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
+static void touchscreen_cb(GtkWidget *widget, gpointer data) {
+  optimize_for_touchscreen=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 static void split_cb(GtkWidget *widget, gpointer data) {
   int new=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   if (new != split) g_idle_add(ext_split_toggle, NULL);
@@ -476,7 +480,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(receivers_combo),NULL,"2");
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(receivers_combo),receivers - 1);
-  gtk_grid_attach(GTK_GRID(grid),receivers_combo,col,row,1,1);
+  my_combo_attach(GTK_GRID(grid),receivers_combo,col,row,1,1);
   g_signal_connect(receivers_combo,"changed",G_CALLBACK(receivers_cb),NULL);
   
   row++;
@@ -512,7 +516,7 @@ void radio_menu(GtkWidget *parent) {
             gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),3);
 	    break;
       }
-      gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
+      my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
       g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
       row++;
       }
@@ -559,7 +563,7 @@ void radio_menu(GtkWidget *parent) {
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sample_rate_combo_box),NULL,rate);
         gtk_combo_box_set_active(GTK_COMBO_BOX(sample_rate_combo_box),0);
       }
-      gtk_grid_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
+      my_combo_attach(GTK_GRID(grid),sample_rate_combo_box,col,row,1,1);
       g_signal_connect(sample_rate_combo_box,"changed",G_CALLBACK(sample_rate_cb),NULL);
       row++;
       }
@@ -597,7 +601,7 @@ void radio_menu(GtkWidget *parent) {
       gtk_combo_box_set_active(GTK_COMBO_BOX(rit_combo),2);
       break;
   }
-  gtk_grid_attach(GTK_GRID(grid), rit_combo, col, row, 1, 1);
+  my_combo_attach(GTK_GRID(grid), rit_combo, col, row, 1, 1);
   g_signal_connect(rit_combo,"changed",G_CALLBACK(rit_cb),NULL);
   row++;
 
@@ -611,7 +615,7 @@ void radio_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sat_combo),NULL,"SAT");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sat_combo),NULL,"RSAT");
   gtk_combo_box_set_active(GTK_COMBO_BOX(sat_combo),sat_mode);
-  gtk_grid_attach(GTK_GRID(grid),sat_combo,col,row,1,1);
+  my_combo_attach(GTK_GRID(grid),sat_combo,col,row,1,1);
   g_signal_connect(sat_combo,"changed",G_CALLBACK(sat_cb),NULL);
   row++;
 
@@ -629,7 +633,7 @@ void radio_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"UK");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(region_combo),NULL,"WRC15");
   gtk_combo_box_set_active(GTK_COMBO_BOX(region_combo),region);
-  gtk_grid_attach(GTK_GRID(grid),region_combo,col,row,1,1);
+  my_combo_attach(GTK_GRID(grid),region_combo,col,row,1,1);
   g_signal_connect(region_combo,"changed",G_CALLBACK(region_cb),NULL);
   row++;
 
@@ -665,7 +669,7 @@ void radio_menu(GtkWidget *parent) {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(filter_combo),4);
         break;
     }
-    gtk_grid_attach(GTK_GRID(grid), filter_combo, col, row, 1, 1);
+    my_combo_attach(GTK_GRID(grid), filter_combo, col, row, 1, 1);
     g_signal_connect(filter_combo,"changed",G_CALLBACK(filter_cb),NULL);
 
     row++;
@@ -714,7 +718,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck10mhz_combo),NULL,"Penelope");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck10mhz_combo),NULL,"Mercury");
     gtk_combo_box_set_active(GTK_COMBO_BOX(ck10mhz_combo),atlas_clock_source_10mhz);
-    gtk_grid_attach(GTK_GRID(grid),ck10mhz_combo,col+1,row,1,1);
+    my_combo_attach(GTK_GRID(grid),ck10mhz_combo,col+1,row,1,1);
     g_signal_connect(ck10mhz_combo,"changed",G_CALLBACK(ck10mhz_cb),NULL);
 
     row++;
@@ -727,7 +731,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck128mhz_combo),NULL,"Penelope");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(ck128mhz_combo),NULL,"Mercury");
     gtk_combo_box_set_active(GTK_COMBO_BOX(ck128mhz_combo),atlas_clock_source_128mhz ? 1 : 0);
-    gtk_grid_attach(GTK_GRID(grid),ck128mhz_combo,col+1,row,1,1);
+    my_combo_attach(GTK_GRID(grid),ck128mhz_combo,col+1,row,1,1);
     g_signal_connect(ck128mhz_combo,"changed",G_CALLBACK(ck128mhz_cb),NULL);
 
     row++;
@@ -740,7 +744,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(micsource_combo),NULL,"Janus");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(micsource_combo),NULL,"Penelope");
     gtk_combo_box_set_active(GTK_COMBO_BOX(micsource_combo),atlas_mic_source ? 1 : 0);
-    gtk_grid_attach(GTK_GRID(grid),micsource_combo,col+1,row,1,1);
+    my_combo_attach(GTK_GRID(grid),micsource_combo,col+1,row,1,1);
     g_signal_connect(micsource_combo,"changed",G_CALLBACK(micsource_cb),NULL);
 
     row++;
@@ -754,7 +758,7 @@ void radio_menu(GtkWidget *parent) {
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(tx_combo),NULL,"Penelope");
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(tx_combo),NULL,"Pennylane");
     gtk_combo_box_set_active(GTK_COMBO_BOX(tx_combo),atlas_penelope);
-    gtk_grid_attach(GTK_GRID(grid),tx_combo,col+1,row,1,1);
+    my_combo_attach(GTK_GRID(grid),tx_combo,col+1,row,1,1);
     g_signal_connect(tx_combo,"changed",G_CALLBACK(tx_cb),NULL);
 
     row++;
@@ -884,6 +888,12 @@ void radio_menu(GtkWidget *parent) {
     gtk_grid_attach(GTK_GRID(grid),rx_gain_calibration_b,col,row,1,1);
     g_signal_connect(rx_gain_calibration_b,"value_changed",G_CALLBACK(rx_gain_calibration_value_changed_cb),NULL);
   }
+
+  col++;
+  GtkWidget *touchscreen_b=gtk_check_button_new_with_label("TouchScreen");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (touchscreen_b), optimize_for_touchscreen);
+  gtk_grid_attach(GTK_GRID(grid),touchscreen_b,col,row,1,1);
+  g_signal_connect(touchscreen_b,"toggled",G_CALLBACK(touchscreen_cb),NULL);
 
   row++;
 

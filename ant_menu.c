@@ -444,7 +444,7 @@ g_print("rx_antennas=%ld\n",radio->info.soapy.rx_antennas);
 
       gtk_combo_box_set_active(GTK_COMBO_BOX(adc0_antenna_combo_box),adc[0].antenna);
       g_signal_connect(adc0_antenna_combo_box,"changed",G_CALLBACK(adc0_antenna_cb),&adc[0]);
-      gtk_grid_attach(GTK_GRID(grid),adc0_antenna_combo_box,1,1,1,1);
+      my_combo_attach(GTK_GRID(grid),adc0_antenna_combo_box,1,1,1,1);
     }
 
     if(can_transmit) {
@@ -461,7 +461,7 @@ g_print("rx_antennas=%ld\n",radio->info.soapy.rx_antennas);
   
         gtk_combo_box_set_active(GTK_COMBO_BOX(dac0_antenna_combo_box),dac[0].antenna);
         g_signal_connect(dac0_antenna_combo_box,"changed",G_CALLBACK(dac0_antenna_cb),&dac[0]);
-        gtk_grid_attach(GTK_GRID(grid),dac0_antenna_combo_box,1,2,1,1);
+        my_combo_attach(GTK_GRID(grid),dac0_antenna_combo_box,1,2,1,1);
       }
     }
 

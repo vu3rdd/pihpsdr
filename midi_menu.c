@@ -895,7 +895,7 @@ void midi_menu(GtkWidget *parent) {
   newNote=gtk_label_new("");
   gtk_grid_attach(GTK_GRID(grid),newNote,col++,row,1,1);
   newType=gtk_combo_box_text_new();
-  gtk_grid_attach(GTK_GRID(grid),newType,col++,row,1,1);
+  my_combo_attach(GTK_GRID(grid),newType,col++,row,1,1);
   g_signal_connect(newType,"changed",G_CALLBACK(type_changed_cb),NULL);
   newVal=gtk_label_new("");
   gtk_grid_attach(GTK_GRID(grid),newVal,col++,row,1,1);

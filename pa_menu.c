@@ -242,7 +242,7 @@ void pa_menu(GtkWidget *parent) {
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b),NULL,"200W");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(max_power_b),NULL,"500W");
   gtk_combo_box_set_active(GTK_COMBO_BOX(max_power_b),pa_power);
-  gtk_grid_attach(GTK_GRID(grid0),max_power_b,2,0,1,1);
+  my_combo_attach(GTK_GRID(grid0),max_power_b,2,0,1,1);
   g_signal_connect(max_power_b,"changed",G_CALLBACK(max_power_changed_cb),NULL);
 
   GtkWidget *tx_out_of_band_b=gtk_check_button_new_with_label("Transmit out of band");

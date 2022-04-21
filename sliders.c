@@ -864,6 +864,9 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_widget_override_font(c25_att_preamp_label, pango_font_description_from_string(SLIDERS_FONT));
   gtk_grid_attach(GTK_GRID(sliders), c25_att_preamp_label, 6, 0, 1, 1);
 
+  //
+  // Do not use my_combo_attach here because these widgets can be hidden/shown
+  //
   c25_att_combobox = gtk_combo_box_text_new();
   gtk_widget_override_font(c25_att_combobox, pango_font_description_from_string(SLIDERS_FONT));
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "0", "0 dB");
