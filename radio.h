@@ -377,4 +377,6 @@ extern void disable_rigctl(void);
 extern int remote_start(void *data);
 #endif
 
+extern int optimize_for_touchscreen;
+extern void my_combo_attach(GtkGrid *grid, GtkWidget *combo, int row, int col, int spanrow, int spancol);
 #endif
