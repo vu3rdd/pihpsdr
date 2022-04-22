@@ -61,12 +61,12 @@ GtkWidget *scale_dialog;
 
 static GtkWidget *af_gain_label;
 static GtkWidget *af_gain_scale;
-static GtkWidget *rf_gain_label;
-static GtkWidget *rf_gain_scale;
+static GtkWidget *rf_gain_label=NULL;
+static GtkWidget *rf_gain_scale=NULL;
 static GtkWidget *agc_gain_label;
 static GtkWidget *agc_scale;
-static GtkWidget *attenuation_label;
-static GtkWidget *attenuation_scale;
+static GtkWidget *attenuation_label=NULL;
+static GtkWidget *attenuation_scale=NULL;
 static GtkWidget *c25_att_preamp_label;
 static GtkWidget *c25_att_combobox;
 static GtkWidget *c25_preamp_combobox;
@@ -218,7 +218,9 @@ void att_type_changed(void) {
   g_print("%s\n",__FUNCTION__);
   if (filter_board == CHARLY25) {
     if(attenuation_label!=NULL) gtk_widget_hide(attenuation_label);
+    if(rf_gain_label!=NULL)     gtk_widget_hide(rf_gain_label);
     if(attenuation_scale!=NULL) gtk_widget_hide(attenuation_scale);
+    if(rf_gain_scale!=NULL)     gtk_widget_hide(rf_gain_scale);
     gtk_widget_show(c25_att_preamp_label);
     gtk_widget_show(c25_att_combobox);
     gtk_widget_show(c25_preamp_combobox);
@@ -228,7 +230,9 @@ void att_type_changed(void) {
     gtk_widget_hide(c25_att_combobox);
     gtk_widget_hide(c25_preamp_combobox);
     if(attenuation_label!=NULL) gtk_widget_show(attenuation_label);
+    if(rf_gain_label!=NULL)     gtk_widget_show(rf_gain_label);
     if(attenuation_scale!=NULL) gtk_widget_show(attenuation_scale);
+    if(rf_gain_scale!=NULL)     gtk_widget_show(rf_gain_scale);
   }
 }
 
@@ -873,7 +877,7 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "1", "-12 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "2", "-24 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_att_combobox), "3", "-36 dB");
-  gtk_grid_attach(GTK_GRID(sliders), c25_att_combobox, 7, 0, 1, 1);
+  my_combo_attach(GTK_GRID(sliders), c25_att_combobox, 7, 0, 1, 1);
   g_signal_connect(G_OBJECT(c25_att_combobox), "changed", G_CALLBACK(c25_att_combobox_changed), NULL);
 
   c25_preamp_combobox = gtk_combo_box_text_new();
@@ -881,7 +885,7 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "0", "0 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "1", "18 dB");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(c25_preamp_combobox), "2", "36 dB");
-  gtk_grid_attach(GTK_GRID(sliders), c25_preamp_combobox, 8, 0, 1, 1);
+  my_combo_attach(GTK_GRID(sliders), c25_preamp_combobox, 8, 0, 1, 1);
   g_signal_connect(G_OBJECT(c25_preamp_combobox), "changed", G_CALLBACK(c25_preamp_combobox_changed), NULL);
   g_idle_add(load_att_type_cb, NULL);
 
