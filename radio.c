@@ -350,7 +350,7 @@ double meter_calibration=0.0;
 double display_calibration=0.0;
 
 int can_transmit=0;
-int optimize_for_touchscreen=1;
+int optimize_for_touchscreen=0;
 
 gboolean duplex=FALSE;
 gboolean mute_rx_while_transmitting=FALSE;
@@ -684,6 +684,14 @@ void start_radio() {
   int i;
 //g_print("start_radio: selected radio=%p device=%d\n",radio,radio->device);
   gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_WATCH));
+
+  //
+  // In the discovery dialog, we have set the combobox behaviour to
+  // "touchscreen friendly". Now we set it to "mouse friendly"
+  // but this can be overridden in the RADIO menu or when reading
+  // from the props file
+  //
+  optimize_for_touchscreen=0;
 
   protocol=radio->protocol;
   device=radio->device;
@@ -2872,17 +2880,43 @@ int remote_start(void *data) {
 }
 #endif
 
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// A mechanism to make ComboBoxes "touchscreen-friendly".
+// If the variable "optimize_for_touchscreen" is nonzero, their
+// behaviour is modified such that they only react on "button release"
+// events, the first release event pops up the menu, the second one makes
+// the choice.
+//
+// This is necessary since a "slow click" (with some delay between press and release)
+// leads you nowhere: the PRESS event lets the menu open, it grabs the focus, and
+// the RELEASE event makes the choice. With a mouse this is no problem since you
+// hold the button while making a choice, but with a touch-screen it may make the
+// GUI un-usable.
+//
+// The variable "optimize_for_touchscreen" can be changed in the RADIO menu (or whereever
+// it is decided to move this).
+//
+///////////////////////////////////////////////////////////////////////////////////////////
+
 static gboolean eventbox_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
+  //
+  // data is the ComboBox that is contained in the EventBox
+  //
   if (event->type == GDK_BUTTON_RELEASE) {
     gtk_combo_box_popup(GTK_COMBO_BOX(data));
-    return TRUE;
   }
-  return FALSE;
+  return TRUE;
 }
 
 //
-// This function replaces gtk_grid_attach for a newly created combo-box
+// This function has to be called instead of "gtk_grid_attach" for ComboBoxes.
+// Basically, it creates an EventBox and puts the ComboBox therein,
+// such that all events (mouse clicks) go to the EventBox. This ignores
+// everything except "button release" events, in this case it lets the ComboBox
+// pop-up the menu which then goes to the foreground.
+// Then, the choice can be made from the menu in the usual way.
 //
 void my_combo_attach(GtkGrid *grid, GtkWidget *combo, int row, int col, int spanrow, int spancol)
 {

@@ -196,6 +196,11 @@ g_print("connect_cb: %s:%d\n",host_addr,host_port);
 void discovery() {
 //fprintf(stderr,"discovery\n");
 
+  //
+  // On the discovery screen, make the combo-boxes "touchscreen-friendly"
+  //
+  optimize_for_touchscreen=1;
+
   protocols_restore_state();
 
   selected_device=0;
@@ -443,8 +448,8 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
               gtk_combo_box_set_active_id(GTK_COMBO_BOX(apps_combobox[row]),
                   "stemlab_sdr_transceiver_hpsdr");
             }
-            gtk_widget_show(apps_combobox[row]);
             my_combo_attach(GTK_GRID(grid), apps_combobox[row], 4, row, 1, 1);
+            gtk_widget_show(apps_combobox[row]);
           }
         }
 #endif
