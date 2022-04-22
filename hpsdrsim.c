@@ -244,26 +244,33 @@ int main(int argc, char *argv[])
         NEWDEVICE=NEW_DEVICE_ORION2;
 
         for (i=1; i<argc; i++) {
-            if (!strncmp(argv[i],"-atlas"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11;}
-            if (!strncmp(argv[i],"-metis"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11;}
-            if (!strncmp(argv[i],"-hermes" ,      7))  {OLDDEVICE=DEVICE_HERMES;      NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x22;}
-            if (!strncmp(argv[i],"-griffin" ,     8))  {OLDDEVICE=DEVICE_GRIFFIN;     NEWDEVICE=NEW_DEVICE_HERMES2;       MAC5=0x33;}
-            if (!strncmp(argv[i],"-angelia" ,     8))  {OLDDEVICE=DEVICE_ANGELIA;     NEWDEVICE=NEW_DEVICE_ANGELIA;       MAC5=0x44;}
-            if (!strncmp(argv[i],"-orion" ,       6))  {OLDDEVICE=DEVICE_ORION;       NEWDEVICE=NEW_DEVICE_ORION;         MAC5=0x55;}
-            if (!strncmp(argv[i],"-orion2" ,      7))  {OLDDEVICE=DEVICE_ORION2;      NEWDEVICE=NEW_DEVICE_ORION2;        MAC5=0x66;}
-            if (!strncmp(argv[i],"-hermeslite" , 11))  {OLDDEVICE=DEVICE_HERMES_LITE; NEWDEVICE=NEW_DEVICE_HERMES_LITE;   MAC5=0x77;}
-            if (!strncmp(argv[i],"-hermeslite2", 12))  {OLDDEVICE=DEVICE_HERMES_LITE2;NEWDEVICE=NEW_DEVICE_HERMES_LITE2;  MAC5=0x88;}
-            if (!strncmp(argv[i],"-c25"    ,      4))  {OLDDEVICE=DEVICE_C25;         NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x99;}
-            if (!strncmp(argv[i],"-diversity",   10))  {diversity=1;}
-            if (!strncmp(argv[i],"-P1",           3))  {oldnew=1;}
-            if (!strncmp(argv[i],"-P2",           3))  {oldnew=2;}
+            if (!strncmp(argv[i],"-atlas"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11; continue;}
+            if (!strncmp(argv[i],"-metis"  ,      6))  {OLDDEVICE=DEVICE_METIS;       NEWDEVICE=NEW_DEVICE_ATLAS;         MAC5=0x11; continue;}
+            if (!strncmp(argv[i],"-hermeslite2", 12))  {OLDDEVICE=DEVICE_HERMES_LITE2;NEWDEVICE=NEW_DEVICE_HERMES_LITE2;  MAC5=0x88; continue;}
+            if (!strncmp(argv[i],"-hermeslite" , 11))  {OLDDEVICE=DEVICE_HERMES_LITE; NEWDEVICE=NEW_DEVICE_HERMES_LITE;   MAC5=0x77; continue;}
+            if (!strncmp(argv[i],"-hermes" ,      7))  {OLDDEVICE=DEVICE_HERMES;      NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x22; continue;}
+            if (!strncmp(argv[i],"-griffin" ,     8))  {OLDDEVICE=DEVICE_GRIFFIN;     NEWDEVICE=NEW_DEVICE_HERMES2;       MAC5=0x33; continue;}
+            if (!strncmp(argv[i],"-angelia" ,     8))  {OLDDEVICE=DEVICE_ANGELIA;     NEWDEVICE=NEW_DEVICE_ANGELIA;       MAC5=0x44; continue;}
+            if (!strncmp(argv[i],"-orion2" ,      7))  {OLDDEVICE=DEVICE_ORION2;      NEWDEVICE=NEW_DEVICE_ORION2;        MAC5=0x66; continue;}
+            if (!strncmp(argv[i],"-orion" ,       6))  {OLDDEVICE=DEVICE_ORION;       NEWDEVICE=NEW_DEVICE_ORION;         MAC5=0x55; continue;}
+            if (!strncmp(argv[i],"-c25"    ,      4))  {OLDDEVICE=DEVICE_C25;         NEWDEVICE=NEW_DEVICE_HERMES;        MAC5=0x99; continue;}
+            if (!strncmp(argv[i],"-diversity",   10))  {diversity=1; continue;}
+            if (!strncmp(argv[i],"-P1",           3))  {oldnew=1; continue;}
+            if (!strncmp(argv[i],"-P2",           3))  {oldnew=2; continue;}
             if (!strncmp(argv[i],"-nb",           3))  {
 		noiseblank=1;
                 if (i < argc-1) sscanf(argv[++i],"%d",&nb_pulse);
                 if (i < argc-1) sscanf(argv[++i],"%d",&nb_width);
                 if (nb_pulse < 1 || nb_pulse > 200) nb_pulse=5;
                 if (nb_width < 1 || nb_width > 200) nb_width=100;
+		continue;
             }
+            fprintf(stderr,"Unknown option: %s\n", argv[i]);
+	    fprintf(stderr,"Valid options are: -atlas | -metis  | -hermes     | -griffin     | -angelia |\n");
+	    fprintf(stderr,"                   -orion | -orion2 | -hermeslite | -hermeslite2 | -c25     |\n");
+	    fprintf(stderr,"                   -diversity | -P1 | -P2                                   |\n");
+	    fprintf(stderr,"                   -nb <num> <width>\n");
+	    exit(8);
         }
 
         switch (OLDDEVICE) {
