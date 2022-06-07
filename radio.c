@@ -1140,11 +1140,22 @@ void start_radio() {
   adc[0].dither = FALSE;
   adc[0].random = FALSE;
   adc[0].preamp = FALSE;
-  if (have_rx_gain) {
-    adc[0].attenuation = 14;
-  } else {
-    adc[0].attenuation = 0;
+
+  //
+  // Some HPSDR radios have RX GAIN instead of attenuation
+  // these usually have a gain range from -12 to +48
+  //
+  if(have_rx_gain && (protocol==ORIGINAL_PROTOCOL || protocol==NEW_PROTOCOL)) {
+    adc[0].min_gain=-12.0;
+    adc[0].max_gain=+48.0;
   }
+
+  /* if (have_rx_gain) { */
+  /*   adc[0].attenuation = 14; */
+  /* } else { */
+  /*   adc[0].attenuation = 0; */
+  /* } */
+
 #ifdef SOAPYSDR
   adc[0].antenna = 0;
   if (device == SOAPYSDR_USB_DEVICE) {
