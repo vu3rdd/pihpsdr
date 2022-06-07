@@ -1800,7 +1800,7 @@ static int last_power=0;
           if (isTransmitting()) {
             output_buffer[C4]=0x20 | (transmitter->attenuation & 0x1F);
           } else {
-            output_buffer[C4]=0x20 | (adc_attenuation[0] & 0x1F);
+            output_buffer[C4]=0x20 | (adc[0].attenuation & 0x1F);
             //output_buffer[C4]=0x20 | ((int)adc[0].gain & 0x1F);
           } 
         }
