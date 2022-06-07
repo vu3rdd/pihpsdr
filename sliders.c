@@ -429,7 +429,7 @@ void set_rf_gain(int rx,double value) {
       sprintf(title,"RF Gain RX %d",rx);
       scale_dialog=gtk_dialog_new_with_buttons(title,GTK_WINDOW(top_window),GTK_DIALOG_DESTROY_WITH_PARENT,NULL,NULL);
       GtkWidget *content=gtk_dialog_get_content_area(GTK_DIALOG(scale_dialog));
-      rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,0.0, 100.0, 1.00);
+      rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-12.0, 48.0, 1.00);
       gtk_widget_set_size_request (rf_gain_scale, 400, 30);
       //gtk_range_set_value (GTK_RANGE(rf_gain_scale),receiver[rx]->rf_gain);
       gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[receiver[rx]->id].gain);
