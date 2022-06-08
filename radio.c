@@ -1182,7 +1182,7 @@ void start_radio() {
   adc[1].random = FALSE;
   adc[1].preamp = FALSE;
   if (have_rx_gain) {
-    adc[0].attenuation = 14;
+    adc[1].gain = 14;
   } else {
     adc[1].attenuation = 0;
   }
