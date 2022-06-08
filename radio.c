@@ -1150,11 +1150,11 @@ void start_radio() {
     adc[0].max_gain=+48.0;
   }
 
-  /* if (have_rx_gain) { */
-  /*   adc[0].attenuation = 14; */
-  /* } else { */
-  /*   adc[0].attenuation = 0; */
-  /* } */
+  if (have_rx_gain) {
+    adc[0].gain = 14.0;
+  } else {
+    adc[0].attenuation = 0;
+  }
 
 #ifdef SOAPYSDR
   adc[0].antenna = 0;
