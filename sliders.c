@@ -859,8 +859,8 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
       gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[0].gain);
     } else {
 #endif
-      rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,-12.0, 48.0, 1.0);
-      gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[active_receiver->adc].attenuation);
+      rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -12.0, 48.0, 1.0);
+      gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[active_receiver->adc].gain);
 #ifdef SOAPYSDR
     }
 #endif
