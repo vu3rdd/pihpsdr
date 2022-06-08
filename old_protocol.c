@@ -1792,7 +1792,8 @@ static int last_power=0;
           if (rxgain > 60) rxgain=60;
 	  // encode all 6 bits of RXgain in ATT value and set bit6
           if (isTransmitting()) {
-	    output_buffer[C4] = 0x40 | (33 - (transmitter->attenuation & 0x1F));
+	      // output_buffer[C4] = 0x40 | (33 - (transmitter->attenuation & 0x1F));
+	    output_buffer[C4] = 0x40 | (rxgain & 0x3F);
           } else { 
 	    output_buffer[C4] = 0x40 | (rxgain & 0x3F);
           }
