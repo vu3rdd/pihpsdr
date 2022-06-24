@@ -3463,7 +3463,7 @@ int parse_cmd(void *data) {
       if (command[2] == ';') {
         double att = 0.0;
         if (have_rx_gain) {
-          att = adc[active_receiver->adc].attenuation + 12.0;
+          att = adc[active_receiver->adc].gain + 12.0;
         } else {
           att = adc[active_receiver->adc].attenuation;
           att = round((att * 99.0) / 31.0);
@@ -3477,10 +3477,11 @@ int parse_cmd(void *data) {
 
           if (have_rx_gain) {
               att = attI - 12.0;
+	      set_rf_gain(active_receiver->id, att);
           } else {
               att = (attI * 31.0) / 99.0;
+	      set_attenuation_value(att);
           }
-          set_attenuation_value(att);
       }
       break;
     case 'C': // RC
