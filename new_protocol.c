@@ -730,8 +730,7 @@ static void new_protocol_high_priority() {
     long long txFrequency;
     long phase;
     int ddc;
-    int txvfo=get_tx_vfo();
-    int txmode=get_tx_mode();
+    int xmit, txvfo, txmode;
 
     if(data_socket==-1) {
       return;
@@ -740,18 +739,23 @@ static void new_protocol_high_priority() {
     pthread_mutex_lock(&hi_prio_mutex);
     memset(high_priority_buffer_to_radio, 0, sizeof(high_priority_buffer_to_radio));
 
+    xmit    = isTransmitting();
+    txvfo   = get_tx_vfo();
+    txmode  = get_tx_mode();
+
     high_priority_buffer_to_radio[0]=high_priority_sequence>>24;
     high_priority_buffer_to_radio[1]=high_priority_sequence>>16;
     high_priority_buffer_to_radio[2]=high_priority_sequence>>8;
     high_priority_buffer_to_radio[3]=high_priority_sequence;
     high_priority_buffer_to_radio[4]=running;
-//
-//  We need not set PTT if doing internal CW with break-in
-//
-    if(txmode==modeCWU || txmode==modeCWL) {
-      if (isTransmitting() && (!cw_keyer_internal || !cw_breakin || CAT_cw_is_active)) high_priority_buffer_to_radio[4]|=0x02;
-    } else {
-      if(isTransmitting()) {
+
+    if (xmit) {
+      //
+      //  We need not set PTT if doing internal CW with break-in
+      //
+      if(txmode==modeCWU || txmode==modeCWL) {
+        if ((!cw_keyer_internal || !cw_breakin || CAT_cw_is_active)) high_priority_buffer_to_radio[4]|=0x02;
+      } else {
         high_priority_buffer_to_radio[4]|=0x02;
       }
     }
@@ -760,7 +764,7 @@ static void new_protocol_high_priority() {
 //  Set DDC frequencies
 //
 
-    if (diversity_enabled && !isTransmitting()) {
+    if (diversity_enabled && !xmit) {
 	//
 	// Use frequency of first receiver for both DDC0 and DDC1
 	// This is overridden later if we do PURESIGNAL TX
@@ -843,7 +847,7 @@ static void new_protocol_high_priority() {
 
     phase=(long)((4294967296.0*(double)txFrequency)/122880000.0);
 
-    if(isTransmitting() && transmitter->puresignal) {
+    if (xmit && transmitter->puresignal) {
       //
       // Set DDC0 and DDC1 (synchronized) to the transmit frequency
       //
@@ -864,7 +868,7 @@ static void new_protocol_high_priority() {
     high_priority_buffer_to_radio[332]=phase;
 
     int power=0;
-    if(isTransmitting()) {
+    if (xmit) {
       if(tune && !transmitter->tune_use_drive) {
         double fac=sqrt((double)transmitter->tune_percent * 0.01);
         power=(int)((double)transmitter->drive_level*fac);
@@ -875,7 +879,7 @@ static void new_protocol_high_priority() {
 
     high_priority_buffer_to_radio[345]=power&0xFF;
 
-    if(isTransmitting()) {
+    if(xmit) {
       band=band_get_band(vfo[txvfo].band);
       high_priority_buffer_to_radio[1401]=band->OCtx<<1;
       if(tune) {
@@ -937,8 +941,16 @@ static void new_protocol_high_priority() {
       }
     }
 
-    if(isTransmitting()) {
-      alex0 |= ALEX_TX_RELAY;
+    if(xmit) {
+//
+//    Do not switch TR relay to "TX" if PA is disabled.
+//    This is necessary because the "PA enable flag" in the GeneralPacket
+//    has no effect for my Anan-7000 (this is the "safety belt").
+//    (this is also the way it is done in the old protocol)
+//
+      if (!band->disablePA  && pa_enabled) {
+        alex0 |= ALEX_TX_RELAY;
+      }
       if(transmitter->puresignal) {
         alex0 |= ALEX_PS_BIT;            // Bit 18
       }
@@ -949,6 +961,7 @@ static void new_protocol_high_priority() {
 //  the frequency of VFO_A is used with ADC0, and that the
 //  frequency of VFO_B can safely be used to control the
 //  filters of ADC1 (if there are any).
+//  
 //
     rxFrequency=vfo[VFO_A].frequency-vfo[VFO_A].lo;
     switch(device) {
@@ -985,7 +998,7 @@ static void new_protocol_high_priority() {
 	if (rxFrequency<1800000L) i=1;
 #ifdef PURESIGNAL
 	// Bypass HPFs if using EXT1 for PURESIGNAL feedback!
-	if (isTransmitting() && transmitter->puresignal && receiver[PS_RX_FEEDBACK]->alex_antenna == 6) i=1;
+	if (xmit && transmitter->puresignal && receiver[PS_RX_FEEDBACK]->alex_antenna == 6) i=1;
 #endif
         if (i) {
           alex0|=ALEX_BYPASS_HPF;
@@ -1010,7 +1023,7 @@ static void new_protocol_high_priority() {
 //                      filters. Therefore we must set these according to the ADC0
 //			(receive) frequency while RXing.
 //
-    if (!isTransmitting() && device != NEW_DEVICE_ORION2 && receiver[0]->alex_antenna < 3) {
+    if (!xmit && device != NEW_DEVICE_ORION2 && receiver[0]->alex_antenna < 3) {
 	txFrequency = rxFrequency;
     }
     if(txFrequency>35600000L) {
@@ -1040,7 +1053,7 @@ static void new_protocol_high_priority() {
 //
     i=receiver[0]->alex_antenna;			// 0,1,2  or 3,4,5
 #ifdef PURESIGNAL
-    if (isTransmitting() && transmitter->puresignal) {
+    if (xmit && transmitter->puresignal) {
 	i=receiver[PS_RX_FEEDBACK]->alex_antenna;   	// 0, 6, or 7
     }
 #endif
@@ -1099,7 +1112,7 @@ static void new_protocol_high_priority() {
 //
 //  Now we set the bits for Ant1/2/3 (RX and TX may be different)
 //
-    if(isTransmitting()) {
+    if(xmit) {
       i=transmitter->alex_antenna;
       //
       // TX antenna outside allowd range: this cannot happen.
@@ -1172,7 +1185,7 @@ static void new_protocol_high_priority() {
 //      The main purpose of RX2 is DIVERSITY. Therefore,
 //      ground RX2 upon TX *always*
 //
-	if (isTransmitting()) {
+	if (xmit) {
 	  alex1|=ALEX1_ANAN7000_RX_GNDonTX;
 	}
 
@@ -1188,7 +1201,7 @@ static void new_protocol_high_priority() {
 //  to the maximum value (to protect RX2 in DIVERSITY setups).
 //
 
-    if(isTransmitting()) {
+    if (xmit) {
       high_priority_buffer_to_radio[1443]=transmitter->attenuation;
       high_priority_buffer_to_radio[1442]=31;
     } else {
@@ -1319,9 +1332,12 @@ static void new_protocol_receive_specific() {
     int i;
     int ddc;
     int rc;
+    int xmit;
 
     pthread_mutex_lock(&rx_spec_mutex);
     memset(receive_specific_buffer, 0, sizeof(receive_specific_buffer));
+
+    xmit=isTransmitting();
 
     receive_specific_buffer[0]=rx_specific_sequence>>24;
     receive_specific_buffer[1]=rx_specific_sequence>>16;
@@ -1337,11 +1353,11 @@ static void new_protocol_receive_specific() {
         if (device==NEW_DEVICE_ANGELIA || device==NEW_DEVICE_ORION || device == NEW_DEVICE_ORION2) ddc=2+i;
         receive_specific_buffer[5]|=receiver[i]->dither<<ddc; // dither enable
         receive_specific_buffer[6]|=receiver[i]->random<<ddc; // random enable
-	if (!isTransmitting() && !diversity_enabled) {
+	if (!xmit && !diversity_enabled) {
 	  // normal RX without diversity
           receive_specific_buffer[7]|=(1<<ddc); // DDC enable
 	}
-	if (isTransmitting() && duplex) {
+	if (xmit && duplex) {
 	  // transmitting with duplex
           receive_specific_buffer[7]|=(1<<ddc); // DDC enable
 	}
@@ -1351,7 +1367,7 @@ static void new_protocol_receive_specific() {
         receive_specific_buffer[22+(ddc*6)]=24;
     }
 
-    if(transmitter->puresignal && isTransmitting()) {
+    if(transmitter->puresignal && xmit) {
 //
 //    Some things are fixed.
 //    the sample rate is always 192.
@@ -1373,7 +1389,7 @@ static void new_protocol_receive_specific() {
 
       receive_specific_buffer[7] |=1; 		// enable  DDC0
     }
-    if (diversity_enabled && ! isTransmitting()) {
+    if (diversity_enabled && !xmit) {
 //
 //    Some things are fixed.
 //    We always use DDC0 for the signals from ADC0, and DDC1 for the signals from ADC1
@@ -1903,6 +1919,7 @@ static void process_high_priority() {
     if (sequence != highprio_rcvd_sequence) {
 	g_print("HighPrio SeqErr Expected=%ld Seen=%ld\n", highprio_rcvd_sequence, sequence);
 	highprio_rcvd_sequence=sequence;
+        sequence_errors++;
     }
     highprio_rcvd_sequence++;
 
@@ -1960,6 +1977,7 @@ static void process_mic_data(int bytes) {
   if (sequence != micsamples_sequence) {
     g_print("MicSample SeqErr Expected=%ld Seen=%ld\n", micsamples_sequence, sequence);
     micsamples_sequence=sequence;
+    sequence_errors++;
   }
   micsamples_sequence++;
   b=4;
