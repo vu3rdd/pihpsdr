@@ -332,11 +332,26 @@ gpointer new_discover_receive_thread(gpointer data) {
                     discovered[devices].info.network.interface_length=sizeof(interface_addr);
                     strcpy(discovered[devices].info.network.interface_name,interface_name);
                     discovered[devices].supported_receivers=2;
-                    fprintf(stderr,"new_discover: found %d protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
-                            devices,
-                            discovered[devices].protocol,
+                    //
+                    // Info not yet made use of:
+                    //
+                    // buffer[12]: P2 version supported (e.g. 39 for 3.9)
+                    // buffer[20]: number of DDCs
+                    // buffer[23]: beta version number (if nonzero)
+                    //             E.g. if buffer[13] is 21 and buffer[23] is 18 this
+                    //             means firmware Version 2.1.18
+                    //
+                    // We put the additional info to stderr at least since it might be
+                    // useful for debugging/development but do not store it in the
+                    // "discovered" data structure.
+                    //
+
+                    fprintf(stderr,"new_discover: P2(%d)  device=%d (%dRX) software_version=%d(.%d) status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
+                            buffer[12] & 0xFF,
                             discovered[devices].device,
+                            buffer[20] & 0xFF,
                             discovered[devices].software_version,
+                            buffer[23] & 0xFF,
                             discovered[devices].status,
                             inet_ntoa(discovered[devices].info.network.address.sin_addr),
                             discovered[devices].info.network.mac_address[0],

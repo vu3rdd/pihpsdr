@@ -284,8 +284,6 @@ void keyer_event(int left, int state) {
         // This is to remember whether the key stroke interrupts a running CAT CW 
 	// Since in this case we return to RX after vox delay.
 	if (CAT_cw_is_active) enforce_cw_vox=1;
-        // This is for aborting CAT CW messages if a key is hit.
-	cw_key_hit = 1;
     }
     if (left) {
       // left paddle hit or released
@@ -422,7 +420,6 @@ static void* keyer_thread(void *arg) {
                     if (*kdash) {                  // send manual dashes
                       cw_key_down=960000;  // max. 20 sec to protect hardware
                       cw_key_up=0;
-                      cw_key_hit=1;
                       gpio_cw_sidetone_set(1);
                       key_state=STRAIGHT;
                     }

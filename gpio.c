@@ -521,9 +521,11 @@ static void process_edge(int offset,int value) {
   if(ENABLE_CW_BUTTONS) {
     if(offset==CWL_BUTTON) {
       keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
+      cw_key_hit=1;  // this is to stop CAT CW messages that may be running
       found=TRUE;
     } else if(offset==CWR_BUTTON) {
       keyer_event(1, CW_ACTIVE_LOW ? (value==PRESSED) : value);
+      cw_key_hit=1;  // this is to stop CAT CW messages that may be running
       found=TRUE;
     }
   }

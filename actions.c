@@ -187,10 +187,12 @@ ACTION_TABLE ActionTable[] = {
 // CW Keydown (MIDI and GPIO)
 // CW speed   (only MIDI)
 // CW side tone frequency (only MIDI)
+// CW PTT (MIDI and GPIO)
 //
   {CW_KEYER_KEYDOWN,    "CW Key\n(keyer)",      NULL,           MIDI_KEY | CONTROLLER_SWITCH},
   {CW_KEYER_SPEED,      "CW Speed\n(keyer)",    NULL,           MIDI_KNOB},
   {CW_KEYER_SIDETONE,   "CW pitch\n(keyer)",    NULL,           MIDI_KNOB},
+  {CW_KEYER_PTT,        "PTT\n(CW keyer)",      NULL,           MIDI_KEY | CONTROLLER_SWITCH},
   {ACTIONS,		"",			NULL,		TYPE_NONE}
 };
 
@@ -239,7 +241,7 @@ static inline double KnobOrWheel(PROCESS_ACTION *a, double oldval, double minval
 
 //
 // This interface puts an "action" into the GTK idle queue,
-// but CW actions are processed immediately
+// but "CW key" actions are processed immediately
 //
 void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
   PROCESS_ACTION *a;
@@ -247,6 +249,7 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
     case CW_LEFT:
     case CW_RIGHT:
 #ifdef LOCALCW
+      cw_key_hit=1;
       keyer_event(action==CW_LEFT,mode==PRESSED);
 #else
       g_print("CW_Left/Right but compiled without LOCALCW\n");
@@ -256,9 +259,9 @@ void schedule_action(enum ACTION action, enum ACTION_MODE mode, gint val) {
       //
       // hard "key-up/down" action WITHOUT break-in
       // intended for external keyers (MIDI or GPIO connected)
-      // which take care of PTT themselves
+      // which take care of PTT themselves.
       //
-      if (mode==PRESSED && cw_keyer_internal==0) {
+      if (mode==PRESSED && (cw_keyer_internal==0 || CAT_cw_is_active)) {
         cw_key_down=960000;  // max. 20 sec to protect hardware
         cw_key_up=0;
         cw_key_hit=1;
@@ -1243,7 +1246,38 @@ int process_action(void *data) {
         g_idle_add(ext_vfo_update,NULL);
       }
       break;
-
+    case CW_KEYER_PTT:
+      //
+      // If you do CW with the key attached to the radio, and use a foot-switch for
+      // PTT, then this should trigger the standard PTT event. However, if you have the
+      // the key attached to the radio and want to use an external keyer (e.g.
+      // controlled by a contest logger), then "internal CW" muste temporarily be
+      // disabled in the radio (while keying from piHPSDR) in the radio.
+      // This is exactly the same situation as when using CAT
+      // CW commands together with "internal" CW (status variable CAT_cw_is_active),
+      // so the mechanism is already there. Therefore, the present case is just
+      // the same as "PTT" except that we set/clear the "CAT CW" condition.
+      //
+      // If the "CAT CW" flag is already cleared when the PTT release arrives, this
+      // means that the CW message from the keyer has been aborted by hitting the
+      // CW key. In this case, the radio takes care of "going RX".
+      //
+      switch (a->mode) {
+        case PRESSED:
+          CAT_cw_is_active = 1;
+          mox_update(1);
+          break;
+        case RELEASED:
+          if (CAT_cw_is_active == 1) {
+            CAT_cw_is_active = 0;
+            mox_update(0);
+          }
+          break;
+        default:
+          // should not happen
+          break;
+      }
+      break;
     case CW_KEYER_SIDETONE:
       if (a->mode==ABSOLUTE) {
         //

@@ -907,18 +907,17 @@ static void process_control_bytes() {
   dash=(control_in[0]&0x02)==0x02;
   dot=(control_in[0]&0x04)==0x04;
 
-  if (cw_keyer_internal) {
-    // Stops CAT cw transmission if paddle hit in "internal" CW
-    if (dash || dot) cw_key_hit=1;
-  } else {
+  // Stops CAT cw transmission if paddle hit in "internal" CW
+  if (dash || dot) {
+    cw_key_hit=1;
+    CAT_cw_is_active=0;
+  }
 #ifdef LOCALCW
-    //
-    // report "key hit" event to the local keyer
-    // (local keyer will stop CAT cw if necessary)
+  if (!cw_keyer_internal) {
     if (dash != previous_dash) keyer_event(0, dash);
     if (dot  != previous_dot ) keyer_event(1, dot );
-#endif
   }
+#endif
 
   if(previous_ptt!=local_ptt) {
     g_idle_add(ext_mox_update,(gpointer)(long)(local_ptt));

@@ -1947,18 +1947,17 @@ static void process_high_priority() {
     alex_reverse_power_average = (alex_reverse_power + 3*alex_reverse_power_average) >> 2;
     supply_volts=((buffer[49]&0xFF)<<8)|(buffer[50]&0xFF);
 
-    if (cw_keyer_internal) {
-      // Stops CAT cw transmission if paddle hit in "internal" CW
-      if (dash || dot) cw_key_hit=1;
-    } else {
+    // Stops CAT cw transmission if paddle hit
+    if (dash || dot) {
+      CAT_cw_is_active=0;
+      cw_key_hit=1;
+    }
 #ifdef LOCALCW
-      //
-      // report "key hit" event to the local keyer
-      // (local keyer will stop CAT cw if necessary)
+    if (!cw_keyer_internal) {
       if (dash != previous_dash) keyer_event(0, dash);
       if (dot  != previous_dot ) keyer_event(1, dot );
-#endif
     }
+#endif
 
     if(previous_ptt!=local_ptt) {
       g_idle_add(ext_mox_update,GINT_TO_POINTER(local_ptt));
