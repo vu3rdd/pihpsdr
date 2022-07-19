@@ -161,6 +161,14 @@ int atlas_config=0;
 int atlas_mic_source=0;
 int atlas_janus=0;
 
+//
+// if hl2_audio_codec is set,  audio data is included in the HPSDR
+// data stream and the "dither" bit is set. This is used by a
+// "compagnion board" and  a variant of the HL2 firmware
+// This bit can be set in the "RADIO" menu.
+//
+int hl2_audio_codec=0;
+
 int classE=0;
 
 int tx_out_of_band=0;

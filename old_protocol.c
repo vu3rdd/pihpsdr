@@ -1274,11 +1274,10 @@ void old_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
     //
     // The HL2 makes no use of audio samples, but instead
     // uses them to write to extended addrs which we do not
-    // want to do un-intentionally, therefore send zeros
-    // We could also stop this data stream during TX
-    // completely
+    // want to do un-intentionally, therefore send zeros.
+    // Note special variants of the HL2 *do* have an audio codec!
     //
-    if (device == DEVICE_HERMES_LITE2) {
+    if (device == DEVICE_HERMES_LITE2 && !hl2_audio_codec) {
       TXRINGBUF[txring_inptr++]=0;
       TXRINGBUF[txring_inptr++]=0;
       TXRINGBUF[txring_inptr++]=0;
@@ -1495,6 +1494,13 @@ void ozy_send_buffer() {
       output_buffer[C3]|=LT2208_RANDOM_ON;
     }
     if(active_receiver->dither) {
+	output_buffer[C3]|=LT2208_DITHER_ON;
+    }
+    //
+    // Some  HL2 firmware variants (ab-) uses this bit for indicating an audio codec is present
+    // We also  accept explicit use  of the "dither" box
+    //
+    if(device == DEVICE_HERMES_LITE2 && hl2_audio_codec) {
 	output_buffer[C3]|=LT2208_DITHER_ON;
     }
     if (filter_board == CHARLY25 && active_receiver->preamp) {

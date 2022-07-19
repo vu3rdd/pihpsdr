@@ -328,6 +328,8 @@ extern GMutex property_mutex;
 extern gboolean server;
 #endif
 
+extern int hl2_audio_codec;
+
 extern void radio_stop(void);
 extern void reconfigure_radio(void);
 extern void start_radio(void);
