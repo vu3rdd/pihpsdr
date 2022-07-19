@@ -913,8 +913,8 @@ static void new_protocol_high_priority() {
 //
 //  ALEX bits
 //
-    long alex0=0x00000000;
-    long alex1=0x00000000;
+    unsigned long alex0=0x00000000;
+    unsigned  long alex1=0x00000000;
 
     if (device != NEW_DEVICE_ORION2) {
       //
@@ -1150,7 +1150,7 @@ static void new_protocol_high_priority() {
 //g_print("ALEX0 bits:  %02X %02X %02X %02X for rx=%lld tx=%lld\n",high_priority_buffer_to_radio[1432],high_priority_buffer_to_radio[1433],high_priority_buffer_to_radio[1434],high_priority_buffer_to_radio[1435],rxFrequency,txFrequency);
 
 //
-//  Orion2 boards: set RX2 filters according ro VFOB frequency
+//  Orion2 boards: set RX2 filters according to VFOB frequency
 //
     if (device == NEW_DEVICE_ORION2) {
 	//
@@ -1163,7 +1163,7 @@ static void new_protocol_high_priority() {
           rxFrequency=vfo[VFO_B].frequency-vfo[VFO_B].lo;
 	}
 //
-//      new ANAN-7000/8000 band-pass RX filters
+//      new ANAN-7000/8000 "Alex1" band-pass RX filters
 //
         if(rxFrequency<1500000L) {
           alex1|=ALEX_ANAN7000_RX_BYPASS_BPF;
@@ -1233,7 +1233,6 @@ static void new_protocol_high_priority() {
     pthread_mutex_unlock(&hi_prio_mutex);
 }
 
-static unsigned char last_50=0;
 
 static void new_protocol_transmit_specific() {
     int txmode=get_tx_mode();
@@ -1299,11 +1298,6 @@ static void new_protocol_transmit_specific() {
     }
     if(mic_bias_enabled) {
       transmit_specific_buffer[50]|=0x10;
-    }
-
-    if(last_50!=transmit_specific_buffer[50]) {
-      last_50=transmit_specific_buffer[50];
-//g_print("tx_specific: 50=%02X\n",transmit_specific_buffer[50]);
     }
 
     // 0..31
@@ -1381,7 +1375,7 @@ static void new_protocol_receive_specific() {
       receive_specific_buffer[19]=192;		// sample rate LSB
       receive_specific_buffer[22]=24;		// bits per sample
 
-      receive_specific_buffer[23]=n_adc;	// TX-DAC associated with DDC1
+      receive_specific_buffer[23]=n_adc;	// TX-DAC (last ADC + 1) associated with DDC1
       receive_specific_buffer[24]=0;		// sample rate MSB
       receive_specific_buffer[25]=192;		// sample rate LSB
       receive_specific_buffer[26]=24;		// bits per sample

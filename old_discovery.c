@@ -343,11 +343,11 @@ fprintf(stderr,"discover_receive_thread\n");
                             break;
                         case DEVICE_HERMES_LITE:
 			    //
-			    // It seems that some HermesLite V2 boards use
+			    // HermesLite V2 boards use
 			    // DEVICE_HERMES_LITE as the ID and a software version
 			    // that is larger or equal to 40, while the original
 			    // (V1) HermesLite boards have software versions up to 31.
-			    // Therefore this is possibly a HL2 board!
+			    //
 			    if (discovered[devices].software_version < 40) {
                               strcpy(discovered[devices].name,"HermesLite V1");		
 			    } else {
@@ -355,11 +355,6 @@ fprintf(stderr,"discover_receive_thread\n");
 			      discovered[devices].device = DEVICE_HERMES_LITE2;
 g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9],buffer[15]);
 			    }
-                            discovered[devices].frequency_min=0.0;
-                            discovered[devices].frequency_max=30720000.0;
-                            break;
-                        case DEVICE_HERMES_LITE2:
-                            strcpy(discovered[devices].name,"HermesLite V2");		
                             discovered[devices].frequency_min=0.0;
                             discovered[devices].frequency_max=30720000.0;
                             break;
