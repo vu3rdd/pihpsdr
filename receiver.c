@@ -735,6 +735,12 @@ void set_filter(RECEIVER *rx) {
   }
 
   RXASetPassband(rx->id,(double)rx->filter_low,(double)rx->filter_high);
+  //
+  // The AGC line position on the panadapter depends on the filter width,
+  // therefore we need to re-calculate. In order to avoid code duplication,
+  // we invoke set_agc
+  //
+  set_agc(rx, rx->agc);
 }
 
 void set_deviation(RECEIVER *rx) {
