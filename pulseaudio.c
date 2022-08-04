@@ -377,7 +377,7 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
   int err;
   int txmode=get_tx_mode();
 
-  if (rx == active_receiver && isTransmitting() && (txmode==modeCWU || txmode==modeCWL)) {
+  if (rx == active_receiver && isTransmitting() && (txmode==modeCWU || txmode==modeCWL) && cw_keyer_sidetone_volume > 0) {
     return 0;
   }
 
