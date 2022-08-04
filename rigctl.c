@@ -2201,12 +2201,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
     case 'U': // ZZRU
       // increments RIT Frequency
       if (command[4] == ';') {
-        if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
-          vfo[VFO_A].rit += 10;
-        } else {
-          vfo[VFO_A].rit += 50;
-        }
-        vfo_update();
+	  vfo[VFO_A].rit += rit_increment;
+	  vfo_update();
       } else if (command[9] == ';') {
         vfo[VFO_A].rit = atoi(&command[4]);
         vfo_update();
@@ -3494,12 +3490,8 @@ int parse_cmd(void *data) {
     case 'D': // RD
       // decrements RIT Frequency
       if (command[2] == ';') {
-        if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
-          vfo[VFO_A].rit -= 10;
-        } else {
-          vfo[VFO_A].rit -= 50;
-        }
-        vfo_update();
+	  vfo[VFO_A].rit -= rit_increment;
+	  vfo_update();
       } else if (command[7] == ';') {
         vfo[VFO_A].rit = atoi(&command[2]);
         vfo_update();
