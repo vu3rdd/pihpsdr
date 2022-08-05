@@ -945,8 +945,9 @@ static void new_protocol_high_priority() {
 //
 //    Do not switch TR relay to "TX" if PA is disabled.
 //    This is necessary because the "PA enable flag" in the GeneralPacket
-//    has no effect for my Anan-7000 (this is the "safety belt").
-//    (this is also the way it is done in the old protocol)
+//    had no effect in the Orion-II firmware up to 2.1.18
+//    (starting with 2.1.15, it works: thanks to Rick N1GP)
+//    But we have to keep this "safety belt" for some time.
 //
       if (!band->disablePA  && pa_enabled) {
         alex0 |= ALEX_TX_RELAY;
