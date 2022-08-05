@@ -518,7 +518,7 @@ cppcheck:
 .PHONY:	clean
 clean:
 	-rm -f *.o
-	-rm -f $(PROGRAM) hpsdrsim
+	-rm -f $(PROGRAM) hpsdrsim bootloader
 	-rm -rf $(PROGRAM).app
 
 #
@@ -574,6 +574,19 @@ newhpsdrsim.o:	newhpsdrsim.c hpsdrsim.h
 
 hpsdrsim:       hpsdrsim.o newhpsdrsim.o
 	$(LINK) -o hpsdrsim hpsdrsim.o newhpsdrsim.o -lm -lpthread
+
+#############################################################################
+#
+# bootloader is a small command-line program that allows to 
+# set the radio's IP address and upload firmware through the
+# ancient protocol. This program can only be run as root since
+# this protocol requires "sniffing" at the Ethernet adapter
+# (this "sniffing" is done via the pcap library)
+#
+#############################################################################
+
+bootloader:	bootloader.c
+	$(CC) -o bootloader bootloader.c -lpcap
 
 debian:
 	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin
