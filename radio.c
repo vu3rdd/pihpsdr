@@ -251,7 +251,7 @@ int cw_keyer_weight=50; // 0-100
 int cw_keyer_spacing=0; // 0=on 1=off
 int cw_keyer_internal=1; // 0=external 1=internal
 int cw_keyer_sidetone_volume=50; // 0-127
-int cw_keyer_ptt_delay=20; // 0-255ms
+int cw_keyer_ptt_delay=30; // 0-255ms
 int cw_keyer_hang_time=500; // ms
 int cw_keyer_sidetone_frequency=800; // Hz
 int cw_breakin=1; // 0=disabled 1=enabled

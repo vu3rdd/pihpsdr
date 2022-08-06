@@ -949,7 +949,7 @@ static void process_control_bytes() {
       //underflow/overflow detection.
       //
       // Measured on HL2 software version 7.2:
-      // multiply FIFO value with 32 to get sample cound
+      // multiply FIFO value with 32 to get sample count
       // multiply FIFO value with 0.67 to get FIFO length in milli-seconds
       // Overflow at about 3600 samples (75 msec).
       //
@@ -1996,11 +1996,10 @@ void ozy_send_buffer() {
       case 11:
         // DL1YCF: HermesLite-II only
         // specify some more robust TX latency and PTT hang times
-        // A latency of 40 msec means that we first send two buffers
-        // of TX iq samples (assuming a buffer length of 1024 samples,
-        // that is 21 msec) before HL2 starts TXing. This should be
-        // enough to prevent underflows and leave some head-room
-        // my measurements indicate that the TX FIFO can hold about
+        // A latency of 40 msec means that we first send 1920
+        // TX iq samples before HL2 starts TXing. This should be
+        // enough to prevent underflows and leave some head-room.
+        // My measurements indicate that the TX FIFO can hold about
         // 75 msec or 3600 samples (cum grano salis). 
         output_buffer[C0]=0x2E;
         output_buffer[C3]=20;   // 20 msec PTT hang time, only bits 4:0

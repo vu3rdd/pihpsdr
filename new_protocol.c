@@ -1282,13 +1282,7 @@ static void new_protocol_transmit_specific() {
     transmit_specific_buffer[10]=cw_keyer_weight; // cw weight
     transmit_specific_buffer[11]=cw_keyer_hang_time>>8;
     transmit_specific_buffer[12]=cw_keyer_hang_time; // cw hang delay
-    //
-    // Measurements with my Anan-7000 show that RF delays up to 20 msec
-    // tend to chop the first dot, and the "rising" envelope at the
-    // beginning of the dot is also not good. This was tested with the
-    // "straight key" option (external keyer attached to CW input jack).
-    //
-    transmit_specific_buffer[13]=30; // rf delay
+    transmit_specific_buffer[13]=cw_keyer_ptt_delay;
 
     transmit_specific_buffer[50]=0;
     if(mic_linein) {
