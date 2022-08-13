@@ -1646,7 +1646,7 @@ void ozy_send_buffer() {
         {
         BAND *band=band_get_current_band();
         int power=0;
-static int last_power=0;
+	static int last_power=0;
 	//
 	// Some HPSDR apps for the RedPitaya generate CW inside the FPGA, but while
 	// doing this, DriveLevel changes are processed by the server, but do not become effective.
@@ -1663,6 +1663,61 @@ static int last_power=0;
           } else {
             power=transmitter->drive_level;
           }
+
+	  if (device == DEVICE_HERMES_LITE2) {
+	      //
+	      // from the "intended" drive level power, calculate the
+	      // next lower TX attenuation which can be from 0.0 to -7.5 dB
+	      // in 0.5 dB steps, encode the step in a four-bit word and shift
+	      // it to the upper 4 bits.
+	      // we always use the att level that produces a little bit *less* attenuation
+	      // than required, and down-scale the IQ samples in transmitter.c
+	      //
+	      // NOTE: this down-scaling does not occur when connecting a CW key to the HL2
+	      //       and using "internal" CW, because in this case the IQ samples are
+	      //       generated in the FPGA. A typical symptom is that the CW signals are
+	      //       stronger than the "TUNE" signal, and in the case of very low drive slider
+	      //       values they can be *much* stronger.
+	      //
+	      // NOTE: When using predistortion (PURESIGNAL), the IQ scaling must be switched off.
+	      //       In this case, the output  power can also be stronger than intended.
+	      //
+	      int hl2power;
+	      if (power < 102) {
+		  hl2power=0;                   // -7.5 dB TX attenuation
+	      } else if (power < 108) {
+		  hl2power=16;                  // -7.0 dB TX attenuation
+	      } else if (power < 114) {
+		  hl2power=32;                  // -6.5 dB TX attenuation
+	      } else if (power < 121) {
+		  hl2power=48;                  // -6.0 dB TX attenuation
+	      } else if (power < 128) {
+		  hl2power=64;                  // -5.5 dB TX attenuation
+	      } else if (power < 136) {
+		  hl2power=80;                  // -5.0 dB TX attenuation
+	      } else if (power < 144) {
+		  hl2power=96;                  // -4.5 dB TX attenuation
+	      } else if (power < 152) {
+		  hl2power=112;                 // -4.0 dB TX attenuation
+	      } else if (power < 161) {
+		  hl2power=128;                 // -3.5 dB TX attenuation
+	      } else if (power < 171) {
+		  hl2power=144;                 // -3.0 dB TX attenuation
+	      } else if (power < 181) {
+		  hl2power=160;                 // -2.5 dB TX attenuation
+	      } else if (power < 192) {
+		  hl2power=176;                 // -2.0 dB TX attenuation
+	      } else if (power < 203) {
+		  hl2power=192;                 // -1.5 dB TX attenuation
+	      } else if (power < 215) {
+		  hl2power=208;                 // -1.0 dB TX attenuation
+	      } else if (power < 228) {
+		  hl2power=224;                 // -0.5 dB TX attenuation
+	      } else {
+		  hl2power=240;                 // no      TX attenuation
+	      }
+	      power=hl2power;
+	  }
         }
 
 //if(last_power!=power) {
