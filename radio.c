@@ -1815,11 +1815,16 @@ void setFrequency(long long f) {
   }
 }
 
-long long getFrequency() { return vfo[active_receiver->id].frequency; }
+long long getFrequency(void) {
+    return vfo[active_receiver->id].frequency;
+}
 
-double getDrive() { return transmitter->drive; }
+double getDrive(void) {
+    return transmitter->drive;
+}
 
 static int calcLevel(double d) {
+    fprintf(stderr, "calcLevel: input d = %f..", d);
   int level = 0;
   int v = get_tx_vfo();
 
