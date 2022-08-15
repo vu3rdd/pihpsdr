@@ -2145,15 +2145,13 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
     case 'D': // ZZRD
       // decrement RIT frequency
       if (command[4] == ';') {
-        if (vfo[VFO_A].mode == modeCWL || vfo[VFO_A].mode == modeCWU) {
-          vfo[VFO_A].rit -= 10;
-        } else {
-          vfo[VFO_A].rit -= 50;
-        }
-        vfo_update();
+          vfo[VFO_A].rit -= rit_increment;
+	  vfo_update();
       } else if (command[9] == ';') {
-        vfo[VFO_A].rit = atoi(&command[4]);
-        vfo_update();
+	  command[9] = '\0';
+	  int rit_val = strtol(&command[4], NULL, 10);
+	  vfo[VFO_A].rit = rit_val;
+	  vfo_update();
       }
       break;
     case 'F': // ZZRF
@@ -2204,8 +2202,10 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
 	  vfo[VFO_A].rit += rit_increment;
 	  vfo_update();
       } else if (command[9] == ';') {
-        vfo[VFO_A].rit = atoi(&command[4]);
-        vfo_update();
+	  command[9] = '\0';
+	  int rit_val = strtol(&command[4], NULL, 10);
+	  vfo[VFO_A].rit = rit_val;
+	  vfo_update();
       }
       break;
     default:
