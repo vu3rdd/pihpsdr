@@ -39,13 +39,10 @@ double nb_transition_time = 0.0001;
 double nb_threshold_value = 20.0;
 
 void nb_changed() {
-    // XXX call NB api to set the changed values.
     SetEXTANBHangtime(0, nb_lag_time);
     SetEXTANBAdvtime(0, nb_lead_time);
     SetEXTANBTau(0, nb_transition_time);
     SetEXTANBThreshold(0, nb_threshold_value);
-
-    fprintf(stderr, "NB values set\n");
 }
 
 static void cleanup() {
