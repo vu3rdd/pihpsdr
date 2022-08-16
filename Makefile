@@ -245,6 +245,7 @@ display_menu.c \
 dsp_menu.c \
 pa_menu.c \
 cw_menu.c \
+nb_menu.c \
 oc_menu.c \
 xvtr_menu.c \
 equalizer_menu.c \
@@ -325,6 +326,7 @@ display_menu.h \
 dsp_menu.h \
 pa_menu.h \
 cw_menu.h \
+nb_menu.h \
 oc_menu.h \
 xvtr_menu.h \
 equalizer_menu.h \
@@ -401,6 +403,7 @@ display_menu.o \
 dsp_menu.o \
 pa_menu.o \
 cw_menu.o \
+nb_menu.o \
 oc_menu.o \
 xvtr_menu.o \
 equalizer_menu.o \

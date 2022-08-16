@@ -35,6 +35,7 @@
 #include "rigctl_menu.h"
 #include "oc_menu.h"
 #include "cw_menu.h"
+#include "nb_menu.h"
 #include "store_menu.h"
 #include "xvtr_menu.h"
 #include "equalizer_menu.h"
@@ -212,6 +213,12 @@ static gboolean toolbar_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
 static gboolean cw_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
   cleanup();
   cw_menu(top_window);
+  return TRUE;
+}
+
+static gboolean nb_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  cleanup();
+  nb_menu(top_window);
   return TRUE;
 }
 
@@ -528,6 +535,11 @@ void new_menu()
         i++;
       }
 #endif
+
+      GtkWidget *nb_b = gtk_button_new_with_label("NB");
+      g_signal_connect (nb_b, "button-press-event", G_CALLBACK(nb_cb), NULL);
+      gtk_grid_attach(GTK_GRID(grid),nb_b,(i%5),i/5,1,1);
+      i++;
 
       GtkWidget *pa_b=gtk_button_new_with_label("PA");
       g_signal_connect (pa_b, "button-press-event", G_CALLBACK(pa_cb), NULL);
