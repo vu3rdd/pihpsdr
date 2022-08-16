@@ -26,16 +26,6 @@
 #include <string.h>
 
 #include "new_menu.h"
-#include "pa_menu.h"
-#include "band.h"
-#include "bandstack.h"
-#include "filter.h"
-#include "radio.h"
-#include "receiver.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "iambic.h"
-#include "ext.h"
 
 #include <wdsp.h>
 
