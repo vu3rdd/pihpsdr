@@ -1101,8 +1101,8 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
               1, // run
               0.010, 0.025, 0.0, 0.010, 0);
 
-  create_anbEXT(rx->id,1,  rx->buffer_size,rx->sample_rate,0.01,0.01,0.01,0.05,30);
-  create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.01,0.01,0.01,0.05,30);
+  create_anbEXT(rx->id,1,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
+  create_nobEXT(rx->id,1,0,rx->buffer_size,rx->sample_rate,0.0001,0.0001,0.0001,0.05,20);
   
   RXASetNC(rx->id, rx->fft_size);
   RXASetMP(rx->id, rx->low_latency);
