@@ -83,6 +83,7 @@ static void nb_transition_time_value_changed_cb(GtkWidget *widget, gpointer data
 
 static void nb_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
     nb_threshold_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+    nb_threshold_value *= 0.165;
     nb_changed();
 }
 
