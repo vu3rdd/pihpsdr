@@ -133,6 +133,12 @@ static GtkWidget *audio_waterfall;
 // RX and TX calibration
 long long calibration = 0LL;
 
+// nb values defined in nb_menu.c
+extern double nb_lag_time;
+extern double nb_lead_time;
+extern double nb_transition_time;
+extern double nb_threshold_value;
+
 /*
 #ifdef GPIO
 static GtkWidget *encoders;
@@ -2400,6 +2406,23 @@ void radioRestoreState() {
     listen_port = atoi(value);
 #endif
 
+  // restore NB values
+  value = getProperty("nb_lead_time");
+  if (value)
+      nb_lead_time = atof(value);
+
+  value = getProperty("nb_lag_time");
+  if (value)
+      nb_lag_time = atof(value);
+
+  value = getProperty("nb_transition_time");
+  if (value)
+      nb_transition_time = atof(value);
+
+  value = getProperty("nb_threshold_value");
+  if (value)
+      nb_threshold_value = atof(value);
+
   g_mutex_unlock(&property_mutex);
 }
 
@@ -2740,6 +2763,16 @@ void radioSaveState() {
   setProperty("radio.midi_enabled", value);
   midi_save_state();
 #endif
+
+  // nb values
+  sprintf(value, "%f", nb_lag_time);
+  setProperty("nb_lag_time", value);
+  sprintf(value, "%f", nb_lead_time);
+  setProperty("nb_lead_time", value);
+  sprintf(value, "%f", nb_transition_time);
+  setProperty("nb_transition_time", value);
+  sprintf(value, "%f", nb_threshold_value);
+  setProperty("nb_threshold_value", value);
 
   saveProperties(property_path);
   g_mutex_unlock(&property_mutex);

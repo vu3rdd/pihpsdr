@@ -34,10 +34,10 @@ static GtkWidget *menu_b = NULL;
 static GtkWidget *dialog = NULL;
 
 // all the time are in ms
-double nb_lag_time = 0.01;
-double nb_lead_time = 0.01;
-double nb_transition_time = 0.01;
-double nb_threshold_value = 20.0;
+double nb_lag_time = 0.001;
+double nb_lead_time = 0.001;
+double nb_transition_time = 0.001;
+double nb_threshold_value = 18.0;
 
 void nb_changed() {
     SetEXTANBHangtime(0, nb_lag_time);
