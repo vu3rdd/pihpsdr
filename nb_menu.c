@@ -35,9 +35,9 @@ static GtkWidget *menu_b = NULL;
 static GtkWidget *dialog = NULL;
 
 // all the time are in ms
-double nb_lag_time = 0.001;
-double nb_lead_time = 0.001;
-double nb_transition_time = 0.001;
+double nb_lag_time = 0.01;
+double nb_lead_time = 0.01;
+double nb_transition_time = 0.01;
 double nb_threshold_value = 18.0;
 int nb2_mode = 0; // 0, 1, 2, 3, 4
 
