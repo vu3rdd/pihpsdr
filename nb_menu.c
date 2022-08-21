@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "new_menu.h"
+#include "noise_menu.h"
 
 #include <wdsp.h>
 
@@ -38,13 +39,8 @@ double nb_lag_time = 0.001;
 double nb_lead_time = 0.001;
 double nb_transition_time = 0.001;
 double nb_threshold_value = 18.0;
+int nb2_mode = 0; // 0, 1, 2, 3, 4
 
-void update_nb() {
-    SetEXTANBHangtime(0, nb_lag_time);
-    SetEXTANBAdvtime(0, nb_lead_time);
-    SetEXTANBTau(0, nb_transition_time);
-    SetEXTANBThreshold(0, nb_threshold_value);
-}
 void nb_changed() {
     update_nb();
 }
@@ -88,6 +84,11 @@ static void nb_transition_time_value_changed_cb(GtkWidget *widget, gpointer data
 static void nb_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
     nb_threshold_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     nb_threshold_value *= 0.165;
+    nb_changed();
+}
+
+static void nb2_mode_changed_cb(GtkWidget *widget, gpointer data) {
+    nb2_mode = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     nb_changed();
 }
 
@@ -163,6 +164,12 @@ void nb_menu(GtkWidget *parent) {
     gtk_widget_show(nb_threshold_value_b);
     gtk_grid_attach(GTK_GRID(grid),nb_threshold_value_b,1,4,1,1);
     g_signal_connect(nb_threshold_value_b,"value_changed",G_CALLBACK(nb_threshold_value_changed_cb),NULL);
+
+    GtkWidget *nb2_mode_b=gtk_spin_button_new_with_range(0, 5, 1);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb2_mode_b),(int)nb2_mode);
+    gtk_widget_show(nb2_mode_b);
+    gtk_grid_attach(GTK_GRID(grid),nb2_mode_b,1,5,1,1);
+    g_signal_connect(nb2_mode_b,"value_changed",G_CALLBACK(nb2_mode_changed_cb),NULL);
 
     gtk_container_add(GTK_CONTAINER(content),grid);
     sub_menu=dialog;

@@ -43,6 +43,7 @@
 #include "filter.h"
 #include "main.h"
 #include "mode.h"
+#include "nb_menu.h"
 #include "new_menu.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
@@ -132,12 +133,6 @@ static GtkWidget *audio_waterfall;
 
 // RX and TX calibration
 long long calibration = 0LL;
-
-// nb values defined in nb_menu.c
-extern double nb_lag_time;
-extern double nb_lead_time;
-extern double nb_transition_time;
-extern double nb_threshold_value;
 
 /*
 #ifdef GPIO
@@ -2423,6 +2418,10 @@ void radioRestoreState() {
   if (value)
       nb_threshold_value = atof(value);
 
+  value = getProperty("nb2_mode");
+  if (value)
+      nb2_mode = atoi(value);
+
   g_mutex_unlock(&property_mutex);
 }
 
@@ -2771,9 +2770,12 @@ void radioSaveState() {
   setProperty("nb_lead_time", value);
   sprintf(value, "%f", nb_transition_time);
   setProperty("nb_transition_time", value);
-  sprintf(value, "%f", nb_threshold_value);
+  sprintf(value, "%f", (nb_threshold_value/0.165));
   setProperty("nb_threshold_value", value);
 
+  sprintf(value, "%d", nb2_mode);
+  setProperty("nb2_mode", value);
+  
   saveProperties(property_path);
   g_mutex_unlock(&property_mutex);
 }

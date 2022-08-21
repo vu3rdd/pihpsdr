@@ -62,8 +62,25 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
   return FALSE;
 }
 
+void update_nb() {
+    SetEXTANBHangtime(active_receiver->id, nb_lag_time);
+    SetEXTANBAdvtime(active_receiver->id, nb_lead_time);
+    SetEXTANBTau(active_receiver->id, nb_transition_time);
+    SetEXTANBThreshold(active_receiver->id, nb_threshold_value);
+}
+
+void update_nb2() {
+    SetEXTNOBMode(active_receiver->id, nb2_mode);
+
+    SetEXTNOBHangtime(active_receiver->id, nb_lag_time);
+    SetEXTNOBAdvtime(active_receiver->id, nb_lead_time);
+    SetEXTNOBTau(active_receiver->id, nb_transition_time);
+    SetEXTNOBThreshold(active_receiver->id, nb_threshold_value);
+}
+
 void set_noise() {
   update_nb();
+  update_nb2();
 
   SetEXTANBRun(active_receiver->id, active_receiver->nb);
   SetEXTNOBRun(active_receiver->id, active_receiver->nb2);
