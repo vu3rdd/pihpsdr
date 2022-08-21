@@ -2764,13 +2764,19 @@ void radioSaveState() {
 #endif
 
   // nb values
-  sprintf(value, "%f", nb_lag_time);
+  sprintf(value, "%1.4f", nb_lag_time);
+  fprintf(stderr, "saving nb_lag_time: %s\n", value);
   setProperty("nb_lag_time", value);
-  sprintf(value, "%f", nb_lead_time);
+
+  sprintf(value, "%1.4f", nb_lead_time);
+  fprintf(stderr, "saving nb_lead_time: %s\n", value);
   setProperty("nb_lead_time", value);
-  sprintf(value, "%f", nb_transition_time);
+
+  sprintf(value, "%1.4f", nb_transition_time);
+  fprintf(stderr, "saving nb_transition_time: %s\n", value);
   setProperty("nb_transition_time", value);
-  sprintf(value, "%f", (nb_threshold_value/0.165));
+
+  sprintf(value, "%1.4f", (nb_threshold_value));
   setProperty("nb_threshold_value", value);
 
   sprintf(value, "%d", nb2_mode);

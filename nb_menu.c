@@ -64,26 +64,26 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void nb_lag_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_lag_time = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    nb_lag_time *= 0.001; // convert ms to sec
+    nb_lag_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    //nb_lag_time *= 0.001; // convert ms to sec
     nb_changed();
 }
 
 static void nb_lead_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_lead_time = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    nb_lead_time *= 0.001;
+    nb_lead_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    //nb_lead_time *= 0.001;
     nb_changed();
 }
 
 static void nb_transition_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_transition_time = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    nb_transition_time *= 0.001; // ms to s
+    nb_transition_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    //nb_transition_time *= 0.001; // ms to s
     nb_changed();
 }
 
 static void nb_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_threshold_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    nb_threshold_value *= 0.165;
+    nb_threshold_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    // nb_threshold_value *= 0.165;
     nb_changed();
 }
 
