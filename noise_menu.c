@@ -26,6 +26,7 @@
 
 #include "new_menu.h"
 #include "noise_menu.h"
+#include "nb_menu.h"
 #include "channel.h"
 #include "band.h"
 #include "bandstack.h"
@@ -62,6 +63,8 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 void set_noise() {
+  update_nb();
+
   SetEXTANBRun(active_receiver->id, active_receiver->nb);
   SetEXTNOBRun(active_receiver->id, active_receiver->nb2);
   SetRXAANRRun(active_receiver->id, active_receiver->nr);

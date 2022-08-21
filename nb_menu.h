@@ -19,3 +19,4 @@
 */
 
 extern void nb_menu(GtkWidget *parent);
+extern void update_nb();

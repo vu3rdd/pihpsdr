@@ -39,11 +39,14 @@ double nb_lead_time = 0.001;
 double nb_transition_time = 0.001;
 double nb_threshold_value = 18.0;
 
-void nb_changed() {
+void update_nb() {
     SetEXTANBHangtime(0, nb_lag_time);
     SetEXTANBAdvtime(0, nb_lead_time);
     SetEXTANBTau(0, nb_transition_time);
     SetEXTANBThreshold(0, nb_threshold_value);
+}
+void nb_changed() {
+    update_nb();
 }
 
 static void cleanup() {
