@@ -43,7 +43,6 @@
 #include "filter.h"
 #include "main.h"
 #include "mode.h"
-#include "nb_menu.h"
 #include "new_menu.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
@@ -2401,27 +2400,6 @@ void radioRestoreState() {
     listen_port = atoi(value);
 #endif
 
-  // restore NB values
-  value = getProperty("nb_lead_time");
-  if (value)
-      nb_lead_time = atof(value);
-
-  value = getProperty("nb_lag_time");
-  if (value)
-      nb_lag_time = atof(value);
-
-  value = getProperty("nb_transition_time");
-  if (value)
-      nb_transition_time = atof(value);
-
-  value = getProperty("nb_threshold_value");
-  if (value)
-      nb_threshold_value = atof(value);
-
-  value = getProperty("nb2_mode");
-  if (value)
-      nb2_mode = atoi(value);
-
   g_mutex_unlock(&property_mutex);
 }
 
@@ -2762,25 +2740,6 @@ void radioSaveState() {
   setProperty("radio.midi_enabled", value);
   midi_save_state();
 #endif
-
-  // nb values
-  sprintf(value, "%1.4f", nb_lag_time);
-  fprintf(stderr, "saving nb_lag_time: %s\n", value);
-  setProperty("nb_lag_time", value);
-
-  sprintf(value, "%1.4f", nb_lead_time);
-  fprintf(stderr, "saving nb_lead_time: %s\n", value);
-  setProperty("nb_lead_time", value);
-
-  sprintf(value, "%1.4f", nb_transition_time);
-  fprintf(stderr, "saving nb_transition_time: %s\n", value);
-  setProperty("nb_transition_time", value);
-
-  sprintf(value, "%1.4f", (nb_threshold_value));
-  setProperty("nb_threshold_value", value);
-
-  sprintf(value, "%d", nb2_mode);
-  setProperty("nb2_mode", value);
   
   saveProperties(property_path);
   g_mutex_unlock(&property_mutex);

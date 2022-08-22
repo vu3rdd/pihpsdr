@@ -318,6 +318,27 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->nr2_ae);
     setProperty(name,value);
 
+    // nb values
+    sprintf(name,"receiver.%d.nb_lag_time",rx->id);
+    sprintf(value, "%1.4f", rx->nb_lag_time);
+    setProperty(name, value);
+
+    sprintf(name,"receiver.%d.nb_lead_time",rx->id);
+    sprintf(value, "%1.4f", rx->nb_lead_time);
+    setProperty(name, value);
+
+    sprintf(name,"receiver.%d.nb_transition_time",rx->id);
+    sprintf(value, "%1.4f", rx->nb_transition_time);
+    setProperty(name, value);
+
+    sprintf(name,"receiver.%d.nb_threshold_value",rx->id);
+    sprintf(value, "%1.4f", rx->nb_threshold_value);
+    setProperty(name, value);
+
+    sprintf(name,"receiver.%d.nb2_mode",rx->id);
+    sprintf(value, "%d", rx->nb2_mode);
+    setProperty(name, value);
+
     sprintf(name,"receiver.%d.low_latency",rx->id);
     sprintf(value,"%d",rx->low_latency);
     setProperty(name,value);
@@ -515,7 +536,33 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.ae",rx->id);
     value=getProperty(name);
     if(value) rx->nr2_ae=atoi(value);
-  
+
+      // restore NB values
+    sprintf(name, "receiver.%d.nb_lead_time", rx->id);
+    value = getProperty(name);
+    if (value)
+	rx->nb_lead_time = atof(value);
+
+    sprintf(name, "receiver.%d.nb_lag_time", rx->id);
+    value = getProperty(name);
+    if (value)
+	rx->nb_lag_time = atof(value);
+
+    sprintf(name, "receiver.%d.nb_transition_time", rx->id);
+    value = getProperty(name);
+    if (value)
+	rx->nb_transition_time = atof(value);
+
+    sprintf(name, "receiver.%d.nb_threshold_value", rx->id);
+    value = getProperty(name);
+    if (value)
+	rx->nb_threshold_value = atof(value);
+
+    sprintf(name, "receiver.%d.nb2_mode", rx->id);
+    value = getProperty(name);
+    if (value)
+	rx->nb2_mode = atoi(value);
+
     sprintf(name,"receiver.%d.low_latency",rx->id);
     value=getProperty(name);
     if(value) rx->low_latency=atoi(value);
@@ -891,6 +938,12 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
+
+  rx->nb_lag_time = 0.0001;
+  rx->nb_lead_time = 0.0001;
+  rx->nb_transition_time = 0.0001;
+  rx->nb_threshold_value = 18.0;
+  rx->nb2_mode = 0;
   
   rx->alex_antenna=0;
   rx->alex_attenuation=0;
@@ -1025,7 +1078,13 @@ g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
-  
+
+  rx->nb_lag_time = 0.0001;
+  rx->nb_lead_time = 0.0001;
+  rx->nb_transition_time = 0.0001;
+  rx->nb_threshold_value = 18.0;
+  rx->nb2_mode = 0;
+
   BAND *b=band_get_band(vfo[rx->id].band);
   rx->alex_antenna=b->alexRxAntenna;
   rx->alex_attenuation=b->alexAttenuation;
@@ -1112,8 +1171,11 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXAAMDSBMode(rx->id, 0);
   SetRXAShiftRun(rx->id, 0);
 
-  SetEXTANBRun(rx->id, rx->nb);
-  SetEXTNOBRun(rx->id, rx->nb2);
+  SetEXTANBHangtime(rx->id, rx->nb_lag_time*0.001);
+  SetEXTANBAdvtime(rx->id, rx->nb_lead_time*0.001);
+  SetEXTANBTau(rx->id, rx->nb_transition_time*0.001);
+  SetEXTANBThreshold(rx->id, rx->nb_threshold_value*0.165);
+  SetEXTNOBMode(rx->id, rx->nb2_mode);
 
   SetRXAEMNRPosition(rx->id, rx->nr_agc);
   SetRXAEMNRgainMethod(rx->id, rx->nr2_gain_method);
@@ -1121,11 +1183,13 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXAEMNRRun(rx->id, rx->nr2);
   SetRXAEMNRaeRun(rx->id, rx->nr2_ae);
 
+  SetEXTANBRun(rx->id, rx->nb);
+  SetEXTNOBRun(rx->id, rx->nb2);
+
   SetRXAANRVals(rx->id, 64, 16, 16e-4, 10e-7); // defaults
   SetRXAANRRun(rx->id, rx->nr);
   SetRXAANFRun(rx->id, rx->anf);
   SetRXASNBARun(rx->id, rx->snb);
-
 
   SetRXAPanelGain1(rx->id, rx->volume);
   SetRXAPanelBinaural(rx->id, binaural);

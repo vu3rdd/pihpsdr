@@ -26,7 +26,6 @@
 
 #include "new_menu.h"
 #include "noise_menu.h"
-#include "nb_menu.h"
 #include "channel.h"
 #include "band.h"
 #include "bandstack.h"
@@ -63,19 +62,19 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 void update_nb() {
-    SetEXTANBHangtime(active_receiver->id, nb_lag_time*0.001);
-    SetEXTANBAdvtime(active_receiver->id, nb_lead_time*0.001);
-    SetEXTANBTau(active_receiver->id, nb_transition_time*0.001);
-    SetEXTANBThreshold(active_receiver->id, nb_threshold_value*0.165);
+    SetEXTANBHangtime(active_receiver->id, active_receiver->nb_lag_time*0.001);
+    SetEXTANBAdvtime(active_receiver->id, active_receiver->nb_lead_time*0.001);
+    SetEXTANBTau(active_receiver->id, active_receiver->nb_transition_time*0.001);
+    SetEXTANBThreshold(active_receiver->id, active_receiver->nb_threshold_value*0.165);
 }
 
 void update_nb2() {
-    SetEXTNOBMode(active_receiver->id, nb2_mode);
+    SetEXTNOBMode(active_receiver->id, active_receiver->nb2_mode);
 
-    SetEXTNOBHangtime(active_receiver->id, nb_lag_time);
-    SetEXTNOBAdvtime(active_receiver->id, nb_lead_time);
-    SetEXTNOBTau(active_receiver->id, nb_transition_time);
-    SetEXTNOBThreshold(active_receiver->id, nb_threshold_value);
+    SetEXTNOBHangtime(active_receiver->id, active_receiver->nb_lag_time*0.001);
+    SetEXTNOBAdvtime(active_receiver->id, active_receiver->nb_lead_time*0.001);
+    SetEXTNOBTau(active_receiver->id, active_receiver->nb_transition_time*0.001);
+    SetEXTNOBThreshold(active_receiver->id, active_receiver->nb_threshold_value*0.165);
 }
 
 void set_noise() {

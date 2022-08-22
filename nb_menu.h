@@ -20,8 +20,3 @@
 
 extern void nb_menu(GtkWidget *parent);
 
-extern double nb_lag_time;
-extern double nb_lead_time;
-extern double nb_transition_time;
-extern double nb_threshold_value;
-extern int nb2_mode;

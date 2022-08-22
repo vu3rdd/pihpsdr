@@ -89,6 +89,11 @@ typedef struct _receiver {
   int nr2_npe_method;
   int nr2_ae;
 
+  double nb_lag_time;
+  double nb_lead_time;
+  double nb_transition_time;
+  double nb_threshold_value;
+  int nb2_mode;
 
   gint alex_antenna;
   gint alex_attenuation;

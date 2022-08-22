@@ -27,19 +27,13 @@
 
 #include "new_menu.h"
 #include "noise_menu.h"
+#include "radio.h"
 
 #include <wdsp.h>
 
 static GtkWidget *parent_window = NULL;
 static GtkWidget *menu_b = NULL;
 static GtkWidget *dialog = NULL;
-
-// all the time are in ms
-double nb_lag_time = 0.01;
-double nb_lead_time = 0.01;
-double nb_transition_time = 0.01;
-double nb_threshold_value = 18.0;
-int nb2_mode = 0; // 0, 1, 2, 3, 4
 
 void nb_changed() {
     update_nb();
@@ -64,31 +58,30 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static void nb_lag_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_lag_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
-    //nb_lag_time *= 0.001; // convert ms to sec
+    active_receiver->nb_lag_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
     nb_changed();
 }
 
 static void nb_lead_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_lead_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    active_receiver->nb_lead_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
     //nb_lead_time *= 0.001;
     nb_changed();
 }
 
 static void nb_transition_time_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_transition_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    active_receiver->nb_transition_time = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
     //nb_transition_time *= 0.001; // ms to s
     nb_changed();
 }
 
 static void nb_threshold_value_changed_cb(GtkWidget *widget, gpointer data) {
-    nb_threshold_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+    active_receiver->nb_threshold_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
     // nb_threshold_value *= 0.165;
     nb_changed();
 }
 
 static void nb2_mode_changed_cb(GtkWidget *widget, gpointer data) {
-    nb2_mode = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+    active_receiver->nb2_mode = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     nb_changed();
 }
 
@@ -142,31 +135,31 @@ void nb_menu(GtkWidget *parent) {
 
     // lag time spin button
     GtkWidget *nb_lag_time_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_lag_time_b),(double)nb_lag_time);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_lag_time_b),(double)active_receiver->nb_lag_time);
     gtk_widget_show(nb_lag_time_b);
     gtk_grid_attach(GTK_GRID(grid),nb_lag_time_b,1,1,1,1);
     g_signal_connect(nb_lag_time_b,"value_changed",G_CALLBACK(nb_lag_time_value_changed_cb),NULL);
 
     GtkWidget *nb_lead_time_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_lead_time_b),(double)nb_lead_time);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_lead_time_b),(double)active_receiver->nb_lead_time);
     gtk_widget_show(nb_lead_time_b);
     gtk_grid_attach(GTK_GRID(grid),nb_lead_time_b,1,2,1,1);
     g_signal_connect(nb_lead_time_b,"value_changed",G_CALLBACK(nb_lead_time_value_changed_cb),NULL);
 
     GtkWidget *nb_transition_time_b=gtk_spin_button_new_with_range(0.0, 0.1, 0.0001);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_transition_time_b),(double)nb_transition_time);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_transition_time_b),(double)active_receiver->nb_transition_time);
     gtk_widget_show(nb_transition_time_b);
     gtk_grid_attach(GTK_GRID(grid),nb_transition_time_b,1,3,1,1);
     g_signal_connect(nb_transition_time_b,"value_changed",G_CALLBACK(nb_transition_time_value_changed_cb),NULL);
 
     GtkWidget *nb_threshold_value_b=gtk_spin_button_new_with_range(15.0, 500.0, 1.0);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_threshold_value_b),(double)nb_threshold_value);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb_threshold_value_b),(double)active_receiver->nb_threshold_value);
     gtk_widget_show(nb_threshold_value_b);
     gtk_grid_attach(GTK_GRID(grid),nb_threshold_value_b,1,4,1,1);
     g_signal_connect(nb_threshold_value_b,"value_changed",G_CALLBACK(nb_threshold_value_changed_cb),NULL);
 
     GtkWidget *nb2_mode_b=gtk_spin_button_new_with_range(0, 5, 1);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb2_mode_b),(int)nb2_mode);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(nb2_mode_b),(int)active_receiver->nb2_mode);
     gtk_widget_show(nb2_mode_b);
     gtk_grid_attach(GTK_GRID(grid),nb2_mode_b,1,5,1,1);
     g_signal_connect(nb2_mode_b,"value_changed",G_CALLBACK(nb2_mode_changed_cb),NULL);
