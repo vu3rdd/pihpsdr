@@ -44,7 +44,15 @@ static cairo_surface_t *meter_surface = NULL;
 static int meter_width;
 static int meter_height;
 static int last_meter_type=SMETER;
-static double max_level=-200.0;
+
+#define min_rxlvl -200.0
+#define min_alc   -100.0
+#define min_pwr      0.0
+
+static double max_rxlvl = min_rxlvl;
+static double max_alc   = min_alc;
+static double max_pwr   = min_pwr;
+
 static int max_count=0;
 
 static void
@@ -93,18 +101,6 @@ meter_draw_cb (GtkWidget *widget, cairo_t   *cr, gpointer   data) {
   return FALSE;
 }
 
-/*
-static void smeter_select_cb (GtkWidget *widget, gpointer        data)
-{
-  smeter=(int)data;
-}
-
-static void alc_meter_select_cb (GtkWidget *widget, gpointer        data)
-{
-  alc=(int)data;
-}
-*/
-
 static gboolean
 meter_press_event_cb (GtkWidget *widget,
                GdkEventButton *event,
@@ -143,7 +139,8 @@ fprintf(stderr,"meter_init: width=%d height=%d\n",width,height);
 
 void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double exciter,double alc,double swr) {
   
-  double level;
+  double rxlvl;   // only used for RX input level, clones "value"
+  double pwr;     // only used for TX power, clones "value"
   char sf[32];
   int text_location;
   double offset;
@@ -152,43 +149,108 @@ void meter_update(RECEIVER *rx,int meter_type,double value,double reverse,double
   cairo_t *cr = cairo_create (meter_surface);
   BAND *band=band_get_current_band();
 
-  if(meter_type==POWER) {
-    level=value;
-    if(level==0.0 || band->disablePA || !pa_enabled) {
-      level=exciter;
-    }
-    if(band->disablePA || !pa_enabled) {
-      units="mW";
-      interval=100.0;
-      level=level*1000.0;
-    } else {
-      switch(pa_power) {
-        case PA_1W:
-          units="mW";
-          interval=100.0;
-          level=level*1000.0;
-          break;
-        case PA_10W:
-          interval=1.0;
-          break;
-        case PA_30W:
-          interval=3.0;
-          break;
-        case PA_50W:
-          interval=5.0;
-          break;
-        case PA_100W:
-          interval=10.0;
-          break;
-        case PA_200W:
-          interval=20.0;
-          break;
-        case PA_500W:
-          interval=50.0;
-          break;
-      }
-    }
+  //
+  // First, do all the work that  does not depend on whether the
+  // meter is analog or digital.
+  //
+
+  if(last_meter_type!=meter_type) {
+    last_meter_type=meter_type;
+    //
+    // reset max values
+    //
+    max_rxlvl = min_rxlvl;
+    max_pwr   = min_pwr;
+    max_alc   = min_alc;
+    max_count =    0;
   }
+
+  //
+  // Only the values max_rxlvl/max_pwr/max_alc are "on display"
+  // The algorithm to calculate these "sedated" values from the
+  // (possibly fluctuating)  input ones is as follows:
+  //
+  // - if counter > CNTMAX then move max_value towards current_value by exponential averaging
+  //                            with parameter EXPAV1, EXPAV2 (but never go below the minimum value)
+  // - if current_value >  max_value then set max_value to current_value and reset counter
+  //
+  // A new max value will therefore be immediately visible, the display stays (if not surpassed) for
+  // CNTMAX cycles and then the displayed value will gradually approach the new one(s). 
+  #define CNTMAX 5
+  #define EXPAV1 0.75
+  #define EXPAV2 0.25
+
+  switch (meter_type) {
+    case POWER:
+      pwr=value;
+      if(pwr==0.0 || band->disablePA || !pa_enabled) {
+        pwr=exciter;
+      }
+      if(band->disablePA || !pa_enabled) {
+        units="mW";
+        interval=100.0;
+        pwr=pwr*1000.0;
+      } else {
+        switch(pa_power) {
+          case PA_1W:
+            units="mW";
+            interval=100.0;
+            pwr=pwr*1000.0;
+            break;
+          case PA_10W:
+            interval=1.0;
+            break;
+          case PA_30W:
+            interval=3.0;
+            break;
+          case PA_50W:
+            interval=5.0;
+            break;
+          case PA_100W:
+            interval=10.0;
+            break;
+          case PA_200W:
+            interval=20.0;
+            break;
+          case PA_500W:
+            interval=50.0;
+            break;
+        }
+      }
+      if (max_count > CNTMAX) {
+        max_pwr = EXPAV1*max_pwr + EXPAV2*pwr;
+        max_alc = EXPAV1*max_alc + EXPAV2*alc;
+        // This is perhaps not necessary ...
+        if (max_pwr < min_pwr) max_pwr=min_pwr;
+        // ... but alc goes to -Infinity during CW
+        if (max_alc < min_alc) max_alc=min_alc;
+      }
+      if (pwr > max_pwr) {
+        max_pwr=pwr;
+        max_count=0;
+      }
+      if (alc > max_alc) {
+        max_alc=alc;
+        max_count=0;
+      }
+      break;
+    case SMETER:
+      rxlvl=value;  // all corrections now in receiver.c
+      if (max_count > CNTMAX) {
+        max_rxlvl=EXPAV1*max_rxlvl + EXPAV2*rxlvl;
+        if (max_rxlvl < min_rxlvl) max_rxlvl=min_rxlvl;
+      }
+      if (rxlvl > max_rxlvl) {
+        max_rxlvl=rxlvl;
+        max_count=0;
+      }
+      break;
+  }
+  max_count++;
+
+  //
+  // From now on, DO NOT USE rxlvl,pwr,alc but use max_rxlvl etc.
+  //
 
 if(analog_meter) {
   cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -199,7 +261,6 @@ if(analog_meter) {
   switch(meter_type) {
     case SMETER:
       {
-      level=value;  // all corrections now in receiver.c
       offset=210.0;
 
       int i;
@@ -271,26 +332,23 @@ if(analog_meter) {
         cairo_new_path(cr);
       }
 
-
-
       cairo_set_line_width(cr, 1.0);
       cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 
-      angle=fmax(-127.0,level)+127.0+offset;
+      angle=fmax(-127.0,max_rxlvl)+127.0+offset;
 
       // if frequency > 30MHz then -93 is S9
       if(vfo[active_receiver->id].frequency>30000000LL) {
         angle=angle+20;
       }
      
-      
       radians=angle*M_PI/180.0;
       cairo_arc(cr, cx, cy, radius+8, radians, radians);
       cairo_line_to(cr, cx, cy);
       cairo_stroke(cr);
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-      sprintf(sf,"%d dBm",(int)(level+0.5));
+      sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
       cairo_move_to(cr, 80, meter_height-2);
       cairo_show_text(cr, sf);
 
@@ -373,57 +431,10 @@ if(analog_meter) {
         cairo_new_path(cr);
       }
 
-/*
-      for(i=0;i<=100;i++) {
-        angle=(double)i+offset;
-        radians=angle*M_PI/180.0;
-
-        switch(i) {
-          //case 5:
-          case 0:
-          case 25:
-          case 50:
-          case 75:
-          case 100:
-            cairo_arc(cr, cx, cy, radius+4, radians, radians);
-            cairo_get_current_point(cr, &x, &y);
-            cairo_arc(cr, cx, cy, radius, radians, radians);
-            cairo_line_to(cr, x, y);
-            cairo_stroke(cr);
-
-            sprintf(sf,"%d",i*2);
-            cairo_arc(cr, cx, cy, radius+5, radians, radians);
-            cairo_get_current_point(cr, &x, &y);
-            cairo_new_path(cr);
-            x-=6.0;
-            cairo_move_to(cr, x, y);
-            cairo_show_text(cr, sf);
-            break;
-          default:
-            if((i%5)==0) {
-              cairo_arc(cr, cx, cy, radius+2, radians, radians);
-              cairo_get_current_point(cr, &x, &y);
-              cairo_arc(cr, cx, cy, radius, radians, radians);
-              cairo_line_to(cr, x, y);
-              cairo_stroke(cr);
-            }
-            break;
-        }
-        cairo_new_path(cr);
-      }
-*/
-
       cairo_set_line_width(cr, 1.0);
       cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 
-      if(level>max_level || max_count==10) {
-          max_level=level;
-          max_count=0;
-      }
-      max_count++;
-
-      //angle=(max_level/2.0)+offset;
-      angle=(max_level*10.0/(double)interval)+offset;
+      angle=(max_pwr*10.0/(double)interval)+offset;
       radians=angle*M_PI/180.0;
       cairo_arc(cr, cx, cy, radius+8, radians, radians);
       cairo_line_to(cr, cx, cy);
@@ -431,8 +442,7 @@ if(analog_meter) {
 
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-      //sprintf(sf,"%0.1f%s",max_level,units);
-      sprintf(sf,"%d%s",(int)(max_level+0.5),units);
+      sprintf(sf,"%d%s",(int)(max_pwr+0.5),units);
       cairo_move_to(cr, 80, meter_height-22);
       cairo_show_text(cr, sf);
 
@@ -446,7 +456,7 @@ if(analog_meter) {
       cairo_show_text(cr, sf);
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-      sprintf(sf,"ALC: %2.1f dB",alc);
+      sprintf(sf,"ALC: %2.1f dB",max_alc);
       cairo_move_to(cr, 60, meter_height-2);
       cairo_show_text(cr, sf);
 
@@ -494,6 +504,7 @@ if(analog_meter) {
   }
 
 } else {
+  // Section for the digital meter
   // clear the meter
   cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
   cairo_paint (cr);
@@ -537,23 +548,12 @@ if(analog_meter) {
     cairo_show_text(cr, "Mic Level");
   }
 
-  if(last_meter_type!=meter_type) {
-    last_meter_type=meter_type;
-    max_count=0;
-    if(meter_type==SMETER) {
-      max_level=-200;
-    } else {
-      max_level=0;
-    }
-  }
-
   cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   switch(meter_type) {
     case SMETER:
       // value is dBm
       text_location=10;
       offset=5.0;
-      level=value;  // all corrections now in receiver.c
 
       if(meter_width>=114) {
         int db=1;
@@ -597,9 +597,9 @@ if(analog_meter) {
         cairo_show_text(cr, "+60");
 
         // if frequency > 30MHz then -93 is S9
-        double l=fmax(-127.0,level);
+        double l=fmax(-127.0,max_rxlvl);
         if(vfo[active_receiver->id].frequency>30000000LL) {
-          l=level+20.0;
+          l=max_rxlvl+20.0;
         }
         
         //cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
@@ -615,28 +615,20 @@ if(analog_meter) {
         cairo_fill(cr);
 	cairo_pattern_destroy(pat);
 
-        if(l>max_level || max_count==10) {
-          max_level=l;
-          max_count=0;
-        }
-
         if(l!=0) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-          cairo_move_to(cr,offset+(double)((max_level+127.0)*db),(double)meter_height-20);
-          cairo_line_to(cr,offset+(double)((max_level+127.0)*db),(double)(meter_height-40));
+          cairo_move_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)meter_height-20);
+          cairo_line_to(cr,offset+(double)((max_rxlvl+127.0)*db),(double)(meter_height-40));
         }
 
 
         cairo_stroke(cr);
 
-        max_count++;
-
-
         text_location=offset+(db*114)+5;
       }
 
       cairo_set_font_size(cr, DISPLAY_FONT_SIZE2);
-      sprintf(sf,"%d dBm",(int)(level+0.5));
+      sprintf(sf,"%d dBm",(int)(max_rxlvl+0.5));
       cairo_move_to(cr, text_location, meter_height-12);
       cairo_show_text(cr, sf);
       break;
@@ -648,15 +640,9 @@ if(analog_meter) {
 
       if (protocol == ORIGINAL_PROTOCOL || protocol == NEW_PROTOCOL) {
 	//
-	// Power levels not available for Soapy
+	// Power/Alc/SWR not available for SOAPY.
 	//
-        if(level>max_level || max_count==10) {
-          max_level=level;
-          max_count=0;
-        }
-        max_count++;
-
-        sprintf(sf,"FWD: %d%s",(int)(max_level+0.5),units);
+        sprintf(sf,"FWD: %d%s",(int)(max_pwr+0.5),units);
         cairo_move_to(cr, 10, 35);
         cairo_show_text(cr, sf);
 
@@ -678,13 +664,16 @@ if(analog_meter) {
 
       cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);  // revert to white color
 
-      sprintf(sf,"ALC: %2.1f dB",alc);
+      sprintf(sf,"ALC: %2.1f dB",max_alc);
       cairo_move_to(cr, meter_width/2, 35);
       cairo_show_text(cr, sf);
       break;
   }
-
 }
+
+  //
+  // This is the same for analog and digital metering
+  //
   cairo_destroy(cr);
   gtk_widget_queue_draw (meter);
 }
