@@ -384,7 +384,7 @@ static gpointer discover_receive_thread(gpointer data) {
     struct timeval tv;
     int i;
 
-fprintf(stderr,"discover_receive_thread\n");
+    fprintf(stderr,"discover_receive_thread\n");
 
     tv.tv_sec = 2;
     tv.tv_usec = 0;
@@ -475,7 +475,7 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
                             discovered[devices].frequency_max=61440000.0;
                             break;
                     }
-g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, discovered[devices].frequency_min, discovered[devices].frequency_max);
+		    g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, discovered[devices].frequency_min, discovered[devices].frequency_max);
                     for(i=0;i<6;i++) {
                         discovered[devices].info.network.mac_address[i]=buffer[i+3];
                     }
@@ -537,21 +537,19 @@ fprintf(stderr,"old_discovery\n");
 
     fprintf(stderr, "discovery found %d devices\n",devices);
 
-    int i;
-    for(i=0;i<devices;i++) {
-                    fprintf(stderr,"discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
-                            discovered[i].device,
-                            discovered[i].software_version,
-                            discovered[i].status,
-                            inet_ntoa(discovered[i].info.network.address.sin_addr),
-                            discovered[i].info.network.mac_address[0],
-                            discovered[i].info.network.mac_address[1],
-                            discovered[i].info.network.mac_address[2],
-                            discovered[i].info.network.mac_address[3],
-                            discovered[i].info.network.mac_address[4],
-                            discovered[i].info.network.mac_address[5],
-                            discovered[i].info.network.interface_name);
+    for(size_t i = 0; i < devices; i++) {
+	fprintf(stderr,"discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
+		discovered[i].device,
+		discovered[i].software_version,
+		discovered[i].status,
+		inet_ntoa(discovered[i].info.network.address.sin_addr),
+		discovered[i].info.network.mac_address[0],
+		discovered[i].info.network.mac_address[1],
+		discovered[i].info.network.mac_address[2],
+		discovered[i].info.network.mac_address[3],
+		discovered[i].info.network.mac_address[4],
+		discovered[i].info.network.mac_address[5],
+		discovered[i].info.network.interface_name);
     }
-
 }
 
