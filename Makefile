@@ -34,13 +34,6 @@ LOCALCW_INCLUDE=LOCALCW
 # uncomment the line to below include support for sx1509 i2c expander
 #SX1509_INCLUDE=sx1509
 
-# uncomment the line below to include support for STEMlab discovery (WITH AVAHI)
-#STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
-
-# uncomment the line below to include support for STEMlab discovery (WITHOUT AVAHI)
-#STEMLAB_DISCOVERY=STEMLAB_DISCOVERY_NOAVAHI
-
-
 # uncomment the line below for various debug facilities
 #DEBUG_OPTION=-D DEBUG
 
@@ -155,30 +148,6 @@ GPIO_OBJS= \
   switch_menu.o
 endif
 
-#
-# We have two versions of STEMLAB_DISCOVERY here,
-# the second one has to be used
-# if you do not have the avahi (devel-) libraries
-# on your system.
-#
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY \
-  `pkg-config --cflags avahi-gobject` \
-  `pkg-config --cflags libcurl`
-STEMLAB_LIBS=`pkg-config --libs avahi-gobject` `pkg-config --libs libcurl`
-STEMLAB_SOURCES=stemlab_discovery.c
-STEMLAB_HEADERS=stemlab_discovery.h
-STEMLAB_OBJS=stemlab_discovery.o
-endif
-
-ifeq ($(STEMLAB_DISCOVERY), STEMLAB_DISCOVERY_NOAVAHI)
-STEMLAB_OPTIONS=-D STEMLAB_DISCOVERY -D NO_AVAHI `pkg-config --cflags libcurl`
-STEMLAB_LIBS=`pkg-config --libs libcurl`
-STEMLAB_SOURCES=stemlab_discovery.c
-STEMLAB_HEADERS=stemlab_discovery.h
-STEMLAB_OBJS=stemlab_discovery.o
-endif
-
 ifeq ($(SERVER_INCLUDE), SERVER)
 SERVER_OPTIONS=-D SERVER
 SERVER_SOURCES= \
@@ -208,7 +177,6 @@ endif
 CFLAGS=	-g -Wno-deprecated-declarations
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
-	$(STEMLAB_OPTIONS) \
         $(PTT_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) \
@@ -219,7 +187,7 @@ ifeq ($(UNAME_S), Linux)
 RT_OPTION=-lrt
 endif
 
-LIBS=$(RT_OPTION) -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) $(MIDI_LIBS)
+LIBS=$(RT_OPTION) -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(MIDI_LIBS)
 INCLUDES=$(GTKINCLUDES)
 
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
@@ -464,18 +432,18 @@ toolbar_menu.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
+		$(MIDI_OBJS) $(SERVER_OBJS)
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
+		$(MIDI_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
 	$(LOCALCW_HEADERS) \
-	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(STEMLAB_HEADERS) $(SERVER_HEADERS) \
+	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(SERVER_HEADERS) \
 	$(AUDIO_SOURCES) $(SOURCES) \
 	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
-	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(SERVER_SOURCES)
+	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
 prebuild:
@@ -494,7 +462,7 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(REMOTE_SOURCES) \
 	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
-	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(STEMLAB_SOURCES) $(LOCALCW_SOURCES) \
+	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(LOCALCW_SOURCES) \
 	$(SERVER_SOURCES)
 
 .PHONY:	clean

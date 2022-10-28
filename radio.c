@@ -769,9 +769,6 @@ void start_radio() {
     case DEVICE_ORION2:
       pa_power = PA_200W;
       break;
-    case DEVICE_STEMLAB:
-      pa_power = PA_100W;
-      break;
     }
     break;
   case NEW_PROTOCOL:
@@ -797,9 +794,6 @@ void start_radio() {
       break;
     case NEW_DEVICE_ORION2:
       pa_power = PA_200W;
-      break;
-    case DEVICE_STEMLAB:
-      pa_power = PA_100W;
       break;
     }
     break;

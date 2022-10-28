@@ -38,9 +38,6 @@ gboolean enable_protocol_2;
 #ifdef SOAPYSDR
 gboolean enable_soapy_protocol;
 #endif
-#ifdef STEMLAB_DISCOVERY
-gboolean enable_stemlab;
-#endif
 gboolean autostart;
 
 void protocols_save_state() {
@@ -54,10 +51,6 @@ void protocols_save_state() {
 #ifdef SOAPYSDR
   sprintf(value,"%d",enable_soapy_protocol);
   setProperty("enable_soapy_protocol",value);
-#endif
-#ifdef STEMLAB_DISCOVERY
-  sprintf(value,"%d",enable_stemlab);
-  setProperty("enable_stemlab",value);
 #endif
 
   sprintf(value,"%d",autostart);
@@ -80,11 +73,6 @@ void protocols_restore_state() {
   enable_soapy_protocol=TRUE;
   value=getProperty("enable_soapy_protocol");
   if(value) enable_soapy_protocol=atoi(value);
-#endif
-#ifdef STEMLAB_DISCOVERY
-  enable_stemlab=TRUE;
-  value=getProperty("enable_stemlab");
-  if(value) enable_stemlab=atoi(value);
 #endif
   autostart=TRUE;
   value=getProperty("autostart");
@@ -112,12 +100,6 @@ static void protocol_2_cb(GtkToggleButton *widget, gpointer data) {
 #ifdef SOAPYSDR
 static void soapy_protocol_cb(GtkToggleButton *widget, gpointer data) {
   enable_soapy_protocol=gtk_toggle_button_get_active(widget);
-}
-#endif
-
-#ifdef STEMLAB_DISCOVERY
-static void stemlab_cb(GtkToggleButton *widget, gpointer data) {
-  enable_stemlab=gtk_toggle_button_get_active(widget);
 }
 #endif
 
@@ -160,15 +142,6 @@ void configure_protocols(GtkWidget *parent) {
   gtk_widget_show(b_enable_soapy_protocol);
   g_signal_connect(b_enable_soapy_protocol,"toggled",G_CALLBACK(soapy_protocol_cb),NULL);
   gtk_grid_attach(GTK_GRID(grid),b_enable_soapy_protocol,0,row,1,1);
-  row++;
-#endif
-
-#ifdef STEMLAB_DISCOVERY
-  GtkWidget *b_enable_stemlab=gtk_check_button_new_with_label("Enable Stemlab");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_enable_stemlab), enable_stemlab);
-  gtk_widget_show(b_enable_stemlab);
-  g_signal_connect(b_enable_stemlab,"toggled",G_CALLBACK(stemlab_cb),NULL);
-  gtk_grid_attach(GTK_GRID(grid),b_enable_stemlab,0,row,1,1);
   row++;
 #endif
 
