@@ -57,9 +57,6 @@
 #include "discovery.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "css.h"
 #include "ext.h"
 #include "vfo.h"
@@ -160,11 +157,6 @@ gboolean main_delete(GtkWidget *widget) {
       case NEW_PROTOCOL:
         new_protocol_stop();
         break;
-#ifdef SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_stop();
-        break;
-#endif
       }
 #ifdef CLIENT_SERVER
     }

@@ -126,11 +126,6 @@ static gboolean restart_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
     case NEW_PROTOCOL:
       new_protocol_restart();
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      // dunno how to do this for soapy
-      break;
-#endif
   }
   return TRUE;
 }

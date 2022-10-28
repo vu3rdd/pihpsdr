@@ -346,18 +346,6 @@ int process_action(void *data) {
         vfo_band_changed(active_receiver->id,band12);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_1240:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band1240);
-      }
-      break;
-    case BAND_144:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band144);
-      }
-      break;
-#endif
     case BAND_15:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,band15);
@@ -378,42 +366,16 @@ int process_action(void *data) {
         vfo_band_changed(active_receiver->id,band20);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_220:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band220);
-      }
-      break;
-    case BAND_2300:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band2300);
-      }
-      break;
-#endif
     case BAND_30:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,band30);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_3400:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band3400);
-      }
-      break;
-#endif
     case BAND_40:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,band40);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_430:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band430);
-      }
-      break;
-#endif
     case BAND_6:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,band6);
@@ -424,30 +386,11 @@ int process_action(void *data) {
         vfo_band_changed(active_receiver->id,band60);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_70:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band70);
-      }
-      break;
-#endif
     case BAND_80:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,band80);
       }
       break;
-#ifdef SOAPYSDR
-    case BAND_902:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,band902);
-      }
-      break;
-    case BAND_AIR:
-      if(a->mode==PRESSED) {
-        vfo_band_changed(active_receiver->id,bandAIR);
-      }
-      break;
-#endif
     case BAND_GEN:
       if(a->mode==PRESSED) {
         vfo_band_changed(active_receiver->id,bandGen);

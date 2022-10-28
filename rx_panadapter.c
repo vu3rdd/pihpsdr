@@ -498,12 +498,6 @@ void rx_panadapter_update(RECEIVER *rx) {
     if (rx->preamp) s1 -= 18.0;
     if (rx->dither) s1 -= 18.0;
   }
-#ifdef SOAPYSDR
-  if(protocol==SOAPYSDR_PROTOCOL) {
-    //s1-=rx->rf_gain;
-    s1-=adc[rx->id].gain;
-  }
-#endif
 
   s1 = floor((rx->panadapter_high - s1)
                         * (double) display_height
@@ -520,12 +514,6 @@ void rx_panadapter_update(RECEIVER *rx) {
       if (rx->preamp) s2 -= 18.0;
       if (rx->dither) s2 -= 18.0;
     }
-#ifdef SOAPYSDR
-    if(protocol==SOAPYSDR_PROTOCOL) {
-      //s2-=rx->rf_gain;
-      s2-=adc[rx->id].gain;
-    }
-#endif
     s2 = floor((rx->panadapter_high - s2)
                             * (double) display_height
                             / (rx->panadapter_high - rx->panadapter_low));

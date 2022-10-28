@@ -21,7 +21,7 @@ char build_date[]=GIT_DATE;
 char build_version[]=GIT_VERSION;
 
 char version[]=GIT_VERSION
-#if defined(GPIO) || defined(PURESIGNAL) || defined(SOAPYSDR) || defined(MIDI)
+#if defined(GPIO) || defined(PURESIGNAL) || defined(MIDI)
 " includes"
 #endif
 #ifdef GPIO
@@ -29,9 +29,6 @@ char version[]=GIT_VERSION
 #endif
 #ifdef PURESIGNAL
 " PURESIGNAL"
-#endif
-#ifdef SOAPYSDR
-" SOAPYSDR"
 #endif
 #ifdef MIDI
 " MIDI"

@@ -19,9 +19,6 @@
 
 extern gboolean enable_protocol_1;
 extern gboolean enable_protocol_2;
-#ifdef SOAPYSDR
-extern gboolean enable_soapy_protocol;
-#endif
 extern gboolean autostart;
 
 extern void protocols_save_state();

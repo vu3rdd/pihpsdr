@@ -198,12 +198,6 @@ if(analog_meter) {
           } else {
               level=value + (double)adc[rx->adc].attenuation;
           }
-#ifdef SOAPYSDR
-      if(protocol==SOAPYSDR_PROTOCOL) {
-        //level-=rx->rf_gain;
-        level-=adc[rx->id].gain;
-      }
-#endif
       if (filter_board == CHARLY25) {
 	// preamp/dither encodes the preamp level
         if (rx->preamp) level -= 18.0;
@@ -570,12 +564,6 @@ if(analog_meter) {
       } else {
         level=value+(double)adc[rx->adc].attenuation;
       }
-#ifdef SOAPYSDR
-      if(protocol==SOAPYSDR_PROTOCOL) {
-        //level-=rx->rf_gain;
-        level-=adc[rx->id].gain;
-      }
-#endif
       if (filter_board == CHARLY25) {
 	// preamp/dither encodes the preamp level
         if (rx->preamp) level -= 18.0;

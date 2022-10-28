@@ -1867,11 +1867,6 @@ g_print("INFO_RADIO: %d\n",bytes_read);
         radio->supported_receivers=ntohs(radio_data.supported_receivers);
         temp=ntohll(radio_data.sample_rate);
         radio_sample_rate=(int)temp;
-#ifdef SOAPYSDR
-        if(protocol==SOAPYSDR_PROTOCOL) {
-          radio->info.soapy.sample_rate=(int)temp;
-        }
-#endif
         display_filled=radio_data.display_filled;
         locked=radio_data.locked;
         receivers=ntohs(radio_data.receivers);

@@ -10,9 +10,6 @@
 #include "mode.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 
 int n_input_devices;
 AUDIO_DEVICE input_devices[MAX_AUDIO_DEVICES];
@@ -193,9 +190,6 @@ static void *mic_read_thread(gpointer arg) {
           switch(protocol) {
             case ORIGINAL_PROTOCOL:
             case NEW_PROTOCOL:
-#ifdef SOAPYSDR
-            case SOAPYSDR_PROTOCOL:
-#endif
               //
               // put sample into ring buffer
               //

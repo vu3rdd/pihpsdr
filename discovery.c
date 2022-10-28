@@ -37,9 +37,6 @@
 #include "discovered.h"
 #include "old_discovery.h"
 #include "new_discovery.h"
-#ifdef SOAPYSDR
-#include "soapy_discovery.h"
-#endif
 #include "main.h"
 #include "radio.h"
 #ifdef USBOZY
@@ -310,13 +307,6 @@ void discovery() {
   /*   new_discovery(); */
   /* } */
 
-#ifdef SOAPYSDR
-  if(enable_soapy_protocol) {
-    status_text("SoapySDR ... Discovering Devices");
-    soapy_discovery();
-  }
-#endif
-
   status_text("Discovery");
   
     fprintf(stderr,"discovery: found %d devices\n", devices);
@@ -384,12 +374,6 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
             }
 #endif
             break;
-#ifdef SOAPYSDR
-          case SOAPYSDR_PROTOCOL:
-            sprintf(text,"%s (Protocol SOAPY_SDR %s) on %s",d->name,d->info.soapy.version,d->info.soapy.address);
-            break;
-
-#endif
         }
 
         GtkWidget *label=gtk_label_new(text);
@@ -410,17 +394,11 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
           gtk_widget_set_sensitive(start_button, FALSE);
         }
 
-#ifdef SOAPYSDR
-        if(d->device!=SOAPYSDR_USB_DEVICE) {
-#endif
           // if not on the same subnet then cannot start it
           if((d->info.network.interface_address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr) != (d->info.network.address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr)) {
             gtk_button_set_label(GTK_BUTTON(start_button),"Subnet!");
             gtk_widget_set_sensitive(start_button, FALSE);
           }
-#ifdef SOAPYSDR
-        }
-#endif
       }
     }
 

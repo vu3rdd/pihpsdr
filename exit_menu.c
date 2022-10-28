@@ -29,9 +29,6 @@
 #include "radio.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "actions.h"
 #ifdef GPIO
 #include "gpio.h"
@@ -63,11 +60,6 @@ static gboolean discovery_cb (GtkWidget *widget, GdkEventButton *event, gpointer
     case NEW_PROTOCOL:
       new_protocol_stop();
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
   }
   radioSaveState();
   radio_stop();
@@ -103,11 +95,6 @@ g_print("exit_cb\n");
       case NEW_PROTOCOL:
         new_protocol_stop();
         break;
-#ifdef SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_stop();
-        break;
-#endif
     }
 #ifdef CLIENT_SERVER
   }
@@ -128,11 +115,6 @@ static gboolean reboot_cb (GtkWidget *widget, GdkEventButton *event, gpointer da
     case NEW_PROTOCOL:
       new_protocol_stop();
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
   }
   radioSaveState();
   int rc=system("reboot");
@@ -150,11 +132,6 @@ static gboolean shutdown_cb (GtkWidget *widget, GdkEventButton *event, gpointer 
     case NEW_PROTOCOL:
       new_protocol_stop();
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_stop();
-      break;
-#endif
   }
   radioSaveState();
   int rc=system("shutdown -h -P now");

@@ -43,9 +43,6 @@
 #include "receiver.h"
 #include "transmitter.h"
 #include "new_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "vfo.h"
 #include "channel.h"
 #include "toolbar.h"
@@ -203,13 +200,6 @@ g_print("vfo_restore_state: %d\n",i);
     vfo[i].band=band20;
     vfo[i].bandstack=0;
     vfo[i].frequency=14010000;
-#ifdef SOAPYSDR
-    if(radio->protocol==SOAPYSDR_PROTOCOL) {
-      vfo[i].band=band144;
-      vfo[i].bandstack=0;
-      vfo[i].frequency=144010000;
-    }
-#endif
     vfo[i].mode=modeCWU;
     vfo[i].filter=filterF6;
     vfo[i].lo=0;
@@ -342,11 +332,6 @@ void vfo_band_changed(int id,int b) {
     case NEW_PROTOCOL:
       schedule_general();
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      soapy_protocol_set_rx_frequency(active_receiver,id);
-      break;
-#endif
   }
   g_idle_add(ext_vfo_update,NULL);
 }

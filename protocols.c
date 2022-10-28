@@ -35,9 +35,6 @@ static GtkWidget *dialog;
 
 gboolean enable_protocol_1;
 gboolean enable_protocol_2;
-#ifdef SOAPYSDR
-gboolean enable_soapy_protocol;
-#endif
 gboolean autostart;
 
 void protocols_save_state() {
@@ -48,10 +45,6 @@ void protocols_save_state() {
   setProperty("enable_protocol_1",value);
   sprintf(value,"%d",enable_protocol_2);
   setProperty("enable_protocol_2",value);
-#ifdef SOAPYSDR
-  sprintf(value,"%d",enable_soapy_protocol);
-  setProperty("enable_soapy_protocol",value);
-#endif
 
   sprintf(value,"%d",autostart);
   setProperty("autostart",value);
@@ -69,11 +62,6 @@ void protocols_restore_state() {
   enable_protocol_2=TRUE;
   value=getProperty("enable_protocol_2");
   if(value) enable_protocol_2=atoi(value);
-#ifdef SOAPYSDR
-  enable_soapy_protocol=TRUE;
-  value=getProperty("enable_soapy_protocol");
-  if(value) enable_soapy_protocol=atoi(value);
-#endif
   autostart=TRUE;
   value=getProperty("autostart");
   if(value) autostart=atoi(value);
@@ -97,11 +85,6 @@ static void protocol_2_cb(GtkToggleButton *widget, gpointer data) {
   enable_protocol_2=gtk_toggle_button_get_active(widget);
 }
 
-#ifdef SOAPYSDR
-static void soapy_protocol_cb(GtkToggleButton *widget, gpointer data) {
-  enable_soapy_protocol=gtk_toggle_button_get_active(widget);
-}
-#endif
 
 static void autostart_cb(GtkToggleButton *widget, gpointer data) {
   autostart=gtk_toggle_button_get_active(widget);
@@ -136,14 +119,6 @@ void configure_protocols(GtkWidget *parent) {
   gtk_grid_attach(GTK_GRID(grid),b_enable_protocol_2,0,row,1,1);
   row++;
 
-#ifdef SOAPYSDR
-  GtkWidget *b_enable_soapy_protocol=gtk_check_button_new_with_label("Enable SoapySDR Protocol");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_enable_soapy_protocol), enable_soapy_protocol);
-  gtk_widget_show(b_enable_soapy_protocol);
-  g_signal_connect(b_enable_soapy_protocol,"toggled",G_CALLBACK(soapy_protocol_cb),NULL);
-  gtk_grid_attach(GTK_GRID(grid),b_enable_soapy_protocol,0,row,1,1);
-  row++;
-#endif
 
   GtkWidget *b_autostart=gtk_check_button_new_with_label("Auto start if only one device");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_autostart), autostart);

@@ -46,9 +46,6 @@
 #include "waterfall.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "ext.h"
 #include "new_menu.h"
 #ifdef CLIENT_SERVER
@@ -213,9 +210,6 @@ void receiver_save_state(RECEIVER *rx) {
     // and then return quickly.
     //
     if (rx->id == PS_RX_FEEDBACK
-#ifdef SOAPYSDR
-        && protocol!=SOAPYSDR_PROTOCOL
-#endif
        ) return;
 #endif
 
@@ -411,9 +405,6 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     // and then return quickly
     //
     if (rx->id == PS_RX_FEEDBACK
-#ifdef SOAPYSDR
-        && protocol!=SOAPYSDR_PROTOCOL
-#endif
        ) return;
 #endif
 
@@ -1027,18 +1018,7 @@ g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",__FUNCTION__,i
       }
   }
 g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
-#ifdef SOAPYSDR
-  if(radio->device==SOAPYSDR_USB_DEVICE) {
-    rx->sample_rate=radio->info.soapy.sample_rate;
-    rx->resampler=NULL;
-    rx->resample_buffer=NULL;
-g_print("%s: id=%d sample_rate=%d\n",__FUNCTION__,rx->id, rx->sample_rate);
-  } else {
-#endif
     rx->sample_rate=48000;
-#ifdef SOAPYSDR
-  }
-#endif
   rx->buffer_size=buffer_size;
   rx->fft_size=fft_size;
   rx->fps=fps;
@@ -1280,12 +1260,6 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
   SetInputSamplerate(rx->id, sample_rate);
   SetEXTANBSamplerate (rx->id, sample_rate);
   SetEXTNOBSamplerate (rx->id, sample_rate);
-#ifdef SOAPYSDR
-  if(protocol==SOAPYSDR_PROTOCOL) {
-    soapy_protocol_change_sample_rate(rx);
-    soapy_protocol_set_mic_sample_rate(rx->sample_rate);
-  }
-#endif
 
   SetChannelState(rx->id,1,0);
 
@@ -1328,11 +1302,6 @@ void receiver_frequency_changed(RECEIVER *rx) {
       case NEW_PROTOCOL:
         schedule_high_priority(); // send new frequency
         break;
-#if SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_set_rx_frequency(rx,id);
-        break;
-#endif
     }
   }
 }
@@ -1441,10 +1410,6 @@ static void process_rx_buffer(RECEIVER *rx) {
             }
           }
           break;
-#ifdef SOAPYSDR
-        case SOAPYSDR_PROTOCOL:
-          break;
-#endif
       }
 
 #ifdef AUDIO_WATERFALL

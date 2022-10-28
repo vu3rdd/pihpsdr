@@ -43,9 +43,6 @@
 #include "band.h"
 #include "discovered.h"
 #include "new_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "vfo.h"
 #include "alex.h"
 #include "agc.h"
@@ -388,11 +385,6 @@ void set_af_gain(int rx,double value) {
 static void rf_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
     adc[active_receiver->adc].gain=gtk_range_get_value(GTK_RANGE(rf_gain_scale));
     switch(protocol) {
-#ifdef SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_set_gain(active_receiver);
-	break;
-#endif
       default:
 	break;
     }
@@ -406,11 +398,6 @@ void update_rf_gain() {
 void set_rf_gain(int rx,double value) {
   g_print("%s\n",__FUNCTION__);
   adc[receiver[rx]->id].gain=value;
-#ifdef SOAPYSDR
-  if(protocol==SOAPYSDR_PROTOCOL) {
-    soapy_protocol_set_gain(receiver[rx]);
-  }
-#endif
   if(display_sliders) {
     //gtk_range_set_value (GTK_RANGE(attenuation_scale),receiver[rx]->rf_gain);
     gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[receiver[rx]->id].gain);
@@ -853,17 +840,8 @@ fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
     gtk_widget_override_font(rf_gain_label, pango_font_description_from_string("Sans 10"));
     gtk_widget_show(rf_gain_label);
     gtk_grid_attach(GTK_GRID(sliders),rf_gain_label,6,0,1,1);
-#ifdef SOAPYSDR
-    if(protocol==SOAPYSDR_PROTOCOL) {
-      rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,adc[0].min_gain, adc[0].max_gain, 1.0);
-      gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[0].gain);
-    } else {
-#endif
       rf_gain_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -12.0, 48.0, 1.0);
       gtk_range_set_value (GTK_RANGE(rf_gain_scale),adc[active_receiver->adc].gain);
-#ifdef SOAPYSDR
-    }
-#endif
     gtk_widget_override_font(rf_gain_scale, pango_font_description_from_string("Sans 10"));
     gtk_range_set_increments (GTK_RANGE(rf_gain_scale),1.0,1.0);
     gtk_widget_show(rf_gain_scale);

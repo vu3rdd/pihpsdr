@@ -245,40 +245,6 @@ void rx_menu(GtkWidget *parent) {
       }
       x++;
       break;
-
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      {
-      int row=1;
-      GtkWidget *sample_rate_label=gtk_label_new(NULL);
-      gtk_label_set_markup(GTK_LABEL(sample_rate_label), "<b>Sample Rate</b>");
-      gtk_grid_attach(GTK_GRID(grid),sample_rate_label,x,row,1,1);
-      row++;
-      
-
-      char rate_string[16];
-      sprintf(rate_string,"%d",radio->info.soapy.sample_rate);
-      GtkWidget *sample_rate=gtk_radio_button_new_with_label(NULL,rate_string);
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sample_rate), radio->info.soapy.sample_rate);
-      gtk_grid_attach(GTK_GRID(grid),sample_rate,x,row,1,1);
-      g_signal_connect(sample_rate,"toggled",G_CALLBACK(sample_rate_cb),GINT_TO_POINTER(radio->info.soapy.sample_rate));
-      row++;
-
-      int rate=radio->info.soapy.sample_rate/2;
-      while(rate>=48000) {
-          sprintf(rate_string,"%d",rate);
-          GtkWidget *next_sample_rate=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(sample_rate),rate_string);
-          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (next_sample_rate), active_receiver->sample_rate==rate);
-          gtk_grid_attach(GTK_GRID(grid),next_sample_rate,x,row,1,1);
-          g_signal_connect(next_sample_rate,"toggled",G_CALLBACK(sample_rate_cb),GINT_TO_POINTER(rate));
-          rate=rate/2;
-          row++;
-      }
-      }
-      x++;
-      break;
-#endif
-
   }
  
   //

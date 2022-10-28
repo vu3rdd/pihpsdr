@@ -45,9 +45,6 @@
 #include "transmitter.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "audio.h"
 #include "ext.h"
 
@@ -593,13 +590,6 @@ static gboolean update_display(gpointer data) {
         }
         break;
 
-#ifdef SOAPY_SDR
-      case SOAPY_PROTOCOL:
-        transmitter->fwd=0.0;
-        transmitter->exciter=0.0;
-        transmitter->rev=0.0;
-        break;
-#endif
     }
 
     double fwd=compute_power(transmitter->fwd);
@@ -731,13 +721,6 @@ TRANSMITTER *create_transmitter(int id, int buffer_size, int fft_size, int fps, 
       tx->mic_dsp_rate=96000;
       tx->iq_output_rate=192000;
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      tx->mic_sample_rate=48000;
-      tx->mic_dsp_rate=96000;
-      tx->iq_output_rate=radio_sample_rate;
-      break;
-#endif
 
   }
   int ratio=tx->iq_output_rate/tx->mic_sample_rate;
@@ -1002,11 +985,6 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     case NEW_PROTOCOL:
       gain=8388607.0; // 24 bit
       break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      gain=32767.0;  // 16 bit
-      break;
-#endif
   }
 
   if (cwmode) {
@@ -1146,11 +1124,6 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 		case NEW_PROTOCOL:
 		    new_protocol_iq_samples(isample,qsample);
 		    break;
-#ifdef SOAPYSDR
-                case SOAPYSDR_PROTOCOL:
-                    soapy_protocol_iq_samples((float)isample,(float)qsample);
-                    break;
-#endif
 	    }
 	}
     }
@@ -1372,11 +1345,6 @@ void tx_set_ps(TRANSMITTER *tx,int state) {
       tx->puresignal = state ? 1 : 0;
       schedule_high_priority();
       schedule_receive_specific();
-#ifdef SOAPY_SDR
-    case SOAPY_PROTOCOL:
-      // are there feedback channels in SOAPY?
-      break;
-#endif
   }
   if(state) {
     // if switching on: wait a while to get the feedback

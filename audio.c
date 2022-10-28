@@ -43,9 +43,6 @@
 #include "mode.h"
 #include "new_protocol.h"
 #include "old_protocol.h"
-#ifdef SOAPYSDR
-#include "soapy_protocol.h"
-#endif
 #include "vfo.h"
 
 int audio = 0;
@@ -509,9 +506,6 @@ g_print("mic_read_thread: snd_pcm_start\n");
         switch(protocol) {
           case ORIGINAL_PROTOCOL:
           case NEW_PROTOCOL:
-#ifdef SOAPYSDR
-          case SOAPYSDR_PROTOCOL:
-#endif
 	    //
 	    // put sample into ring buffer
 	    //

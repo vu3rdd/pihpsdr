@@ -37,17 +37,6 @@ enum {
   band12,
   band10,
   band6,
-#ifdef SOAPYSDR
-  band70,
-  band144,
-  band220,
-  band430,
-  band902,
-  band1240,
-  band2300,
-  band3400,
-  bandAIR,
-#endif
   bandWWV,
   bandGen,
   BANDS

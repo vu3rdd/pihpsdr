@@ -28,9 +28,6 @@ GPIO_INCLUDE=GPIO
 # uncomment the line to below include support local CW keyer
 LOCALCW_INCLUDE=LOCALCW
 
-# uncomment the line below for SoapySDR
-#SOAPYSDR_INCLUDE=SOAPYSDR
-
 # uncomment the line to below include support for sx1509 i2c expander
 #SX1509_INCLUDE=sx1509
 
@@ -92,21 +89,6 @@ USBOZY_HEADERS= \
 ozyio.h
 USBOZY_OBJS= \
 ozyio.o
-endif
-
-
-ifeq ($(SOAPYSDR_INCLUDE),SOAPYSDR)
-SOAPYSDR_OPTIONS=-D SOAPYSDR
-SOAPYSDRLIBS=-lSoapySDR
-SOAPYSDR_SOURCES= \
-soapy_discovery.c \
-soapy_protocol.c
-SOAPYSDR_HEADERS= \
-soapy_discovery.h \
-soapy_protocol.h
-SOAPYSDR_OBJS= \
-soapy_discovery.o \
-soapy_protocol.o
 endif
 
 
@@ -176,7 +158,7 @@ endif
 //CFLAGS=	-g -Wno-deprecated-declarations -O3
 CFLAGS=	-g -Wno-deprecated-declarations
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
-	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(SOAPYSDR_OPTIONS) $(LOCALCW_OPTIONS) \
+	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(LOCALCW_OPTIONS) \
         $(PTT_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) \
@@ -187,7 +169,7 @@ ifeq ($(UNAME_S), Linux)
 RT_OPTION=-lrt
 endif
 
-LIBS=$(RT_OPTION) -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(MIDI_LIBS)
+LIBS=$(RT_OPTION) -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS)
 INCLUDES=$(GTKINCLUDES)
 
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
@@ -430,19 +412,19 @@ encoder_menu.o \
 switch_menu.o \
 toolbar_menu.o
 
-$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
+$(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
 		$(MIDI_OBJS) $(SERVER_OBJS)
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
-		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
+		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
 		$(MIDI_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
-all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) $(SOAPYSDR_HEADERS) \
+all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) \
 	$(LOCALCW_HEADERS) \
 	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(SERVER_HEADERS) \
 	$(AUDIO_SOURCES) $(SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) $(LOCALCW_SOURCE) \
+	$(USBOZY_SOURCES) $(LOCALCW_SOURCE) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(SERVER_SOURCES)
 
 .PHONY:	prebuild
@@ -461,7 +443,7 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 .PHONY:	cppcheck
 cppcheck:
 	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(REMOTE_SOURCES) \
-	$(USBOZY_SOURCES) $(SOAPYSDR_SOURCES) \
+	$(USBOZY_SOURCES) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(LOCALCW_SOURCES) \
 	$(SERVER_SOURCES)
 
