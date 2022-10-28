@@ -252,7 +252,7 @@ int stemlab_get_info(int id) {
   int optval,i;
 
   // Allow RP app to come up
-  sleep(2);
+  //sleep(2);
 
   devices=id;
 
@@ -523,8 +523,8 @@ fprintf(stderr,"old_discovery\n");
         g_main_context_iteration(NULL, 0);
         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
             if((ifa->ifa_flags&IFF_UP)==IFF_UP
-                && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING) {
-                //&& (ifa->ifa_flags&IFF_LOOPBACK)!=IFF_LOOPBACK) {
+                && (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING
+                && (ifa->ifa_flags&IFF_LOOPBACK)==IFF_LOOPBACK) {
                 discover(ifa);
             }
         }
@@ -533,7 +533,7 @@ fprintf(stderr,"old_discovery\n");
     freeifaddrs(addrs);
 
     // Do one additional "discover" for a fixed TCP address
-    discover(NULL);
+    // discover(NULL);
 
     fprintf(stderr, "discovery found %d devices\n",devices);
 
