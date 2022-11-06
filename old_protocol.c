@@ -1661,6 +1661,8 @@ void ozy_send_buffer() {
             power=transmitter->drive_level;
           }
 
+	  // printf("power: %d\n", power);
+#if 0
 	  if (device == DEVICE_HERMES_LITE2) {
 	      //
 	      // from the "intended" drive level power, calculate the
@@ -1715,14 +1717,13 @@ void ozy_send_buffer() {
 	      }
 	      power=hl2power;
 	  }
+#endif
         }
 
 //if(last_power!=power) {
 //  g_print("power=%d\n",power);
 //  last_power=power;
 //}
-
-
 
         output_buffer[C0]=0x12; /* addr[6:1] = 001001b */
         output_buffer[C1]=power & 0xFF;
