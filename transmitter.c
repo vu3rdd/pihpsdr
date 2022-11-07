@@ -1028,8 +1028,8 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   }
 
   if (isTransmitting()) {
-
-    if(radio->device==NEW_DEVICE_ATLAS && atlas_penelope) {
+    if((radio->device==NEW_DEVICE_ATLAS && atlas_penelope) ||
+       (radio->device == DEVICE_HERMES_LITE2)) { // radioberry
       //
       // On these boards, drive level changes are performed by
       // scaling the TX IQ samples. In the other cases, DriveLevel

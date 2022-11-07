@@ -1728,7 +1728,7 @@ void ozy_send_buffer() {
 	/* } */
 
         output_buffer[C0]=0x12; /* addr[6:1] = 001001b */
-        output_buffer[C1]=power & 0xFF;
+        output_buffer[C1]=255 & 0xff; // power & 0xFF;
         output_buffer[C2]=0x00;
         output_buffer[C3]=0x00;
         output_buffer[C4]=0x00;
