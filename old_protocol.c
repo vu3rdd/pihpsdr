@@ -1653,13 +1653,14 @@ void ozy_send_buffer() {
 	// Therefore, when in CW mode, send the TX drive level also when receiving.
 	// (it would be sufficient to do so only with internal CW).
 	//
+	power=transmitter->drive_level;
         if(isTransmitting() || (txmode == modeCWU) || (txmode == modeCWL)) {
           if(tune && !transmitter->tune_use_drive) {
             double fac=sqrt((double)transmitter->tune_percent * 0.01);
             power=(int)((double)transmitter->drive_level*fac);
-          } else {
-            power=transmitter->drive_level;
-          }
+          } /* else { */
+          /*   power=transmitter->drive_level; */
+          /* } */
 
 	  // printf("power: %d\n", power);
 #if 0
