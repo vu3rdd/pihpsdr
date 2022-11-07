@@ -1720,10 +1720,11 @@ void ozy_send_buffer() {
 #endif
         }
 
-//if(last_power!=power) {
-//  g_print("power=%d\n",power);
-//  last_power=power;
-//}
+	/* if(last_power!=power) { */
+	/*     int computed_gain = (power >> 5) + ((power + 4) >> 3); */
+	/*     g_print("power=%d, computed gain = %d\n",power, computed_gain); */
+	/*     last_power=power; */
+	/* } */
 
         output_buffer[C0]=0x12; /* addr[6:1] = 001001b */
         output_buffer[C1]=power & 0xFF;

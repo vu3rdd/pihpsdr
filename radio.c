@@ -1615,17 +1615,21 @@ double getDrive(void) {
 }
 
 static int calcLevel(double d) {
-    fprintf(stderr, "calcLevel: input d = %f..", d);
   int level = 0;
   int v = get_tx_vfo();
 
   BAND *band = band_get_band(vfo[v].band);
-  double target_dbm = 10.0 * log10(d * 1000.0);
+  double target_dbm_orig = 10.0 * log10(d * 1000.0);
   double gbb = band->pa_calibration;
-  target_dbm -= gbb;
+  double target_dbm = target_dbm_orig - gbb;
   double target_volts = sqrt(pow(10, target_dbm * 0.1) * 0.05);
   double volts = min((target_volts / 0.8), 1.0);
   double actual_volts = volts * (1.0 / 0.98);
+
+  /* printf("calcLevel: d = %f\n", d); */
+  /* printf("calcLevel: target_dbm_orig = %f\n", target_dbm_orig); */
+  /* printf("calcLevel: gbb = %f\n", gbb); */
+  /* printf("calcLevel: target_dbm = %f\n", target_dbm); */
 
   if (actual_volts < 0.0) {
     actual_volts = 0.0;
