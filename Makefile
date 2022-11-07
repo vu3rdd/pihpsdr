@@ -155,8 +155,8 @@ AUDIO_SOURCES=portaudio.c
 AUDIO_OBJS=portaudio.o
 endif
 
-//CFLAGS=	-g -Wno-deprecated-declarations -O3
-CFLAGS=	-g -Wno-deprecated-declarations
+CFLAGS=	-Wno-deprecated-declarations -O3
+//CFLAGS=	-g -Wno-deprecated-declarations
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(LOCALCW_OPTIONS) \
         $(PTT_OPTIONS) \
