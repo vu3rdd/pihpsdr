@@ -48,6 +48,7 @@ void cw_changed() {
 // NewProtocol: rely on periodically sent HighPrio packets
 #ifdef LOCALCW
   keyer_update();
+  midi_keyer_update();
 #endif
 //
 // speed and side tone frequency are displayed in the VFO bar
@@ -81,6 +82,11 @@ static void cw_vfo_cb(GtkToggleButton *widget, gpointer data) {
 
 static void cw_keyer_internal_cb(GtkWidget *widget, gpointer data) {
   cw_keyer_internal=cw_keyer_internal==1?0:1;
+  cw_changed();
+}
+
+static void cw_keyer_midi_cb(GtkWidget *widget, gpointer data) {
+  cw_keyer_midi = cw_keyer_midi == 1 ? 0: 1;
   cw_changed();
 }
 
@@ -288,6 +294,13 @@ void cw_menu(GtkWidget *parent) {
   gtk_widget_show(cw_keyer_spacing_b);
   gtk_grid_attach(GTK_GRID(grid),cw_keyer_spacing_b,0,11,1,1);
   g_signal_connect(cw_keyer_spacing_b,"toggled",G_CALLBACK(cw_keyer_spacing_cb),NULL);
+
+  GtkWidget *cw_keyer_midi_b=gtk_check_button_new_with_label("CW handled in MIDI Keyer");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cw_keyer_midi_b), cw_keyer_midi);
+  gtk_widget_show(cw_keyer_midi_b);
+  gtk_grid_attach(GTK_GRID(grid),cw_keyer_midi_b,0,12,1,1);
+  g_signal_connect(cw_keyer_midi_b,"toggled",G_CALLBACK(cw_keyer_midi_cb),NULL);
+
 #endif
 
   gtk_container_add(GTK_CONTAINER(content),grid);

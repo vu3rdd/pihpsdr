@@ -291,3 +291,5 @@ int MIDIstop();
 
 void DoTheMidi(int code, enum ACTIONtype type, int val);
 #endif
+
+void midi_keyer_update();

@@ -1283,6 +1283,9 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
 #ifdef LOCALCW
                 keyer_update();
 #endif
+#ifdef MIDI
+		midi_keyer_update();
+#endif
                 vfo_update();
             }
         }
@@ -3147,6 +3150,7 @@ int parse_cmd(void *data) {
           cw_keyer_speed = speed;
 #ifdef LOCALCW
           keyer_update();
+	  midi_keyer_update();
 #endif
           vfo_update();
         }

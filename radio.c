@@ -253,6 +253,8 @@ int cw_keyer_mode = KEYER_MODE_A;
 int cw_keyer_weight = 50;              // 0-100
 int cw_keyer_spacing = 0;              // 0=on 1=off
 int cw_keyer_internal = 1;             // 0=external 1=internal
+int cw_keyer_midi = 0;                 // 0 = (external) midi keyer
+				       // disabled, 1 = enabled
 int cw_keyer_sidetone_volume = 50;     // 0-127
 int cw_keyer_ptt_delay = 20;           // 0-255ms
 int cw_keyer_hang_time = 500;          // ms
@@ -460,6 +462,11 @@ void reconfigure_radio() {
     if (!duplex) {
       reconfigure_transmitter(transmitter, display_width, rx_height);
     }
+#ifdef MIDI
+    if (cw_keyer_midi == 1) {
+      midi_keyer_update();
+    }
+#endif
   }
 }
 
@@ -669,6 +676,10 @@ static void create_visual() {
   if (cw_keyer_internal == 0) {
     g_print("Initialize keyer.....\n");
     keyer_update();
+  }
+
+  if (cw_keyer_midi == 1) {
+      midi_keyer_update();
   }
 #endif
 
@@ -1213,6 +1224,9 @@ void start_radio() {
   if (midi_enabled && (midi_device_name != NULL)) {
     if (register_midi_device(midi_device_name) < 0) {
       midi_enabled = FALSE;
+    }
+    if (cw_keyer_midi == 1) {
+	midi_keyer_update();
     }
   } else {
     midi_enabled = FALSE;
@@ -1864,8 +1878,11 @@ void radioRestoreState() {
     if (value)
       cw_keys_reversed = atoi(value);
     value = getProperty("cw_keyer_speed");
-    if (value)
+    if (value) {
       cw_keyer_speed = atoi(value);
+      // if we have the midikeyer, set the speed to this value
+      midi_keyer_update();
+    }
     value = getProperty("cw_keyer_mode");
     if (value)
       cw_keyer_mode = atoi(value);
@@ -1879,6 +1896,11 @@ void radioRestoreState() {
     value = getProperty("cw_keyer_internal");
     if (value)
       cw_keyer_internal = atoi(value);
+
+    value = getProperty("cw_keyer_midi");
+    if (value)
+      cw_keyer_midi = atoi(value);
+
 #endif
     value = getProperty("cw_keyer_sidetone_volume");
     if (value)
@@ -2293,6 +2315,10 @@ void radioSaveState() {
     setProperty("cw_keyer_spacing", value);
     sprintf(value, "%d", cw_keyer_internal);
     setProperty("cw_keyer_internal", value);
+
+    sprintf(value, "%d", cw_keyer_midi);
+    setProperty("cw_keyer_midi", value);
+
     sprintf(value, "%d", cw_keyer_sidetone_volume);
     setProperty("cw_keyer_sidetone_volume", value);
     sprintf(value, "%d", cw_keyer_ptt_delay);
@@ -2600,6 +2626,9 @@ int remote_start(void *data) {
                         gdk_cursor_new(GDK_ARROW));
 #ifdef MIDI
   MIDIstartup();
+  if (cw_keyer_midi == 1) {
+      midi_keyer_update();
+  }
 #endif
   for (int i = 0; i < receivers; i++) {
     gint timer_id = gdk_threads_add_timeout_full(

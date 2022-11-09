@@ -55,6 +55,7 @@ static enum {
 static gboolean configure=FALSE;
 
 static snd_rawmidi_t *input;
+snd_rawmidi_t *cw_midi_output = NULL;
 
 void configure_midi_device(gboolean state) {
   configure=state;
@@ -203,7 +204,7 @@ int register_midi_device(char *myname) {
     for(i=0;i<n_midi_devices;i++) {
         if(strcmp(myname,midi_devices[i].name)==0) {
 	    strcpy(portname,midi_devices[i].port);
-            if ((ret = snd_rawmidi_open(&input, NULL, midi_devices[i].port, SND_RAWMIDI_NONBLOCK)) < 0) {
+            if ((ret = snd_rawmidi_open(&input, &cw_midi_output, midi_devices[i].port, SND_RAWMIDI_NONBLOCK)) < 0) {
                g_print("%s: cannot open port \"%s\": %s\n", __FUNCTION__, midi_devices[i].port, snd_strerror(ret));
                break;
             }

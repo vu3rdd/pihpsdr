@@ -217,6 +217,7 @@ extern int cw_keyer_mode;
 extern int cw_keyer_weight;
 extern int cw_keyer_spacing;
 extern int cw_keyer_internal;
+extern int cw_keyer_midi;
 extern int cw_keyer_sidetone_volume;
 extern int cw_keyer_ptt_delay;
 extern int cw_keyer_hang_time;
