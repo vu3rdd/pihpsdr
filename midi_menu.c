@@ -126,10 +126,12 @@ static gboolean midi_enable_cb(GtkWidget *widget,gpointer data) {
   }
   midi_enabled=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (widget));
   if(midi_enabled) {
-    if(register_midi_device(midi_device_name)<0) {
-      midi_enabled=FALSE;
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (widget), midi_enabled);
-    }
+      if (midi_device_name != NULL) {
+          if(register_midi_device(midi_device_name)<0) {
+              midi_enabled=FALSE;
+              gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (widget), midi_enabled);
+          }
+      }
   }
   return TRUE;
 }
