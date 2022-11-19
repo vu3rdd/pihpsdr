@@ -34,7 +34,7 @@
 
 static int colorLowR=0; // black
 static int colorLowG=0;
-static int colorLowB=0;
+static int colorLowB=255;
 
 static int colorMidR=255; // red
 static int colorMidG=0;
