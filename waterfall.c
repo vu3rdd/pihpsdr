@@ -242,7 +242,7 @@ void waterfall_update(RECEIVER *rx) {
 
     
     if(rx->waterfall_automatic) {
-        rx->waterfall_low=-119; //average/display_width;
+        rx->waterfall_low=-128; //average/display_width;
         rx->waterfall_high=-77; //rx->waterfall_low+50;
     }
 
