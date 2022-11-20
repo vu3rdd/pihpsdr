@@ -1039,12 +1039,12 @@ void vfo_update() {
         cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
         cairo_show_text(cr, vfo_texts[0]);
         // show the step digit and the rest in grey
-        cairo_set_font_size(cr, 50);
-        cairo_set_source_rgb(cr, 0.75, 0.75, 0.75);
+        // cairo_set_font_size(cr, 50);
+        cairo_set_source_rgb(cr, 0.0, 1.0, 1.0); // 0.75, 0.75, 0.75);
         cairo_show_text(cr, ".");
-	cairo_set_source_rgb(cr, 0.75, 0.75, 0.75);
+	cairo_set_source_rgb(cr, 0.75, 1.0, 1.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[1]);
-	cairo_set_source_rgb(cr, 0.75, 0.75, 0.75);
+	cairo_set_source_rgb(cr, 0.75, 1.0, 1.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[2]);
 
         cairo_select_font_face(cr, "Cantarell",
