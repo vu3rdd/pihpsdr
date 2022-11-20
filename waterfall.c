@@ -32,9 +32,9 @@
 #endif
 
 
-static int colorLowR=0; // blue
+static int colorLowR=0; // black
 static int colorLowG=0;
-static int colorLowB=128; // navy blue
+static int colorLowB=0;
 
 static int colorMidR=255; // red
 static int colorMidG=0;
@@ -242,8 +242,8 @@ void waterfall_update(RECEIVER *rx) {
 
     
     if(rx->waterfall_automatic) {
-      rx->waterfall_low=average/display_width;
-      rx->waterfall_high=rx->waterfall_low+50;
+        rx->waterfall_low=-119; //average/display_width;
+        rx->waterfall_high=-77; //rx->waterfall_low+50;
     }
 
     gtk_widget_queue_draw (rx->waterfall);
