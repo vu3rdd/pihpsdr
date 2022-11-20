@@ -32,9 +32,9 @@
 #endif
 
 
-static int colorLowR=0; // black
+static int colorLowR=0; // blue
 static int colorLowG=0;
-static int colorLowB=255;
+static int colorLowB=128; // navy blue
 
 static int colorMidR=255; // red
 static int colorMidG=0;
