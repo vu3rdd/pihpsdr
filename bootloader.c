@@ -133,19 +133,22 @@ int main(int argc, char **argv)
     hisip[0]=0;
     rbffile=NULL;
 
-    i=1;
-    while (i < argc) {
+    i=0;
+    while (++i < argc) {
       if (!strcmp(argv[i],"-d")) {
         do_display=1;
         do_lookup=0;
+        continue;
       }
       if (!strcmp(argv[i],"-i") && i+1 < argc) {
         dev=argv[++i];
         do_display=0;
         do_lookup=1;
+        continue;
       }
       if (!strcmp(argv[i],"-f") && i+1 < argc) {
         rbffile=argv[++i];
+        continue;
       }
       if (!strcmp(argv[i],"-s") && i+1 < argc) {
         int i1,i2,i3,i4;
@@ -153,13 +156,13 @@ int main(int argc, char **argv)
         if (sscanf(argv[i],"%d.%d.%d.%d",&i1,&i2,&i3,&i4) < 4) {
           printf("Could not determine IP addr from string %s\n", argv[i]);
         } else {
-          hisip[0]=i1;
-          hisip[1]=i2;
-          hisip[2]=i3;
-          hisip[3]=i4;
+          hisip[0]=i1 & 0xff;
+          hisip[1]=i2 & 0xff;
+          hisip[2]=i3 & 0xff;
+          hisip[3]=i4 & 0xff;
         }
+        continue;
       }
-      i++;
     }
 
     //
@@ -171,14 +174,18 @@ int main(int argc, char **argv)
     }
     
     ifp=devlist;
+    have_addr=0;
+    have_mac=0;
     while (ifp != NULL) {
       if (do_lookup && strcmp(ifp->name, dev)) {
         // we are looking for a specific interface, skip all others
         ifp=ifp->next;
         continue;
       }
-      have_addr=0;
-      have_mac=0;
+      if (do_display) {
+        have_addr=0;
+        have_mac=0;
+      }
       addr=ifp->addresses;
       while (addr != NULL) {
         sa=addr->addr;
@@ -190,7 +197,7 @@ int main(int argc, char **argv)
             myip[1]=i2;
             myip[2]=i3;
             myip[3]=i4;
-            if (i > 127) have_addr=1;
+            if (myip[0] > 127) have_addr=1;
           }
         }
         if (sa->sa_family == AF_LINK) {
@@ -221,10 +228,10 @@ int main(int argc, char **argv)
         addr=addr->next;
       }
       if (have_addr && have_mac) {
-        printf("Interface=%-10s Address=(%3d,%3d,%3d,%3d) MAC=%02x:%02x:%02x:%02x:%02x:%02x\n",
+        printf("Interface=%-10s MAC=%02x:%02x:%02x:%02x:%02x:%02x Address=%d.%d.%d.%d\n",
             ifp->name,
-            myip[0], myip[1], myip[2], myip[3],
-            mymac[0],mymac[1],mymac[2],mymac[3],mymac[4],mymac[5]);
+            mymac[0],mymac[1],mymac[2],mymac[3],mymac[4],mymac[5],
+            myip[0], myip[1], myip[2], myip[3]);
       }
       ifp=ifp->next;
     }
@@ -234,9 +241,10 @@ int main(int argc, char **argv)
     // If no suitable interface has been specified
     // (or if this is a "display" run), give up.
     //
-    if (dev == NULL || !have_addr || !have_mac) {
-      return 8;
-    }
+    if (dev == NULL) return 0;  // this was a "display" run
+    if (!have_addr)  printf("Interface %s has no IP  address (exiting).\n",dev);
+    if (!have_mac)   printf("Interface %s has no MAC address (exiting).\n",dev);
+    if (!have_addr || !have_mac) return 8;
 
     //
     //  Check some assumptions about RBF file
@@ -259,7 +267,7 @@ int main(int argc, char **argv)
       if (rbffd >= 0) {
         rbflen=lseek(rbffd, 0, SEEK_END);
         if (rbflen < 100000UL) {
-          printf("RBF file seems unreasonably short!\n");
+          printf("RBF file seems unreasonably short,  ignoring.\n");
           close(rbffd);
           rbffd=-1;
         } else {
