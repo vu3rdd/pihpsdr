@@ -948,8 +948,8 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
 
     int l_temp = strlen(temp);
     if (step < l_temp) {
-        strncpy(s2, temp, l_temp - step);
-        strncpy(s3, &temp[l_temp - step], step);
+        strncpy(s2, temp, l_temp - step - 1);
+        strncpy(s3, &temp[l_temp - step - 1], step+1);
     } else {
         strncpy(s2, temp, l_temp);
     }
@@ -1086,7 +1086,7 @@ void vfo_update() {
         /*     cairo_set_source_rgb(cr, 0.0, 1.0, 1.0); // 0.75, 0.75, 0.75); */
         /*     cairo_show_text(cr, "."); */
         /* } */
-        cairo_set_source_rgb(cr, 0.75, 1.0, 1.0); // 0.75, 0.75);
+        cairo_set_source_rgb(cr, 0.0, 1.0, 0.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[2]);
 
         cairo_select_font_face(cr, "Cantarell",
