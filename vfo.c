@@ -1317,17 +1317,23 @@ void vfo_update() {
         cairo_show_text(cr, "SPLIT");
 
         cairo_move_to(cr, 5, 40);
-        if(sat_mode!=SAT_NONE) {
-          cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+        if(vfo[id].ctun) {
+          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         } else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
         }
-        cairo_set_font_size(cr, 16);
-        if(sat_mode==SAT_NONE || sat_mode==SAT_MODE) {
-          cairo_show_text(cr, "SAT");
-        } else {
-          cairo_show_text(cr, "RSAT");
-        }
+        cairo_show_text(cr, "CTUN");
+        /* if(sat_mode!=SAT_NONE) { */
+        /*   cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); */
+        /* } else { */
+        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
+        /* } */
+        /* cairo_set_font_size(cr, 16); */
+        /* if(sat_mode==SAT_NONE || sat_mode==SAT_MODE) { */
+        /*   cairo_show_text(cr, "SAT"); */
+        /* } else { */
+        /*   cairo_show_text(cr, "RSAT"); */
+        /* } */
 
 
         if(duplex) {
