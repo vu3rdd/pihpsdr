@@ -924,6 +924,33 @@ char **draw_vfo_val(char *vfo_str, int step) {
     return s;
 }
 
+char **draw_vfo_val_fixed(char *vfo_str, int step) {
+    // eg: The vfo_str is "VFO A: 7.123456"
+    // we should return:
+    //   ["VFO A: 7.123", "456"]
+    int l = strlen(vfo_str);
+
+    char **s = malloc(2 * sizeof(char *));
+
+    char *s1 = malloc(sizeof(char) * 20);
+    char *s2 = malloc(sizeof(char) * 20);
+    char *s3 = malloc(sizeof(char) * 20);
+
+    memset(s1, '\0', 20);
+    memset(s2, '\0', 20);
+    memset(s3, '\0', 20);
+
+    strncpy(s2, &vfo_str[l-3], 3);
+    strncpy(s1, &vfo_str[0], l-3);
+
+    s[0] = s1;
+    s[1] = s2;
+    s[2] = s3;
+
+    return s;
+}
+
+
 void vfo_update() {
     
     int id=active_receiver->id;
@@ -1017,7 +1044,7 @@ void vfo_update() {
                                CAIRO_FONT_WEIGHT_NORMAL);
 
         sprintf(temp_text,"%0lld.%06lld",af/(long long)1000000,af%(long long)1000000);
-        char **vfo_texts = draw_vfo_val(temp_text, s);
+        char **vfo_texts = draw_vfo_val_fixed(temp_text, s);
 
         if(txvfo == 0 && (isTransmitting() || oob)) {
             if (oob) sprintf(temp_text,"VFO A: Out of band");
@@ -1040,6 +1067,7 @@ void vfo_update() {
         cairo_show_text(cr, vfo_texts[0]);
         // show the step digit and the rest in grey
         // cairo_set_font_size(cr, 50);
+        cairo_show_text(cr, ".");
 	cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[1]);
         if (strlen(vfo_texts[2]) != 0) {
