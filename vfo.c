@@ -935,18 +935,30 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
     char *s1 = malloc(sizeof(char) * 20);
     char *s2 = malloc(sizeof(char) * 20);
     char *s3 = malloc(sizeof(char) * 20);
+    char *temp = malloc(sizeof(char) * 10);
 
     memset(s1, '\0', 20);
     memset(s2, '\0', 20);
     memset(s3, '\0', 20);
+    memset(temp, '\0', 10);
 
-    strncpy(s2, &vfo_str[l-3], 3);
     strncpy(s1, &vfo_str[0], l-3);
+    temp[0] = '.';
+    strncpy(&temp[1], &vfo_str[l-3], 3);
+
+    int l_temp = strlen(temp);
+    if (step < l_temp) {
+        strncpy(s2, temp, l_temp - step);
+        strncpy(s3, &temp[l_temp - step], step);
+    } else {
+        strncpy(s2, temp, l_temp);
+    }
 
     s[0] = s1;
     s[1] = s2;
     s[2] = s3;
 
+    free(temp);
     return s;
 }
 
@@ -1067,13 +1079,13 @@ void vfo_update() {
         cairo_show_text(cr, vfo_texts[0]);
         // show the step digit and the rest in grey
         // cairo_set_font_size(cr, 50);
-        cairo_show_text(cr, ".");
+        // cairo_show_text(cr, ".");
 	cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[1]);
-        if (strlen(vfo_texts[2]) != 0) {
-            cairo_set_source_rgb(cr, 0.0, 1.0, 1.0); // 0.75, 0.75, 0.75);
-            cairo_show_text(cr, ".");
-        }
+        /* if (strlen(vfo_texts[2]) != 0) { */
+        /*     cairo_set_source_rgb(cr, 0.0, 1.0, 1.0); // 0.75, 0.75, 0.75); */
+        /*     cairo_show_text(cr, "."); */
+        /* } */
         cairo_set_source_rgb(cr, 0.75, 1.0, 1.0); // 0.75, 0.75);
         cairo_show_text(cr, vfo_texts[2]);
 
