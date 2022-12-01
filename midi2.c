@@ -435,13 +435,17 @@ g_print("%s:TAB:Insert desc=%p in CMDS[%d] table\n",__FUNCTION__,desc,key);
 void midi_keyer_update(void) {
     // read the global cw_keyer_speed and send midi commands
     char wpmctrl[4] = {0xb1, 0, cw_keyer_speed}; // 0xb0, lower nibble is channel number.
-
+    char paddleReverseCtl[4] = {0xb1, 2, cw_keys_reversed};
     int status;
     if (cw_midi_output != NULL) {
 	fprintf(stderr, "MIDI Keyer: setting WPM to %d\n", cw_keyer_speed);
 	if ((status = snd_rawmidi_write(cw_midi_output, wpmctrl, 4)) < 0) {
 	    fprintf(stderr, "Problem writing to MIDI output: %s", snd_strerror(status));
 	}
+
+        if ((status = snd_rawmidi_write(cw_midi_output, paddleReverseCtl, 4)) < 0) {
+            fprintf(stderr, "Problem writing to MIDI output: %s", snd_strerror(status));
+        }
     } else {
 	fprintf(stderr, "MIDI device is not open yet\n");
     }
