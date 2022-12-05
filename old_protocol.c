@@ -1297,14 +1297,7 @@ void old_protocol_audio_samples(RECEIVER *rx,short left_audio_sample,short right
   }
 }
 
-//
-// This is a copy of old_protocol_iq_samples,
-// but it includes the possibility to send a side tone
-// We use it to provide a side-tone for CW/TUNE, in
-// all other cases side==0 and this routine then is
-// fully equivalent to old_protocol_iq_samples.
-//
-void old_protocol_iq_samples_with_sidetone(int isample, int qsample, int side) {
+void old_protocol_iq_samples(int isample, int qsample, int side) {
   if(isTransmitting()) {
     pthread_mutex_lock(&send_audio_mutex);
     if (!txring_flag) {
@@ -1327,31 +1320,6 @@ void old_protocol_iq_samples_with_sidetone(int isample, int qsample, int side) {
       TXRINGBUF[txring_inptr++]=side >> 8;
       TXRINGBUF[txring_inptr++]=side;
     }
-    TXRINGBUF[txring_inptr++]=isample >> 8;
-    TXRINGBUF[txring_inptr++]=isample;
-    TXRINGBUF[txring_inptr++]=qsample >> 8;
-    TXRINGBUF[txring_inptr++]=qsample;
-    if (txring_inptr >= TXRINGBUFLEN) txring_inptr=0;
-    pthread_mutex_unlock(&send_audio_mutex);
-  }
-}
-
-void old_protocol_iq_samples(int isample,int qsample) {
-  if(isTransmitting()) {
-    pthread_mutex_lock(&send_audio_mutex);
-    if (!txring_flag) {
-      //
-      // First time we arrive here after a RX->TX transition:
-      // Clear TX IQ ring buffer so the amples will be sent
-      // as soon as possible.
-      //
-      txring_flag=1;
-      txring_inptr = txring_outptr = 0;
-    }
-    TXRINGBUF[txring_inptr++]=0;
-    TXRINGBUF[txring_inptr++]=0;
-    TXRINGBUF[txring_inptr++]=0;
-    TXRINGBUF[txring_inptr++]=0;
     TXRINGBUF[txring_inptr++]=isample >> 8;
     TXRINGBUF[txring_inptr++]=isample;
     TXRINGBUF[txring_inptr++]=qsample >> 8;

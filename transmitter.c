@@ -51,9 +51,7 @@
 #include "audio.h"
 #include "ext.h"
 #include "sliders.h"
-
-double getNextSideToneSample();
-double getNextInternalSideToneSample();
+#include "sintab.h"
 
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
@@ -100,6 +98,12 @@ double ctcss_frequencies[CTCSS_FREQUENCIES]= {
   136.5,141.3,146.2,151.4,156.7,162.2,167.9,173.8,179.9,186.2,
   192.8,203.5,210.7,218.1,225.7,233.6,241.8,250.3
 };
+
+//
+// static variables for the sine tone generators
+//
+static int p1radio=0, p2radio=0;  // sine tone to the radio
+static int p1local=0, p2local=0;  // sine tone to local audio
 
 static void init_analyzer(TRANSMITTER *tx);
 
@@ -1257,8 +1261,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 //
 //  When doing CW, we do not need WDSP since Q(t) = cw_shape_buffer(t) and I(t)=0
 //  For the old protocol where the IQ and audio samples are tied together, we can
-//  easily generate a synchronous side tone (and use the function
-//  old_protocol_iq_samples_with_sidetone for this purpose).
+//  easily generate a synchronous side tone
 //
 //  Note that the CW shape buffer is tied to the mic sample rate (48 kHz).
 //
@@ -1270,8 +1273,11 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	// with the pulse envelope. We also produce a side tone with same shape.
 	// Note that tx->iq_output_buffer is not used. Therefore, all the
         // SetTXAPostGen functions are not needed for CW!
-	//
-	// In the new protocol, we just put "silence" into the TX IQ buffer
+        //
+        // "Side tone to radio" treatment:
+        // old protocol: done HERE
+        // new protocol: already done in add_mic_sample
+        // soapy       : no audio to radio
 	//
 	switch (protocol) {
 	  case ORIGINAL_PROTOCOL:
@@ -1284,8 +1290,8 @@ static void full_tx_buffer(TRANSMITTER *tx) {
             for(j=0;j<tx->output_samples;j++) {
 	      ramp=cw_shape_buffer48[j];	    	    // between 0.0 and 1.0
 	      qsample=floor(gain*ramp+0.5);         // always non-negative, isample is just the pulse envelope
-	      sidetone=sidevol * ramp * getNextInternalSideToneSample();
-	      old_protocol_iq_samples_with_sidetone(isample,qsample,sidetone);
+	      sidetone=sidevol * ramp * sine_generator(&p1radio, &p2radio, cw_keyer_sidetone_frequency);
+	      old_protocol_iq_samples(isample,qsample,sidetone);
 	    }
 	    break;
 	  case NEW_PROTOCOL:
@@ -1325,7 +1331,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	    qsample=qs>=0.0?(long)floor(qs*gain+0.5):(long)ceil(qs*gain-0.5);
 	    switch(protocol) {
 		case ORIGINAL_PROTOCOL:
-		    old_protocol_iq_samples(isample,qsample);
+		    old_protocol_iq_samples(isample,qsample,0);
 		    break;
 		case NEW_PROTOCOL:
 		    new_protocol_iq_samples(isample,qsample);
@@ -1403,7 +1409,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
 	// store the ramp value in cw_shape_buffer, but also use it for shaping the "local"
 	// side tone
 	ramp=cwramp48[cw_shape];
-	cwsample=0.00197 * getNextSideToneSample() * cw_keyer_sidetone_volume * ramp;
+	cwsample=0.00197 * cw_keyer_sidetone_volume * ramp * sine_generator(&p1local, &p2local, cw_keyer_sidetone_frequency);
 	if(active_receiver->local_audio && cw_keyer_sidetone_volume > 0) cw_audio_write(active_receiver,cwsample);
         cw_shape_buffer48[tx->samples]=ramp;
 	//
@@ -1419,7 +1425,9 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
 	//
         if (protocol == NEW_PROTOCOL) {
  	    s=0;
- 	    if (!cw_keyer_internal || CAT_cw_is_active) s=(int) (cwsample * 32767.0);
+            // cwsample is in the range 0.0 - 0.25. For my Anan-7000, the following scaling
+            // produces the same volume as "internal CW".
+ 	    if (!cw_keyer_internal || CAT_cw_is_active) s=(int) (cwsample * 65535.0);
 	    new_protocol_cw_audio_samples(s, s);
 	    s=4*cw_shape;
 	    i=4*tx->samples;
@@ -1665,24 +1673,52 @@ void tx_set_ps_sample_rate(TRANSMITTER *tx,int rate) {
 #endif
 }
 
-// Sine tone generator:
-// somewhat improved, and provided two siblings
-// for generating side tones simultaneously on the
-// HPSDR board and local audio.
+///////////////////////////////////////////////////////////////////////////
+// Sine tone generator based on phase words that are
+// passed as an argument. The phase (value 0-256) is encoded in
+// two integers (in the range 0-255) as
+//
+// phase = p1 + p2/256
+//
+// and the sine value is obtained from the table by linear
+// interpolateion
+//
+// sine := sintab[p1] + p2*(sintab(p1+1)-sintab(p2))/256.0
+//
+// and the phase word is updated, depending on the frequency f, as
+//
+// p1 := p1 + (256*f)/48000
+// p2 := p2 + (256*f)%48000
+//
+///////////////////////////////////////////////////////////////////////////
+// The idea of this sine generator is
+// - it does not depend on an external sin function
+// - it does not do much floating point
+// - many sine generators can run in parallel, with their "own"
+//   phase words and frequency
+// - the phase is always continuous, even if there are frequency jumps
+///////////////////////////////////////////////////////////////////////////
 
-#define TWOPIOVERSAMPLERATE 0.0001308996938995747;  // 2 Pi / 48000
-
-static long asteps = 0;
-static long bsteps = 0;
-
-double getNextSideToneSample() {
-  	double angle = (asteps*cw_keyer_sidetone_frequency)*TWOPIOVERSAMPLERATE;
-	if (++asteps == 48000) asteps = 0;
-	return sin(angle);
-}
-
-double getNextInternalSideToneSample() {
-	double angle = (bsteps*cw_keyer_sidetone_frequency)*TWOPIOVERSAMPLERATE;
-	if (++bsteps == 48000) bsteps = 0;
-	return sin(angle);
+float sine_generator(int *phase1, int *phase2, int freq) {
+  register float val,s,d;
+  register int p1=*phase1;
+  register int p2=*phase2;
+  register int32_t f256=freq*256; // so we know 256*freq won't overflow
+  s=sintab[p1];
+  d=sintab[p1+1]-s;
+  val = s + p2*d*0.00390625;  // 1/256
+  p1 += f256 / 48000;
+  p2 += ((f256 % 48000)*256)/48000;
+  // correct overflows in fractional and integer phase to keep
+  // p1,p2 within bounds
+  if (p2 > 255) {
+    p2 -= 256;
+    p1++;
+  }
+  if (p1 > 255) {
+    p1 -=256;
+  }
+  *phase1=p1;
+  *phase2=p2;
+  return val;
 }
