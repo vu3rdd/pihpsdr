@@ -85,6 +85,8 @@ static void vfo_save_bandstack() {
   entry->frequency=vfo[0].frequency;
   entry->mode=vfo[0].mode;
   entry->filter=vfo[0].filter;
+  entry->ctun=vfo[0].ctun;
+  entry->ctun_frequency=vfo[0].ctun_frequency;
 }
 
 void modesettings_save_state() {
@@ -439,15 +441,15 @@ void vfo_band_changed(int id,int b) {
   BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
   vfo[id].band=b;
   vfo[id].frequency=entry->frequency;
+  vfo[id].ctun=entry->ctun;
+  vfo[id].ctun_frequency=entry->ctun_frequency;
   vfo[id].mode=entry->mode;
   vfo[id].lo=band->frequencyLO+band->errorLO;
 
-  // turn off ctun
-  vfo[id].ctun=0;
-  vfo[id].ctun_frequency=0LL;
-  vfo[id].offset=0;
-  // tell WDSP about the offset
-  set_offset(active_receiver, vfo[id].offset);
+  //
+  // In the case of CTUN, the offset is re-calculated
+  // during receiver_vfo_changed ==> receiver_frequency_changed
+  //
 
   switch(id) {
     case 0:
@@ -487,6 +489,8 @@ void vfo_bandstack_changed(int b) {
   BANDSTACK *bandstack=bandstack_get_bandstack(vfo[id].band);
   BANDSTACK_ENTRY *entry=&bandstack->entry[vfo[id].bandstack];
   vfo[id].frequency=entry->frequency;
+  vfo[id].ctun_frequency=entry->ctun_frequency;
+  vfo[id].ctun=entry->ctun;
   vfo[id].mode=entry->mode;
   vfo[id].filter=entry->filter;
 

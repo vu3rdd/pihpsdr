@@ -68,7 +68,11 @@ static gboolean bandstack_select_cb (GtkWidget *widget, gpointer        data) {
     // current frequency/mode, which should be reflected by the button text.
     //
     char label[32];
-    snprintf(label,32,"%lld %s",vfo[0].frequency,mode_string[vfo[0].mode]);
+    if (vfo[0].ctun) {
+      snprintf(label,32,"%lld %s",vfo[0].ctun_frequency,mode_string[vfo[0].mode]);
+    } else {
+      snprintf(label,32,"%lld %s",vfo[0].frequency,mode_string[vfo[0].mode]);
+    }
     gtk_button_set_label(GTK_BUTTON(last_bandstack), label);
   }
 
@@ -120,7 +124,11 @@ void bandstack_menu(GtkWidget *parent) {
   int col=0;
   for(i=0;i<bandstack->entries;i++) {
     BANDSTACK_ENTRY *entry=&bandstack->entry[i];
-    sprintf(label,"%lld %s",entry->frequency,mode_string[entry->mode]);
+    if (entry->ctun) {
+      sprintf(label,"%lld %s",entry->ctun_frequency,mode_string[entry->mode]);
+    } else {
+      sprintf(label,"%lld %s",entry->frequency,mode_string[entry->mode]);
+    }
     GtkWidget *b=gtk_button_new_with_label(label);
     set_button_text_color(b,"black");
     //gtk_widget_override_font(b, pango_font_description_from_string("Arial 20"));

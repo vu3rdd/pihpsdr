@@ -24,14 +24,18 @@
 /**
 * @brief Bandstack definition
 */
+
+//
+// a) ctun and ctun_frequency added such that one returns to the "old"
+//    setup when switching bands.
+// b) variable filter frequencies removed because they were nowhere used
+//
 struct _BANDSTACK_ENTRY {
     long long frequency;
+    int ctun;
+    long long ctun_frequency;
     int mode;
     int filter;
-    int var1Low;
-    int var1High;
-    int var2Low;
-    int var2High;
 };
 
 typedef struct _BANDSTACK_ENTRY BANDSTACK_ENTRY;
