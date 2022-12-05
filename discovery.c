@@ -540,7 +540,20 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
     gtk_widget_show_all(discovery_dialog);
 fprintf(stderr,"showing device dialog\n");
 
-    // autostart if one device and autostart enabled
+    //
+    // Autostart and RedPitaya radios:
+    //
+    // Autostart means that if there only one device detected, start the
+    // radio without the need to click the "Start" button.
+    //
+    // If this is the first round of a RedPitaya (STEMlab) discovery,
+    // there may be more than one SDR app on the RedPitya available
+    // from which one can choose one.
+    // With autostart, there is no choice in this case, the SDR app
+    // with highest priority is automatically chosen (and started),
+    // and then the discovery process is re-initiated for RedPitya
+    // devices only.
+    //
     g_print("%s: devices=%d autostart=%d\n",__FUNCTION__,devices,autostart);
 
     if(devices==1 && autostart) {

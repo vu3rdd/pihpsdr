@@ -1327,12 +1327,15 @@ void receiver_frequency_changed(RECEIVER *rx) {
 
   if(vfo[id].ctun) {
 
-    long long frequency=vfo[id].frequency;
-    long long half=(long long)rx->sample_rate/2LL;
-    long long rx_low=vfo[id].ctun_frequency+rx->filter_low;
-    long long rx_high=vfo[id].ctun_frequency+rx->filter_high;
-
     if(rx->zoom>1) {
+      //
+      // Adjust PAN if new filter width has moved out of
+      // current display range
+      //
+      long long frequency=vfo[id].frequency;
+      long long half=(long long)rx->sample_rate/2LL;
+      long long rx_low=vfo[id].ctun_frequency+rx->filter_low;
+      long long rx_high=vfo[id].ctun_frequency+rx->filter_high;
       long long min_display=frequency-half+(long long)((double)rx->pan*rx->hz_per_pixel);
       long long max_display=min_display+(long long)((double)rx->width*rx->hz_per_pixel);
       if(rx_low<=min_display) {
@@ -1346,6 +1349,10 @@ void receiver_frequency_changed(RECEIVER *rx) {
       }
     }
 
+    //
+    // The (HPSDR) frequency does not change in CTUN,
+    // so simply compute new offset and tell WDSP about it
+    //
     vfo[id].offset=vfo[id].ctun_frequency-vfo[id].frequency;
     if(vfo[id].rit_enabled) {
       vfo[id].offset+=vfo[id].rit;
@@ -1353,6 +1360,9 @@ void receiver_frequency_changed(RECEIVER *rx) {
     set_offset(rx,vfo[id].offset);
   } else {
     switch(protocol) {
+      case ORIGINAL_PROTOCOL:
+	// P1 does this automatically
+        break;
       case NEW_PROTOCOL:
         schedule_high_priority(); // send new frequency
         break;
