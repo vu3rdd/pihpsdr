@@ -566,9 +566,14 @@ int process_action(void *data) {
       if(a->mode==PRESSED) {
         vfo[active_receiver->id].ctun=!vfo[active_receiver->id].ctun;
         if(!vfo[active_receiver->id].ctun) {
-          vfo[active_receiver->id].offset=0;
+          // when deactivating CTUN,  keep frequency
+          setFrequency(vfo[active_receiver->id].ctun_frequency);
+        } else {
+          // when activating CTUN, continue with current frequency
+          vfo[active_receiver->id].ctun_frequency=vfo[active_receiver->id].frequency;
         }
-        vfo[active_receiver->id].ctun_frequency=vfo[active_receiver->id].frequency;
+        // in either case, start with zero offset after toggling CTUN
+        vfo[active_receiver->id].offset=0;
         set_offset(receiver[active_receiver->id],vfo[active_receiver->id].offset);
         g_idle_add(ext_vfo_update, NULL);
       }

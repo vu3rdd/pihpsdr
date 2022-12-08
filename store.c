@@ -129,7 +129,11 @@ void store_memory_slot(int index) {
    //
    // Store current frequency, mode, and filter in slot #index
    //
-   mem[index].frequency = vfo[id].frequency;
+   if (vfo[id].ctun) {
+     mem[index].frequency = vfo[id].ctun_frequency;
+   } else {
+     mem[index].frequency = vfo[id].frequency;
+   }
    mem[index].mode = vfo[id].mode;
    mem[index].filter=vfo[id].filter;
 
