@@ -31,9 +31,6 @@ LOCALCW_INCLUDE=LOCALCW
 # uncomment the line below for SoapySDR
 #SOAPYSDR_INCLUDE=SOAPYSDR
 
-# uncomment the line to below include support for sx1509 i2c expander
-#SX1509_INCLUDE=sx1509
-
 # uncomment the line below to include support for STEMlab discovery (WITH AVAHI)
 #STEMLAB_DISCOVERY=STEMLAB_DISCOVERY
 
@@ -54,6 +51,9 @@ LINK?=   $(CC)
 
 PKG_CONFIG = pkg-config
 
+#
+# Add modules for MIDI if required. Note these are different for Linux/MacOS
+#
 ifeq ($(MIDI_INCLUDE),MIDI)
 MIDI_OPTIONS=-D MIDI
 MIDI_HEADERS= midi.h midi_menu.h alsa_midi.h
@@ -125,6 +125,9 @@ LOCALCW_HEADERS= iambic.h
 LOCALCW_OBJS   = iambic.o
 endif
 
+#
+# disable GPIO for MacOS
+#
 ifeq ($(UNAME_S), Darwin)
 GPIO_INCLUDE=
 endif
@@ -176,16 +179,13 @@ GTKLIBS=`$(PKG_CONFIG) --libs gtk+-3.0`
 
 #
 # set options for audio module
-#  - MacOS: only PORTAUDIO
-#  - Linux: either ALSA or PULSEAUDIO
+#  - MacOS: only PORTAUDIO tested (although PORTAUDIO might work)
+#  - Linux: either PULSEAUDIO (default) or ALSO (upon request)
 #
 ifeq ($(UNAME_S), Darwin)
     AUDIO_MODULE=PORTAUDIO
 endif
 
-#
-# default audio for LINUX is PULSEAUDIO but we can also use ALSA
-#
 ifeq ($(UNAME_S), Linux)
   ifeq ($(AUDIO_MODULE) , ALSA)
     AUDIO_MODULE=ALSA
@@ -284,7 +284,6 @@ old_discovery.c \
 new_discovery.c \
 old_protocol.c \
 new_protocol.c \
-new_protocol_programmer.c \
 rx_panadapter.c \
 tx_panadapter.c \
 property.c \
@@ -318,7 +317,8 @@ i2c.c \
 gpio.c \
 encoder_menu.c \
 switch_menu.c \
-toolbar_menu.c
+toolbar_menu.c \
+sintab.c
 
 
 
@@ -397,7 +397,8 @@ i2c.h \
 gpio.h \
 encoder_menu.h \
 switch_menu.h \
-toolbar_menu.h
+toolbar_menu.h \
+sintab.h
 
 
 
@@ -442,7 +443,6 @@ old_discovery.o \
 new_discovery.o \
 old_protocol.o \
 new_protocol.o \
-new_protocol_programmer.o \
 rx_panadapter.o \
 tx_panadapter.o \
 property.o \
@@ -475,7 +475,8 @@ i2c.o \
 gpio.o \
 encoder_menu.o \
 switch_menu.o \
-toolbar_menu.o
+toolbar_menu.o \
+sintab.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
