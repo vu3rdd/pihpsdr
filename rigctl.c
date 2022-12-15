@@ -770,7 +770,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             // set the step size
             int i=atoi(&command[4]) ;
             vfo_set_step_from_index(i);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           } else {
           }
           break;
@@ -1089,8 +1089,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply) ;
           } else if(command[5]==';') {
             int state=atoi(&command[4]);
-            ctun_update(VFO_A,state);
-            vfo_update();
+            vfo_ctun_update(VFO_A,state);
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'O': //ZZCO
@@ -1101,8 +1101,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply) ;
           } else if(command[5]==';') {
             int state=atoi(&command[4]);
-            ctun_update(VFO_B,state);
-            vfo_update();
+            vfo_ctun_update(VFO_B,state);
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'P': //ZZCP
@@ -1320,7 +1320,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           } else if(command[15]==';') {
             long long f=atoll(&command[4]);
             vfo_set_frequency(VFO_A,f);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'B': //ZZFB
@@ -1335,7 +1335,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           } else if(command[15]==';') {
             long long f=atoll(&command[4]);
             vfo_set_frequency(VFO_B,f);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'D': //ZZFD
@@ -1351,7 +1351,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
               active_receiver->deviation=5000;
             } else {
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'H': //ZZFH
@@ -1456,7 +1456,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             int agc=atoi(&command[4]);
             // update RX1 AGC
             receiver[0]->agc=agc;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'U': //ZZGU
@@ -1468,7 +1468,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             int agc=atoi(&command[4]);
             // update RX2 AGC
             receiver[1]->agc=agc;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -1605,7 +1605,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
               int ps=atoi(&command[4]);
               transmitter->puresignal=ps;
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -1947,7 +1947,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           // clear RIT frequency
           if(command[4]==';') {
             vfo[VFO_A].rit=0;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'D': //ZZRD
@@ -1958,10 +1958,10 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             } else {
               vfo[VFO_A].rit-=rit_increment;
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           } else if(command[9]==';') {
             vfo[VFO_A].rit=atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'F': //ZZRF
@@ -1971,7 +1971,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply);
           } else if(command[9]==';') {
             vfo[VFO_A].rit=atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'M': //ZZRM
@@ -2003,7 +2003,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply);
           } else if(command[5]==';') {
             vfo[VFO_A].rit_enabled=atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'U': //ZZRU
@@ -2014,10 +2014,10 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             } else {
               vfo[VFO_A].rit+=rit_increment;
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           } else if(command[9]==';') {
             vfo[VFO_A].rit=atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -2361,7 +2361,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           // clear transmitter XIT
           if(command[4]==';') {
             transmitter->xit=0;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'F': //ZZXF
@@ -2371,7 +2371,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply) ;
           } else if(command[9]==';') {
             transmitter->xit=(long long)atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'H': //ZZXH
@@ -2444,7 +2444,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
             send_resp(client->fd,reply);
           } else if(command[5]==';') {
             transmitter->xit_enabled=atoi(&command[4]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'T': //ZZXT
@@ -2507,7 +2507,7 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
                 active_receiver=receiver[1];
               }
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -2714,7 +2714,7 @@ int parse_cmd(void *data) {
           } else if(command[13]==';') {
             long long f=atoll(&command[2]);
             vfo_set_frequency(VFO_A,f);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'B': //FB
@@ -2729,7 +2729,7 @@ int parse_cmd(void *data) {
           } else if(command[13]==';') {
             long long f=atoll(&command[2]);
             vfo_set_frequency(VFO_B,f);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'C': //FC
@@ -2865,7 +2865,7 @@ int parse_cmd(void *data) {
           } else if(command[5]==';') {
             // update RX1 AGC
             receiver[0]->agc=atoi(&command[2])/5;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -2932,7 +2932,7 @@ int parse_cmd(void *data) {
 #ifdef LOCALCW
               keyer_update();
 #endif
-              vfo_update();
+              g_idle_add(ext_vfo_update,NULL);
             }
           } else {
           }
@@ -2966,7 +2966,7 @@ int parse_cmd(void *data) {
             send_resp(client->fd,reply);
           } else if(command[4]==';') {
             locked = atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'M': //LM
@@ -3124,7 +3124,7 @@ int parse_cmd(void *data) {
           } else if(command[3]==';') {
             active_receiver->anf=atoi(&command[2]);
             SetRXAANFRun(active_receiver->id, active_receiver->anf);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -3193,7 +3193,7 @@ int parse_cmd(void *data) {
             double level=(double)atoi(&command[2]);
             level=(level/100.0)*20.0;
             transmitter_set_compressor_level(transmitter,level);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'M': //PM
@@ -3266,7 +3266,7 @@ int parse_cmd(void *data) {
           // clears RIT
           if(command[2]==';') {
             vfo[VFO_A].rit=0;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'D': //RD
@@ -3277,10 +3277,10 @@ int parse_cmd(void *data) {
             } else {
               vfo[VFO_A].rit-=50;
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           } else if(command[7]==';') {
             vfo[VFO_A].rit=atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'G': //RG
@@ -3302,7 +3302,7 @@ int parse_cmd(void *data) {
             send_resp(client->fd,reply);
           } else if(command[3]==';') {
             vfo[VFO_A].rit_enabled=atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'U': //RU
@@ -3313,10 +3313,10 @@ int parse_cmd(void *data) {
             } else {
               vfo[VFO_A].rit+=50;
             }
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           } else if(command[7]==';') {
             vfo[VFO_A].rit=atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'X': //RX
@@ -3748,7 +3748,7 @@ int parse_cmd(void *data) {
           } else if(command[5]==';') {
             // convert 0..9 to 0.0..1.0
             vox_threshold=atof(&command[2])/9.0;
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         case 'R': //VR
@@ -3762,7 +3762,7 @@ int parse_cmd(void *data) {
             send_resp(client->fd,reply);
           } else if(command[3]==';') {
             vox_enabled=atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:
@@ -3786,7 +3786,7 @@ int parse_cmd(void *data) {
             send_resp(client->fd,reply);
           } else if(command[3]==';') {
             transmitter->xit_enabled=atoi(&command[2]);
-            vfo_update();
+            g_idle_add(ext_vfo_update,NULL);
           }
           break;
         default:

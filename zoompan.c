@@ -33,6 +33,7 @@
 #include "client_server.h"
 #endif
 #include "actions.h"
+#include "ext.h"
 
 static int width;
 static int height;
@@ -93,7 +94,7 @@ g_print("zoom_value_changed_cb\n");
   }
   g_mutex_unlock(&active_receiver->display_mutex);
   g_mutex_unlock(&pan_zoom_mutex);
-  vfo_update();
+  g_idle_add(ext_vfo_update,NULL);
 }
 
 void set_zoom(int rx,double value) {
@@ -130,7 +131,7 @@ void set_zoom(int rx,double value) {
       scale_timer=g_timeout_add(2000,scale_timeout_cb,NULL);
     }
   }
-  vfo_update();
+  g_idle_add(ext_vfo_update,NULL);
 }
 
 void remote_set_zoom(int rx,double value) {
