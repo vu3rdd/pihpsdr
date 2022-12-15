@@ -225,7 +225,7 @@ static void hl2audio_cb(GtkWidget *widget, gpointer data) {
 
 static void split_cb(GtkWidget *widget, gpointer data) {
   int new=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  if (new != split) g_idle_add(ext_split_toggle, NULL);
+  radio_set_split(new);
 }
 
 //

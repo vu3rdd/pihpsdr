@@ -87,6 +87,11 @@ static void save_xvtr () {
 }
 
 void update_receiver(int band,gboolean error) {
+  //
+  // TODO: find out what this is *exactly* doing, and try
+  //       to use receiver_frequency_change() instead of
+  //       frequency_changed()
+  //
   RECEIVER *rx=active_receiver;
   gboolean saved_ctun;
 //g_print("update_receiver: band=%d error=%d\n",band,error);
