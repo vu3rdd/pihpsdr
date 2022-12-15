@@ -1368,7 +1368,7 @@ void start_radio() {
     soapy_protocol_set_gain(rx);
 
     if(vfo[0].ctun) {
-      setFrequency(vfo[0].ctun_frequency);
+      receiver_set_frequency(rx,vfo[0].ctun_frequency);
     }
     soapy_protocol_start_receiver(rx);
 
@@ -1845,52 +1845,6 @@ int isTransmitting() {
   return mox | vox | tune;
 }
 
-void setFrequency(long long f) {
-  int v=active_receiver->id;
-  vfo[v].band=get_band_from_frequency(f);
-
-  if(vfo[v].ctun) {
-    //
-    // If new frequency is within "window", change the CTUN frequency and
-    // update the offset. If it is outside, deactivate CTUN and fall
-    // through
-    //
-    long long minf=vfo[v].frequency-(long long)(active_receiver->sample_rate/2);
-    long long maxf=vfo[v].frequency+(long long)(active_receiver->sample_rate/2);
-    if(f > minf && f < maxf) {
-      vfo[v].ctun_frequency=f;
-      vfo[v].offset=f-vfo[v].frequency;
-      set_offset(active_receiver,vfo[v].offset);
-      return;
-    }
-    vfo[v].ctun=0;
-    vfo[v].ctun_frequency=0;
-    vfo[v].offset=0;
-    set_offset(active_receiver,vfo[v].offset);
-  }
-  vfo[v].frequency=f;
-
-  switch(protocol) {
-    case NEW_PROTOCOL:
-      schedule_high_priority();
-      break;
-    case ORIGINAL_PROTOCOL:
-      break;
-#ifdef SOAPYSDR
-    case SOAPYSDR_PROTOCOL:
-      if(!vfo[v].ctun) {
-        soapy_protocol_set_rx_frequency(active_receiver,v);
-        vfo[v].offset=0;
-      }
-      break;
-#endif
-  }
-}
-
-long long getFrequency() {
-    return vfo[active_receiver->id].frequency;
-}
-
 double getDrive() {
     return transmitter->drive;
 }
@@ -2039,6 +1993,10 @@ void set_alex_attenuation(int v) {
     if(protocol==NEW_PROTOCOL) {
       schedule_high_priority();
     }
+}
+
+void radio_split_toggle() {
+  radio_set_split(!split);
 }
 
 void radio_set_split(int val) {

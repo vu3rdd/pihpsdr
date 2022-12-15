@@ -1322,20 +1322,46 @@ g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",__FUNCTI
 g_print("%s: id=%d rate=%d buffer_size=%d output_samples=%d\n",__FUNCTION__,rx->id, rx->sample_rate, rx->buffer_size, rx->output_samples);
 }
 
+void receiver_set_frequency(RECEIVER *rx, long long f) {
+  int id=rx->id;
+
+  //
+  // update VFO, and let receiver_frequency_changed do the rest
+  //
+  vfo[id].band=get_band_from_frequency(f);
+  if(vfo[id].ctun) {
+    vfo[id].ctun_frequency=f;
+  } else {
+    vfo[id].frequency=f;
+  }
+  receiver_frequency_changed(rx);
+}
+
 void receiver_frequency_changed(RECEIVER *rx) {
   int id=rx->id;
 
   if(vfo[id].ctun) {
+    int ctun_ok=1;
+    long long frequency=vfo[id].frequency;
+    long long half=(long long)rx->sample_rate/2LL;
+    long long rx_low=vfo[id].ctun_frequency+rx->filter_low;
+    long long rx_high=vfo[id].ctun_frequency+rx->filter_high;
+    if (rx_low < frequency - half || rx_high > frequency+half) {
+      //
+      // Perhaps this is paranoia, but a "legal" VFO might turn
+      // into an "illegal" when when reducing the sample rate,
+      // thus narrowing the CTUN window
+      //
+      g_print("%s: CTUN freq out of range\n", __FUNCTION__);
+      vfo[id].frequency=vfo[id].ctun_frequency;
+      ctun_ok=0;
+    }
 
     if(rx->zoom>1) {
       //
       // Adjust PAN if new filter width has moved out of
       // current display range
       //
-      long long frequency=vfo[id].frequency;
-      long long half=(long long)rx->sample_rate/2LL;
-      long long rx_low=vfo[id].ctun_frequency+rx->filter_low;
-      long long rx_high=vfo[id].ctun_frequency+rx->filter_high;
       long long min_display=frequency-half+(long long)((double)rx->pan*rx->hz_per_pixel);
       long long max_display=min_display+(long long)((double)rx->width*rx->hz_per_pixel);
       if(rx_low<=min_display) {
@@ -1350,28 +1376,31 @@ void receiver_frequency_changed(RECEIVER *rx) {
     }
 
     //
-    // The (HPSDR) frequency does not change in CTUN,
-    // so simply compute new offset and tell WDSP about it
+    // Compute new offset and tell WDSP about it
     //
     vfo[id].offset=vfo[id].ctun_frequency-vfo[id].frequency;
     if(vfo[id].rit_enabled) {
       vfo[id].offset+=vfo[id].rit;
     }
     set_offset(rx,vfo[id].offset);
-  } else {
-    switch(protocol) {
-      case ORIGINAL_PROTOCOL:
-	// P1 does this automatically
-        break;
-      case NEW_PROTOCOL:
-        schedule_high_priority(); // send new frequency
-        break;
+    //
+    // If we have changed the CTUN center frequency,
+    // we cannot return but must tell the radio about it
+    //
+    if (ctun_ok) return;
+  }
+  switch(protocol) {
+    case ORIGINAL_PROTOCOL:
+      // P1 does this automatically
+      break;
+    case NEW_PROTOCOL:
+      schedule_high_priority(); // send new frequency
+      break;
 #if SOAPYSDR
-      case SOAPYSDR_PROTOCOL:
-        soapy_protocol_set_rx_frequency(rx,id);
-        break;
+    case SOAPYSDR_PROTOCOL:
+      soapy_protocol_set_rx_frequency(rx,id);
+      break;
 #endif
-    }
   }
 }
 
@@ -1390,9 +1419,12 @@ void receiver_mode_changed(RECEIVER *rx) {
 }
 
 void receiver_vfo_changed(RECEIVER *rx) {
+  //
+  // Called when the VFO controlling rx has changed,
+  // e.g. after a "swap VFO" action
+  //
   receiver_frequency_changed(rx);
   receiver_mode_changed(rx);
-  //receiver_filter_changed(rx);
 }
 
 static void process_rx_buffer(RECEIVER *rx) {

@@ -1533,22 +1533,78 @@ void vfo_set_frequency(int v,long long f) {
   if (b != vfo[v].band) {
     vfo_band_changed(v, b);
   }
-  if(active_receiver->id==v) {
-    setFrequency(f);
-  } else {
-    // change VFO frequency of the non-active receiver
-    vfo[v].frequency=f;
-    if (vfo[v].ctun) {
-      vfo[v].ctun=FALSE;
-      vfo[v].offset=0;
-      vfo[v].ctun_frequency=vfo[v].frequency;
-    }
+  if (v == VFO_A) receiver_set_frequency(receiver[0], f);
+  if (v == VFO_B) {
+    //
+    // If there is only one receiver, there is no RX running that
+    // is controlled by VFO_B, so just update the frequency of the
+    // VFO without telling WDSP about it.
+    // If VFO_B controls a (running) receiver, do the "full job".
+    //
     if (receivers == 2) {
-      // VFO v controls a running  WDSP receiver,
-      // need to "manually change" it.
-      // DO NOT DO IT HERE. Better add a "RECEIVER *rx" argument
-      // to setFrequency in radio.c
+      receiver_set_frequency(receiver[1], f);
+    } else {
+      vfo[v].frequency=f;
+      if (vfo[v].ctun) {
+        vfo[v].ctun=FALSE;
+        vfo[v].offset=0;
+        vfo[v].ctun_frequency=vfo[v].frequency;
+      }
     }
   }
   g_idle_add(ext_vfo_update, NULL);
 }
+
+//
+// Set CTUN state of a VFO
+//
+void vfo_ctun_update(int id,int state) {
+  long long f;
+  if (vfo[id].ctun == state) return;  // no-op if no change
+  vfo[id].ctun=state;
+  if(vfo[id].ctun) {
+    // CTUN turned OFF->ON
+    vfo[id].ctun_frequency=vfo[id].frequency;
+    vfo[id].offset=0;
+    if (id < receivers) receiver_set_frequency(receiver[id],vfo[id].ctun_frequency);
+  } else {
+    // CTUN turned ON->OFF: keep frequency
+    vfo[id].frequency=vfo[id].ctun_frequency;
+    vfo[id].offset=0;
+    if (id < receivers) receiver_set_frequency(receiver[id],vfo[id].ctun_frequency);
+  }
+}
+
+//
+// helper function for numerically entering a new VFO frequency
+//
+void num_pad(int val) {
+  //
+  // The numpad may be difficult to use since the frequency has to be given in Hz
+  // TODO: add a multiplier button like "kHz"
+  // TODO: display the current "entered_frequency" somewhere 
+  //       (not all of us are good in typing blind)
+  //
+  RECEIVER *rx=active_receiver;
+  if(!vfo[rx->id].entering_frequency) {
+    vfo[rx->id].entered_frequency=0;
+    vfo[rx->id].entering_frequency=TRUE;
+  }
+  switch(val) {
+    case -1: // clear
+      vfo[rx->id].entered_frequency=0;
+      vfo[rx->id].entering_frequency=FALSE;
+      break;
+    case -2: // enter
+      if(vfo[rx->id].entered_frequency!=0) {
+        receiver_set_frequency(rx, vfo[rx->id].entered_frequency);
+        g_idle_add(ext_vfo_update, NULL);
+      }
+      vfo[rx->id].entering_frequency=FALSE;
+      break;
+    default:
+      vfo[rx->id].entered_frequency=(vfo[rx->id].entered_frequency*10)+val;
+      break;
+  }
+}
+

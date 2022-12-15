@@ -338,6 +338,7 @@ extern void radio_change_receivers(int r);
 extern void radio_change_sample_rate(int rate);
 extern void set_alex_antennas(void);
 extern void tx_vfo_changed(void);
+extern void radio_split_toggle();
 extern void radio_set_split(int v);
 extern void setMox(int state);
 extern int getMox(void);
@@ -359,9 +360,6 @@ extern void set_attenuation(int value);
 extern void set_alex_attenuation(int v);
 
 extern int isTransmitting(void);
-
-extern void setFrequency(long long f);
-extern long long getFrequency(void);
 
 extern void radioRestoreState(void);
 extern void radioSaveState(void);

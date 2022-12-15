@@ -180,6 +180,7 @@ extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_
 extern RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels, int fps, int width, int height);
 extern void receiver_change_sample_rate(RECEIVER *rx,int sample_rate);
 extern void receiver_change_adc(RECEIVER *rx,int adc);
+extern void receiver_set_frequency(RECEIVER *rx, long long frequency);
 extern void receiver_frequency_changed(RECEIVER *rx);
 extern void receiver_mode_changed(RECEIVER *rx);
 extern void receiver_filter_changed(RECEIVER *rx);

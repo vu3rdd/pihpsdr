@@ -74,11 +74,6 @@ struct _mode_settings {
 
 extern struct _mode_settings mode_settings[];
 
-typedef struct _set_frequency {
-  int vfo;
-  long long frequency;
-} SET_FREQUENCY;
-
 #define STEPS 15
 extern char *step_labels[];
 
@@ -117,5 +112,9 @@ extern void vfo_rit_update(int rx);
 extern void vfo_rit_clear(int rx);
 extern void vfo_rit(int rx,int i);
 extern void vfo_set_frequency(int vfo, long long f);
+
+extern void vfo_ctun_update(int id, int state);
+
+extern void num_pad(int val);
 
 #endif
