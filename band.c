@@ -777,3 +777,50 @@ int canTransmit() {
     return result;
 }
 */
+
+void band_plus(int id) {
+  long long frequency_min=radio->frequency_min;
+  long long frequency_max=radio->frequency_max;
+  int b=vfo[id].band;
+  BAND *band;
+  int found=0;
+  while(!found) {
+    b++;
+    if(b>=BANDS+XVTRS) b=0;
+    band=(BAND*)band_get_band(b);
+    if(strlen(band->title)>0) {
+      if(b<BANDS) {
+        if(!(band->frequencyMin==0.0 && band->frequencyMax==0.0)) {
+          if(band->frequencyMin<frequency_min || band->frequencyMax>frequency_max) {
+            continue;
+          }
+        }
+      }
+      vfo_band_changed(id,b);
+      found=1;
+    }
+  }
+}
+
+void band_minus(int id) {
+  long long frequency_min=radio->frequency_min;
+  long long frequency_max=radio->frequency_max;
+  int b=vfo[id].band;
+  BAND *band;
+  int found=0;
+  while(!found) {
+    b--;
+    if(b<0) b=BANDS+XVTRS-1;
+    band=(BAND*)band_get_band(b);
+    if(strlen(band->title)>0) {
+      if(b<BANDS) {
+        if(band->frequencyMin<frequency_min || band->frequencyMax>frequency_max) {
+          continue;
+        }
+      }
+      vfo_band_changed(id,b);
+      found=1;
+    }
+  }
+}
+

@@ -122,4 +122,6 @@ extern void bandRestoreState(void);
 char* getFrequencyInfo(long long frequency,int filter_low,int filter_high);
 int canTransmit(void);
 
+extern void band_minus(int id);
+extern void band_plus(int id);
 #endif
