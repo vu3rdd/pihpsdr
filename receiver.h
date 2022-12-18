@@ -81,6 +81,7 @@ typedef struct _receiver {
   gint nb2;
   gint nr;
   gint nr2;
+  gint nr3;
   gint anf;
   gint snb;
 

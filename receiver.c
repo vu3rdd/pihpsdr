@@ -293,6 +293,11 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(name,"receiver.%d.nr2",rx->id);
     sprintf(value,"%d",rx->nr2);
     setProperty(name,value);
+
+    sprintf(name,"receiver.%d.nr3",rx->id);
+    sprintf(value,"%d",rx->nr3);
+    setProperty(name,value);
+
     sprintf(name,"receiver.%d.anf",rx->id);
     sprintf(value,"%d",rx->anf);
     setProperty(name,value);
@@ -509,6 +514,11 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.nr2",rx->id);
     value=getProperty(name);
     if(value) rx->nr2=atoi(value);
+
+    sprintf(name,"receiver.%d.nr3",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr3=atoi(value);
+
     sprintf(name,"receiver.%d.anf",rx->id);
     value=getProperty(name);
     if(value) rx->anf=atoi(value);
@@ -922,6 +932,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->nb2=0;
   rx->nr=0;
   rx->nr2=0;
+  rx->nr3=0;
   rx->anf=0;
   rx->snb=0;
 
@@ -1051,6 +1062,7 @@ g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
   rx->nb2=0;
   rx->nr=0;
   rx->nr2=0;
+  rx->nr3=0;
   rx->anf=0;
   rx->snb=0;
 
@@ -1162,6 +1174,8 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXAEMNRnpeMethod(rx->id, rx->nr2_npe_method);
   SetRXAEMNRRun(rx->id, rx->nr2);
   SetRXAEMNRaeRun(rx->id, rx->nr2_ae);
+
+  SetRXARNNRRun(rx->id, rx->nr3);
 
   SetEXTANBRun(rx->id, rx->nb);
   SetEXTNOBRun(rx->id, rx->nb2);

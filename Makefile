@@ -169,7 +169,7 @@ ifeq ($(UNAME_S), Linux)
 RT_OPTION=-lrt
 endif
 
-LIBS=$(RT_OPTION) -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS)
+LIBS=$(RT_OPTION) -lm -lwdsp -lrnnoise -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS)
 INCLUDES=$(GTKINCLUDES)
 
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)

@@ -93,6 +93,11 @@ void modesettings_save_state() {
     sprintf(name,"modeset.%d.nr2", i);
     sprintf(value,"%d", mode_settings[i].nr2);
     setProperty(name,value);
+
+    sprintf(name,"modeset.%d.nr3", i);
+    sprintf(value,"%d", mode_settings[i].nr3);
+    setProperty(name,value);
+
     sprintf(name,"modeset.%d.nb", i);
     sprintf(value,"%d", mode_settings[i].nb);
     setProperty(name,value);
@@ -119,6 +124,7 @@ void modesettings_restore_state() {
     mode_settings[i].filter=filterF6;
     mode_settings[i].nr=0;
     mode_settings[i].nr2=0;
+    mode_settings[i].nr3=0;
     mode_settings[i].nb=0;
     mode_settings[i].nb2=0;
     mode_settings[i].anf=0;
@@ -134,6 +140,11 @@ void modesettings_restore_state() {
     value=getProperty(name);
     if(value) mode_settings[i].nr2=atoi(value);
     sprintf(name,"modeset.%d.nb",i);
+
+    sprintf(name,"modeset.%d.nr3",i);
+    value=getProperty(name);
+    if(value) mode_settings[i].nr3=atoi(value);
+
     value=getProperty(name);
     if(value) mode_settings[i].nb=atoi(value);
     sprintf(name,"modeset.%d.nb2",i);
@@ -399,6 +410,7 @@ void vfo_mode_changed(int m) {
   vfo[id].filter      =mode_settings[m].filter;
   active_receiver->nr =mode_settings[m].nr;
   active_receiver->nr2=mode_settings[m].nr2;
+  active_receiver->nr3=mode_settings[m].nr3;
   active_receiver->nb =mode_settings[m].nb;
   active_receiver->nb2=mode_settings[m].nb2;
   active_receiver->anf=mode_settings[m].anf;
@@ -1181,7 +1193,7 @@ void vfo_update() {
           cairo_show_text(cr, "NB");
         }
 
-	// NR and NR2 are mutually exclusive
+	// NR, NR2 and NR3 are mutually exclusive
         cairo_move_to(cr, 70, 40);
         if(active_receiver->nr) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
@@ -1193,6 +1205,7 @@ void vfo_update() {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
           cairo_show_text(cr, "NR");
         }
+        // XXX need to have a button for NR3
 
         cairo_move_to(cr, 70, 20);
         if(active_receiver->anf) {
