@@ -82,6 +82,7 @@ typedef struct _receiver {
   gint nr;
   gint nr2;
   gint nr3;
+  gint nr4;
   gint anf;
   gint snb;
 
@@ -89,6 +90,12 @@ typedef struct _receiver {
   int nr2_gain_method;
   int nr2_npe_method;
   int nr2_ae;
+
+  float nr4_reduction_amount;
+  float nr4_smoothing_factor;
+  float nr4_whitening_factor;
+  float nr4_noise_rescale;
+  float nr4_post_filter_threshold;
 
   double nb_lag_time;
   double nb_lead_time;

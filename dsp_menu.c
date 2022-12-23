@@ -63,6 +63,36 @@ static void agc_hang_threshold_value_changed_cb(GtkWidget *widget, gpointer data
   }
 }
 
+static void nr4_reduction_amount_scale_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->nr4_reduction_amount=(int)gtk_range_get_value(GTK_RANGE(widget));
+
+  SetRXASBNRreductionAmount(active_receiver->id, (int)active_receiver->nr4_reduction_amount);
+}
+
+static void nr4_smoothing_factor_scale_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->nr4_smoothing_factor=(int)gtk_range_get_value(GTK_RANGE(widget));
+
+  SetRXASBNRsmoothingFactor(active_receiver->id, (int)active_receiver->nr4_smoothing_factor);
+}
+
+static void nr4_whitening_factor_scale_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->nr4_whitening_factor = (int)gtk_range_get_value(GTK_RANGE(widget));
+
+  SetRXASBNRwhiteningFactor(active_receiver->id, (int)active_receiver->nr4_whitening_factor);
+}
+
+static void nr4_noise_rescale_scale_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->nr4_noise_rescale=(int)gtk_range_get_value(GTK_RANGE(widget));
+
+  SetRXASBNRnoiseRescale(active_receiver->id, (int)active_receiver->nr4_noise_rescale);
+}
+
+static void nr4_post_filter_threshold_scale_changed_cb(GtkWidget *widget, gpointer data) {
+  active_receiver->nr4_post_filter_threshold=(int)gtk_range_get_value(GTK_RANGE(widget));
+
+  SetRXASBNRpostFilterThreshold(active_receiver->id, (int)active_receiver->nr4_post_filter_threshold);
+}
+
 static void pre_post_agc_cb(GtkToggleButton *widget, gpointer data) {
   if(gtk_toggle_button_get_active(widget)) {
     active_receiver->nr_agc=GPOINTER_TO_UINT(data);
@@ -125,6 +155,7 @@ void dsp_menu(GtkWidget *parent) {
   gtk_label_set_markup(GTK_LABEL(agc_hang_threshold_label), "<b>AGC Hang Threshold</b>");
   gtk_widget_show(agc_hang_threshold_label);
   gtk_grid_attach(GTK_GRID(grid),agc_hang_threshold_label,0,1,1,1);
+
   GtkWidget *agc_hang_threshold_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
   gtk_range_set_increments (GTK_RANGE(agc_hang_threshold_scale),1.0,1.0);
   gtk_range_set_value (GTK_RANGE(agc_hang_threshold_scale),active_receiver->agc_hang_threshold);
@@ -198,6 +229,66 @@ void dsp_menu(GtkWidget *parent) {
   gtk_widget_show(ae_b);
   gtk_grid_attach(GTK_GRID(grid),ae_b,0,5,1,1);
   g_signal_connect(ae_b,"toggled",G_CALLBACK(ae_cb),NULL);
+
+  GtkWidget *nr4_reduction_amount_label=gtk_label_new("NR4 Reduction Amount");
+  gtk_label_set_markup(GTK_LABEL(nr4_reduction_amount_label), "<b>NR4 Reduction Amount</b>");
+  gtk_widget_show(nr4_reduction_amount_label);
+  gtk_grid_attach(GTK_GRID(grid),nr4_reduction_amount_label,0,6,1,1);
+
+  GtkWidget *nr4_reduction_amount_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 20.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(nr4_reduction_amount_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(nr4_reduction_amount_scale),active_receiver->nr4_reduction_amount);
+  gtk_widget_show(nr4_reduction_amount_scale);
+  gtk_grid_attach(GTK_GRID(grid),nr4_reduction_amount_scale,1,6,2,1);
+  g_signal_connect(G_OBJECT(nr4_reduction_amount_scale),"value_changed",G_CALLBACK(nr4_reduction_amount_scale_changed_cb),NULL);
+
+  GtkWidget *nr4_smoothing_factor_label=gtk_label_new("NR4 Smoothing factor");
+  gtk_label_set_markup(GTK_LABEL(nr4_smoothing_factor_label), "<b>NR4 Smoothing factor</b>");
+  gtk_widget_show(nr4_smoothing_factor_label);
+  gtk_grid_attach(GTK_GRID(grid),nr4_smoothing_factor_label,0,7,1,1);
+
+  GtkWidget *nr4_smoothing_factor_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(nr4_smoothing_factor_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(nr4_smoothing_factor_scale),active_receiver->nr4_smoothing_factor);
+  gtk_widget_show(nr4_smoothing_factor_scale);
+  gtk_grid_attach(GTK_GRID(grid),nr4_smoothing_factor_scale,1,7,2,1);
+  g_signal_connect(G_OBJECT(nr4_smoothing_factor_scale),"value_changed",G_CALLBACK(nr4_smoothing_factor_scale_changed_cb),NULL);
+
+  GtkWidget *nr4_whitening_factor_label=gtk_label_new("NR4 Whitening factor");
+  gtk_label_set_markup(GTK_LABEL(nr4_whitening_factor_label), "<b>NR4 Whitening factor</b>");
+  gtk_widget_show(nr4_whitening_factor_label);
+  gtk_grid_attach(GTK_GRID(grid),nr4_whitening_factor_label,0,8,1,1);
+
+  GtkWidget *nr4_whitening_factor_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 100.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(nr4_whitening_factor_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(nr4_whitening_factor_scale),active_receiver->nr4_whitening_factor);
+  gtk_widget_show(nr4_whitening_factor_scale);
+  gtk_grid_attach(GTK_GRID(grid),nr4_whitening_factor_scale,1,8,2,1);
+  g_signal_connect(G_OBJECT(nr4_whitening_factor_scale),"value_changed",G_CALLBACK(nr4_whitening_factor_scale_changed_cb),NULL);
+
+  GtkWidget *nr4_noise_rescale_label=gtk_label_new("NR4 noise Rescale");
+  gtk_label_set_markup(GTK_LABEL(nr4_noise_rescale_label), "<b>NR4 noise rescale</b>");
+  gtk_widget_show(nr4_noise_rescale_label);
+  gtk_grid_attach(GTK_GRID(grid),nr4_noise_rescale_label,0,9,1,1);
+
+  GtkWidget *nr4_noise_rescale_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.0, 12.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(nr4_noise_rescale_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(nr4_noise_rescale_scale),active_receiver->nr4_noise_rescale);
+  gtk_widget_show(nr4_noise_rescale_scale);
+  gtk_grid_attach(GTK_GRID(grid),nr4_noise_rescale_scale,1,9,2,1);
+  g_signal_connect(G_OBJECT(nr4_noise_rescale_scale),"value_changed",G_CALLBACK(nr4_noise_rescale_scale_changed_cb),NULL);
+
+  GtkWidget *nr4_post_filter_threshold_label=gtk_label_new("NR4 post filter threshold");
+  gtk_label_set_markup(GTK_LABEL(nr4_post_filter_threshold_label), "<b>NR4 post filter threshold</b>");
+  gtk_widget_show(nr4_post_filter_threshold_label);
+  gtk_grid_attach(GTK_GRID(grid),nr4_post_filter_threshold_label,0,10,1,1);
+
+  GtkWidget *nr4_post_filter_threshold_scale=gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -10.0, 10.0, 1.0);
+  gtk_range_set_increments (GTK_RANGE(nr4_post_filter_threshold_scale),1.0,1.0);
+  gtk_range_set_value (GTK_RANGE(nr4_post_filter_threshold_scale),active_receiver->nr4_post_filter_threshold);
+  gtk_widget_show(nr4_post_filter_threshold_scale);
+  gtk_grid_attach(GTK_GRID(grid),nr4_post_filter_threshold_scale,1,10,2,1);
+  g_signal_connect(G_OBJECT(nr4_post_filter_threshold_scale),"value_changed",G_CALLBACK(nr4_post_filter_threshold_scale_changed_cb),NULL);
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

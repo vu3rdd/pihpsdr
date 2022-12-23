@@ -61,6 +61,7 @@ struct _mode_settings {
   int nr;
   int nr2;
   int nr3;
+  int nr4;
   int anf;
   int snb;
 };

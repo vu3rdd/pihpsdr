@@ -86,6 +86,7 @@ void set_noise() {
   SetRXAANRRun(active_receiver->id, active_receiver->nr);
   SetRXAEMNRRun(active_receiver->id, active_receiver->nr2);
   SetRXARNNRRun(active_receiver->id, active_receiver->nr3);
+  SetRXASBNRRun(active_receiver->id, active_receiver->nr4);
   SetRXAANFRun(active_receiver->id, active_receiver->anf);
   SetRXASNBARun(active_receiver->id, active_receiver->snb);
   g_idle_add(ext_vfo_update,NULL);
@@ -128,9 +129,11 @@ static void nr_none_cb(GtkToggleButton *widget, gpointer data) {
     active_receiver->nr=0;
     active_receiver->nr2=0;
     active_receiver->nr3=0;
+    active_receiver->nr4=0;
     mode_settings[vfo[active_receiver->id].mode].nr=0;
     mode_settings[vfo[active_receiver->id].mode].nr2=0;
     mode_settings[vfo[active_receiver->id].mode].nr3=0;
+    mode_settings[vfo[active_receiver->id].mode].nr4=0;
     update_noise();
   }
 }
@@ -140,6 +143,7 @@ static void nr_cb(GtkToggleButton *widget, gpointer data) {
     active_receiver->nr=1;
     active_receiver->nr2=0;
     active_receiver->nr3=0;
+    active_receiver->nr4=0;
     mode_settings[vfo[active_receiver->id].mode].nr=1;
     mode_settings[vfo[active_receiver->id].mode].nr2=0;
     mode_settings[vfo[active_receiver->id].mode].nr3=0;
@@ -162,9 +166,11 @@ static void nr2_cb(GtkToggleButton *widget, gpointer data) {
     active_receiver->nr=0;
     active_receiver->nr2=1;
     active_receiver->nr3=0;
+    active_receiver->nr4=0;
     mode_settings[vfo[active_receiver->id].mode].nr=0;
     mode_settings[vfo[active_receiver->id].mode].nr2=1;
     mode_settings[vfo[active_receiver->id].mode].nr3=0;
+    mode_settings[vfo[active_receiver->id].mode].nr4=0;
     update_noise();
   }
 }
@@ -174,9 +180,25 @@ static void nr3_cb(GtkToggleButton *widget, gpointer data) {
     active_receiver->nr=0;
     active_receiver->nr2=0;
     active_receiver->nr3=1;
+    active_receiver->nr4=0;
     mode_settings[vfo[active_receiver->id].mode].nr=0;
     mode_settings[vfo[active_receiver->id].mode].nr2=0;
     mode_settings[vfo[active_receiver->id].mode].nr3=1;
+    mode_settings[vfo[active_receiver->id].mode].nr4=0;
+    update_noise();
+  }
+}
+
+static void nr4_cb(GtkToggleButton *widget, gpointer data) {
+  if(gtk_toggle_button_get_active(widget)) {
+    active_receiver->nr=0;
+    active_receiver->nr2=0;
+    active_receiver->nr3=0;
+    active_receiver->nr4=1;
+    mode_settings[vfo[active_receiver->id].mode].nr=0;
+    mode_settings[vfo[active_receiver->id].mode].nr2=0;
+    mode_settings[vfo[active_receiver->id].mode].nr3=0;
+    mode_settings[vfo[active_receiver->id].mode].nr4=1;
     update_noise();
   }
 }
@@ -312,6 +334,14 @@ void noise_menu(GtkWidget *parent) {
   gtk_widget_show(b_nr3);
   gtk_grid_attach(GTK_GRID(grid),b_nr3,col,row,1,1);
   g_signal_connect(b_nr3,"toggled",G_CALLBACK(nr3_cb),NULL);
+
+  row++;
+
+  GtkWidget *b_nr4=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(b_nr),"NR4");
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_nr4), active_receiver->nr4);
+  gtk_widget_show(b_nr4);
+  gtk_grid_attach(GTK_GRID(grid),b_nr4,col,row,1,1);
+  g_signal_connect(b_nr4,"toggled",G_CALLBACK(nr4_cb),NULL);
 
   gtk_container_add(GTK_CONTAINER(content),grid);
 

@@ -298,6 +298,10 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->nr3);
     setProperty(name,value);
 
+    sprintf(name,"receiver.%d.nr4",rx->id);
+    sprintf(value,"%d",rx->nr4);
+    setProperty(name,value);
+
     sprintf(name,"receiver.%d.anf",rx->id);
     sprintf(value,"%d",rx->anf);
     setProperty(name,value);
@@ -518,6 +522,10 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.nr3",rx->id);
     value=getProperty(name);
     if(value) rx->nr3=atoi(value);
+
+    sprintf(name,"receiver.%d.nr4",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4=atoi(value);
 
     sprintf(name,"receiver.%d.anf",rx->id);
     value=getProperty(name);
@@ -933,6 +941,7 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->nr=0;
   rx->nr2=0;
   rx->nr3=0;
+  rx->nr4=0;
   rx->anf=0;
   rx->snb=0;
 
@@ -940,6 +949,12 @@ g_print("%s: id=%d buffer_size=%d\n",__FUNCTION__,id,buffer_size);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
+
+  rx->nr4_reduction_amount = 10.F;
+  rx->nr4_smoothing_factor = 0.F;
+  rx->nr4_whitening_factor = 0.F;
+  rx->nr4_noise_rescale = 2.F;
+  rx->nr4_post_filter_threshold = -10.F;
 
   rx->nb_lag_time = 0.0001;
   rx->nb_lead_time = 0.0001;
@@ -1063,6 +1078,7 @@ g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
   rx->nr=0;
   rx->nr2=0;
   rx->nr3=0;
+  rx->nr4=0;
   rx->anf=0;
   rx->snb=0;
 
@@ -1070,6 +1086,12 @@ g_print("%s: id=%d default adc=%d\n",__FUNCTION__,rx->id, rx->adc);
   rx->nr2_gain_method=2;
   rx->nr2_npe_method=0;
   rx->nr2_ae=1;
+
+  rx->nr4_reduction_amount = 10.F;
+  rx->nr4_smoothing_factor = 0.F;
+  rx->nr4_whitening_factor = 0.F;
+  rx->nr4_noise_rescale = 2.F;
+  rx->nr4_post_filter_threshold = -10.F;
 
   rx->nb_lag_time = 0.0001;
   rx->nb_lead_time = 0.0001;
@@ -1176,6 +1198,16 @@ g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
   SetRXAEMNRaeRun(rx->id, rx->nr2_ae);
 
   SetRXARNNRRun(rx->id, rx->nr3);
+
+  // nr4
+  SetRXASBNRreductionAmount(rx->id, rx->nr4_reduction_amount);
+  SetRXASBNRsmoothingFactor(rx->id, rx->nr4_smoothing_factor);
+  SetRXASBNRwhiteningFactor(rx->id, rx->nr4_whitening_factor);
+  SetRXASBNRnoiseRescale(rx->id, rx->nr4_noise_rescale);
+  SetRXASBNRpostFilterThreshold(rx->id, rx->nr4_post_filter_threshold);
+
+  SetRXASBNRRun(rx->id, rx->nr4);
+
 
   SetEXTANBRun(rx->id, rx->nb);
   SetEXTNOBRun(rx->id, rx->nb2);
