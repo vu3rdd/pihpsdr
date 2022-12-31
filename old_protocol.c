@@ -1728,7 +1728,13 @@ void ozy_send_buffer() {
 	/* } */
 
         output_buffer[C0]=0x12; /* addr[6:1] = 001001b */
+#ifdef SW_LEVEL_CTRL
+        // highest power from hardware, but use software scaling to
+        // scale the level
+        output_buffer[C1]=255 & 0xFF;
+#else
         output_buffer[C1]=power & 0xFF;
+#endif
         output_buffer[C2]=0x00;
         output_buffer[C3]=0x00;
         output_buffer[C4]=0x00;

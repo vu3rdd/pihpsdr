@@ -16,6 +16,9 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 #
 GPIO_INCLUDE=GPIO
 
+# uncomment if level control (power output) is software based
+LEVEL_CTRL=SW_LEVEL_CTRL
+
 # uncomment the line below to include Pure Signal support
 #PURESIGNAL_INCLUDE=PURESIGNAL
 
@@ -41,6 +44,10 @@ LOCALCW_INCLUDE=LOCALCW
 
 CC=gcc
 LINK=gcc
+
+ifeq ($(LEVEL_CTRL),SW_LEVEL_CTRL)
+LEVEL_OPTIONS=-D SW_LEVEL_CTRL
+endif
 
 ifeq ($(MIDI_INCLUDE),MIDI)
 MIDI_OPTIONS=-D MIDI
@@ -157,7 +164,7 @@ endif
 
 CFLAGS=	-Wno-deprecated-declarations -O3
 # CFLAGS=	-Wno-deprecated-declarations -O3 -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits
-OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
+OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(LEVEL_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(LOCALCW_OPTIONS) \
         $(PTT_OPTIONS) \
 	$(SERVER_OPTIONS) \
