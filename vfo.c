@@ -1203,7 +1203,7 @@ void vfo_update() {
           cairo_show_text(cr, "NB");
         }
 
-	// NR, NR2 and NR3 are mutually exclusive
+	// NR, NR2, NR3 and NR4 are mutually exclusive
         cairo_move_to(cr, 70, 40);
         if(active_receiver->nr) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
@@ -1211,11 +1211,16 @@ void vfo_update() {
         } else if (active_receiver->nr2) {
           cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
           cairo_show_text(cr, "NR2");
+        } else if (active_receiver->nr3) {
+          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+          cairo_show_text(cr, "NR3");
+        } else if (active_receiver->nr4) {
+          cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+          cairo_show_text(cr, "NR4");
 	} else {
           cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
           cairo_show_text(cr, "NR");
         }
-        // XXX need to have a button for NR3 and NR4
 
         cairo_move_to(cr, 70, 20);
         if(active_receiver->anf) {
