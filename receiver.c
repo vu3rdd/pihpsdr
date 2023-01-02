@@ -302,6 +302,26 @@ void receiver_save_state(RECEIVER *rx) {
     sprintf(value,"%d",rx->nr4);
     setProperty(name,value);
 
+    sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
+    sprintf(value,"%d",rx->nr4_reduction_amount);
+    setProperty(name,value);
+
+    sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
+    sprintf(value,"%d",rx->nr4_smoothing_factor);
+    setProperty(name,value);
+
+    sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
+    sprintf(value,"%d",rx->nr4_whitening_factor);
+    setProperty(name,value);
+
+    sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
+    sprintf(value,"%d",rx->nr4_noise_rescale);
+    setProperty(name,value);
+
+    sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
+    sprintf(value,"%d",rx->nr4_post_filter_threshold);
+    setProperty(name,value);
+
     sprintf(name,"receiver.%d.anf",rx->id);
     sprintf(value,"%d",rx->anf);
     setProperty(name,value);
@@ -526,6 +546,26 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
     sprintf(name,"receiver.%d.nr4",rx->id);
     value=getProperty(name);
     if(value) rx->nr4=atoi(value);
+
+    sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_reduction_amount = atoi(value);
+
+    sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_smoothing_factor = atoi(value);
+
+    sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_whitening_factor = atoi(value);
+
+    sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_noise_rescale = atoi(value);
+
+    sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
+    value=getProperty(name);
+    if(value) rx->nr4_post_filter_threshold = atoi(value);
 
     sprintf(name,"receiver.%d.anf",rx->id);
     value=getProperty(name);
