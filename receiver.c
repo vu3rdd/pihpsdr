@@ -303,23 +303,23 @@ void receiver_save_state(RECEIVER *rx) {
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
-    sprintf(value,"%d",rx->nr4_reduction_amount);
+    sprintf(value,"%f",rx->nr4_reduction_amount);
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
-    sprintf(value,"%d",rx->nr4_smoothing_factor);
+    sprintf(value,"%f",rx->nr4_smoothing_factor);
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
-    sprintf(value,"%d",rx->nr4_whitening_factor);
+    sprintf(value,"%f",rx->nr4_whitening_factor);
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
-    sprintf(value,"%d",rx->nr4_noise_rescale);
+    sprintf(value,"%f",rx->nr4_noise_rescale);
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
-    sprintf(value,"%d",rx->nr4_post_filter_threshold);
+    sprintf(value,"%f",rx->nr4_post_filter_threshold);
     setProperty(name,value);
 
     sprintf(name,"receiver.%d.anf",rx->id);
@@ -549,23 +549,23 @@ g_print("%s: id=%d\n",__FUNCTION__,rx->id);
 
     sprintf(name,"receiver.%d.nr4_reduction_amount",rx->id);
     value=getProperty(name);
-    if(value) rx->nr4_reduction_amount = atoi(value);
+    if(value) rx->nr4_reduction_amount = atof(value);
 
     sprintf(name,"receiver.%d.nr4_smoothing_factor",rx->id);
     value=getProperty(name);
-    if(value) rx->nr4_smoothing_factor = atoi(value);
+    if(value) rx->nr4_smoothing_factor = atof(value);
 
     sprintf(name,"receiver.%d.nr4_whitening_factor",rx->id);
     value=getProperty(name);
-    if(value) rx->nr4_whitening_factor = atoi(value);
+    if(value) rx->nr4_whitening_factor = atof(value);
 
     sprintf(name,"receiver.%d.nr4_noise_rescale",rx->id);
     value=getProperty(name);
-    if(value) rx->nr4_noise_rescale = atoi(value);
+    if(value) rx->nr4_noise_rescale = atof(value);
 
     sprintf(name,"receiver.%d.nr4_post_filter_threshold",rx->id);
     value=getProperty(name);
-    if(value) rx->nr4_post_filter_threshold = atoi(value);
+    if(value) rx->nr4_post_filter_threshold = atof(value);
 
     sprintf(name,"receiver.%d.anf",rx->id);
     value=getProperty(name);
