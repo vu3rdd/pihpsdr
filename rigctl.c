@@ -1996,6 +1996,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
               receiver[0]->nr = atoi(&command[4]);
               if (receiver[0]->nr) {
                   receiver[0]->nr2 = 0;
+                  receiver[0]->nr3 = 0;
+                  receiver[0]->nr4 = 0;
               }
               update_noise();
           }
@@ -2009,6 +2011,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
               receiver[0]->nr2 = atoi(&command[4]);
               if (receiver[0]->nr2) {
                   receiver[0]->nr = 0;
+                  receiver[0]->nr3 = 0;
+                  receiver[0]->nr4 = 0;
               }
               update_noise();
           }
