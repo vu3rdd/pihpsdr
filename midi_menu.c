@@ -357,6 +357,13 @@ static void load_original_cb(GtkWidget *widget,gpointer user_data) {
   gint res;
   struct desc *cmd;
 
+  if (midi_device_name == NULL) {
+      filename = g_new(gchar,10);
+      sprintf(filename,"midi.midi");
+  } else {
+      filename=g_new(gchar,strlen(midi_device_name)+6);
+      sprintf(filename,"%s.midi",midi_device_name);
+  }
   load_dialog = gtk_file_chooser_dialog_new ("Open ORIGINAL MIDI File",
                                       GTK_WINDOW(dialog),
                                       action,
@@ -366,8 +373,6 @@ static void load_original_cb(GtkWidget *widget,gpointer user_data) {
                                       GTK_RESPONSE_ACCEPT,
                                       NULL);
   chooser = GTK_FILE_CHOOSER (load_dialog);
-  filename=g_new(gchar,strlen(midi_device_name)+6);
-  sprintf(filename,"%s.midi",midi_device_name);
   gtk_file_chooser_set_current_name(chooser,filename);
   res = gtk_dialog_run (GTK_DIALOG (load_dialog));
   if(res==GTK_RESPONSE_ACCEPT) {
