@@ -981,6 +981,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
       gain=32767.0;  // 16 bit
+      gain=gain*(double)transmitter->drive_level*0.00392;
       break;
     case NEW_PROTOCOL:
       gain=8388607.0; // 24 bit
