@@ -1056,7 +1056,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	//
 	for (j=0; j< 480; j++) {
 	      new_protocol_iq_samples(0,0);
-	}
+	}	
     }
     txflag=1;
 //
@@ -1155,11 +1155,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
   double mic_sample_double, ramp;
   int i,s;
   int updown;
-  double gain = 1.0;
 
-#ifdef SW_LEVEL_CTRL
-  gain=gain*(double)transmitter->drive_level*0.00392;
-#endif
 //
 // silence TX audio if tuning, or when doing CW.
 // (in order not to fire VOX)
@@ -1208,10 +1204,8 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
 	// side tone
 	ramp=cwramp48[cw_shape];
 	cwsample=0.00197 * getNextSideToneSample() * cw_keyer_sidetone_volume * ramp;
-	if(active_receiver->local_audio)
-            cw_audio_write(active_receiver,cwsample);
-
-        cw_shape_buffer48[tx->samples]=ramp*gain;
+	if(active_receiver->local_audio) cw_audio_write(active_receiver,cwsample);
+        cw_shape_buffer48[tx->samples]=ramp;
 	//
 	// In the new protocol, we MUST maintain a constant flow of audio samples to the radio
 	// (at least for ANAN-200D and ANAN-7000 internal side tone generation)
