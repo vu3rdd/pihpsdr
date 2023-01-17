@@ -3154,7 +3154,9 @@ int parse_cmd(void *data) {
           cw_keyer_speed = speed;
 #ifdef LOCALCW
           keyer_update();
+#ifdef MIDI
 	  midi_keyer_update();
+#endif
 #endif
           vfo_update();
         }

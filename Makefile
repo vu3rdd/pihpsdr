@@ -17,13 +17,13 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 GPIO_INCLUDE=GPIO
 
 # uncomment if level control (power output) is software based
-# LEVEL_CTRL=SW_LEVEL_CTRL
+LEVEL_CTRL=SW_LEVEL_CTRL
 
 # uncomment the line below to include Pure Signal support
 #PURESIGNAL_INCLUDE=PURESIGNAL
 
 # uncomment the line below to include MIDI support
-MIDI_INCLUDE=MIDI
+# MIDI_INCLUDE=MIDI
 
 # uncomment the line below to include USB Ozy support
 # USBOZY_INCLUDE=USBOZY

@@ -678,9 +678,11 @@ static void create_visual() {
     keyer_update();
   }
 
+#ifdef MIDI
   if (cw_keyer_midi == 1) {
       midi_keyer_update();
   }
+#endif
 #endif
 
 #ifdef CLIENT_SERVER
@@ -1880,8 +1882,10 @@ void radioRestoreState() {
     value = getProperty("cw_keyer_speed");
     if (value) {
       cw_keyer_speed = atoi(value);
+#ifdef MIDI
       // if we have the midikeyer, set the speed to this value
       midi_keyer_update();
+#endif
     }
     value = getProperty("cw_keyer_mode");
     if (value)

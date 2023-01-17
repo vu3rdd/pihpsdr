@@ -48,7 +48,9 @@ void cw_changed() {
 // NewProtocol: rely on periodically sent HighPrio packets
 #ifdef LOCALCW
   keyer_update();
+#ifdef MIDI
   midi_keyer_update();
+#endif
 #endif
 //
 // speed and side tone frequency are displayed in the VFO bar
