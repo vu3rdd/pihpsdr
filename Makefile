@@ -17,7 +17,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 GPIO_INCLUDE=GPIO
 
 # uncomment if level control (power output) is software based
-LEVEL_CTRL=SW_LEVEL_CTRL
+# LEVEL_CTRL=SW_LEVEL_CTRL
 
 # uncomment the line below to include Pure Signal support
 #PURESIGNAL_INCLUDE=PURESIGNAL
