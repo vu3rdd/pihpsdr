@@ -973,7 +973,12 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       // read/set RX0 AGC Threshold
       if (command[4] == ';') {
         // send reply back
-        sprintf(reply, "ZZAR%+04d;", (int)(receiver[0]->agc_gain));
+        memset(reply, '\0', 10);
+        if (receiver[0]->agc_gain >= 0) {
+            sprintf(reply, "ZZAR+%+03d;", (int)(receiver[0]->agc_gain));
+        } else {
+            sprintf(reply, "ZZAR-%+03d;", (int)(receiver[0]->agc_gain));
+        }
         send_resp(client->fd, reply);
       } else {
         int threshold = atoi(&command[4]);
