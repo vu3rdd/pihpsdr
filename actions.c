@@ -311,8 +311,10 @@ int process_action(void *data) {
       set_af_gain(0,value);
       break;
     case AF_GAIN_RX2:
-      value=KnobOrWheel(a, receiver[1]->volume, 0.0, 1.0, 0.01);
-      set_af_gain(1,value);
+      if (receivers == 2) {
+        value=KnobOrWheel(a, receiver[1]->volume, 0.0, 1.0, 0.01);
+        set_af_gain(1,value);
+      }
       break;
     case AGC:
       if(a->mode==PRESSED) {
@@ -333,8 +335,10 @@ int process_action(void *data) {
       set_agc_gain(0,value);
       break;
     case AGC_GAIN_RX2:
-      value=KnobOrWheel(a, receiver[1]->agc_gain, -20.0, 120.0, 1.0);
-      set_agc_gain(1,value);
+      if (receivers == 2) {
+        value=KnobOrWheel(a, receiver[1]->agc_gain, -20.0, 120.0, 1.0);
+        set_agc_gain(1,value);
+      }
       break;
     case ANF:
       if(a->mode==PRESSED) {
@@ -895,8 +899,10 @@ int process_action(void *data) {
       set_rf_gain(0,value);
       break;
     case RF_GAIN_RX2:
-      value=KnobOrWheel(a, adc[receiver[1]->adc].gain, adc[receiver[1]->adc].min_gain, adc[receiver[1]->adc].max_gain, 1.0);
-      set_rf_gain(1,value);
+      if (receivers == 2) {
+        value=KnobOrWheel(a, adc[receiver[1]->adc].gain, adc[receiver[1]->adc].min_gain, adc[receiver[1]->adc].max_gain, 1.0);
+        set_rf_gain(1,value);
+      }
       break;
     case RIT:
       vfo_rit(active_receiver->id,a->val);
@@ -936,10 +942,10 @@ int process_action(void *data) {
       }
       break;
     case RIT_RX1:
-      vfo_rit(receiver[0]->id,a->val);
+      vfo_rit(0, a->val);
       break;
     case RIT_RX2:
-      vfo_rit(receiver[1]->id,a->val);
+      vfo_rit(1, a->val);
       break;
     case RIT_STEP:
       switch(a->mode) {
@@ -1009,9 +1015,11 @@ int process_action(void *data) {
       set_squelch(receiver[0]);
       break;
     case SQUELCH_RX2:
-      value=KnobOrWheel(a, receiver[1]->squelch, 0.0, 100.0, 1.0);
-      receiver[1]->squelch=value;
-      set_squelch(receiver[1]);
+      if (receivers == 2) {
+        value=KnobOrWheel(a, receiver[1]->squelch, 0.0, 100.0, 1.0);
+        receiver[1]->squelch=value;
+        set_squelch(receiver[1]);
+      }
       break;
     case SWAP_RX:
       if(a->mode==PRESSED) {
@@ -1031,8 +1039,8 @@ int process_action(void *data) {
       break;
     case TUNE_DRIVE:
       if(can_transmit) {
-        value=KnobOrWheel(a, (double) transmitter->tune_percent, 0.0, 100.0, 1.0);
-        transmitter->tune_percent=(int) value;
+        value=KnobOrWheel(a, (double) transmitter->tune_drive, 0.0, 100.0, 1.0);
+        transmitter->tune_drive=(int) value;
       }
       break;
     case TUNE_FULL:

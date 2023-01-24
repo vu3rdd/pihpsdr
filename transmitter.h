@@ -91,7 +91,7 @@ typedef struct _transmitter {
 
   int drive;
   int tune_use_drive;
-  int tune_percent;
+  int tune_drive;
 
   int drive_level;
  

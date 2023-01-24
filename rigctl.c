@@ -68,12 +68,6 @@
 int rigctl_port_base=19090;
 int rigctl_enable=0;
 
-// the port client will be connecting to
-// 2-26-17 K5JAE - Changed the defines to const ints to allow use via pointers.
-static const int TelnetPortA = 19090;
-static const int TelnetPortB = 19091;
-static const int TelnetPortC = 19092;
-
 #define RIGCTL_THROTTLE_NSEC    15000000L
 #define NSEC_PER_SEC          1000000000L
 
@@ -837,6 +831,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
               int threshold=atoi(&command[4]);
               set_agc_gain(VFO_B,(double)threshold);
             }
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'T': //ZZAT
@@ -863,6 +859,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           if(command[4]==';') {
             if(receivers==2) {
               band_minus(receiver[1]->id);
+            } else {
+              implemented=FALSE;
             }
           }
           break;
@@ -871,6 +869,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           if(command[4]==';') {
             if(receivers==2) {
               band_plus(receiver[1]->id);
+            } else {
+              implemented=FALSE;
             }
           }
           break;
@@ -1461,14 +1461,18 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           break;
         case 'U': //ZZGU
           // set/read RX2 AGC
-          if(command[4]==';') {
-            sprintf(reply,"ZZGU%d;",receiver[1]->agc);
-            send_resp(client->fd,reply) ;
-          } else if(command[5]==';') {
-            int agc=atoi(&command[4]);
-            // update RX2 AGC
-            receiver[1]->agc=agc;
-            g_idle_add(ext_vfo_update,NULL);
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZGU%d;",receiver[1]->agc);
+              send_resp(client->fd,reply) ;
+            } else if(command[5]==';') {
+              int agc=atoi(&command[4]);
+              // update RX2 AGC
+              receiver[1]->agc=agc;
+              g_idle_add(ext_vfo_update,NULL);
+            }
+          } else {
+            implemented=FALSE;
           }
           break;
         default:
@@ -1578,6 +1582,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
               receiver[1]->volume=(double)gain/100.0;
               update_af_gain();
             }
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'D': //ZZLD
@@ -1750,28 +1756,36 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           break;
         case 'C': //ZZNC
           // set/read RX2 NB1
-          if(command[4]==';') {
-            sprintf(reply,"ZZNC%d;",receiver[1]->nb);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->nb=atoi(&command[4]);
-            if(receiver[1]->nb) {
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZNC%d;",receiver[1]->nb);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->nb=atoi(&command[4]);
+              if(receiver[1]->nb) {
               receiver[1]->nb2=0;
+              }
+              update_noise();
             }
-            update_noise();
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'D': //ZZND
           // set/read RX2 NB2
-          if(command[4]==';') {
-            sprintf(reply,"ZZND%d;",receiver[1]->nb2);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->nb2=atoi(&command[4]);
-            if(receiver[1]->nb2) {
-              receiver[1]->nb=0;
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZND%d;",receiver[1]->nb2);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->nb2=atoi(&command[4]);
+              if(receiver[1]->nb2) {
+                receiver[1]->nb=0;
+              }
+              update_noise();
             }
-            update_noise();
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'L': //ZZNL
@@ -1794,25 +1808,31 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           break;
         case 'O': //ZZNO
           // set/read RX2 SNB status
-          if(command[4]==';') {
-            sprintf(reply,"ZZNO%d;",receiver[1]->snb);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->snb=atoi(&command[4]);
-            update_noise();
+          if (receivers == 2){
+            if(command[4]==';') {
+              sprintf(reply,"ZZNO%d;",receiver[1]->snb);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->snb=atoi(&command[4]);
+              update_noise();
+            }
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'R': //ZZNR
           // set/read RX1 NR
-          if(command[4]==';') {
-            sprintf(reply,"ZZNR%d;",receiver[0]->nr);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[0]->nr=atoi(&command[4]);
-            if(receiver[0]->nr) {
-              receiver[0]->nr2=0;
+          if (receivers == 2){
+            if(command[4]==';') {
+              sprintf(reply,"ZZNR%d;",receiver[0]->nr);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[0]->nr=atoi(&command[4]);
+              if(receiver[0]->nr) {
+                receiver[0]->nr2=0;
+              }
+              update_noise();
             }
-            update_noise();
           }
           break;
         case 'S': //ZZNS
@@ -1840,38 +1860,50 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           break;
         case 'U': //ZZNU
           // set/read RX2 ANF
-          if(command[4]==';') {
-            sprintf(reply,"ZZNU%d;",receiver[1]->anf);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->anf=atoi(&command[4]);
-            update_noise();
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZNU%d;",receiver[1]->anf);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->anf=atoi(&command[4]);
+              update_noise();
+            }
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'V': //ZZNV
           // set/read RX2 NR
-          if(command[4]==';') {
-            sprintf(reply,"ZZNV%d;",receiver[1]->nr);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->nr=atoi(&command[4]);
-            if(receiver[1]->nr) {
-              receiver[1]->nr2=0;
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZNV%d;",receiver[1]->nr);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->nr=atoi(&command[4]);
+              if(receiver[1]->nr) {
+                receiver[1]->nr2=0;
+              }
+              update_noise();
             }
-            update_noise();
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'W': //ZZNW
           // set/read RX2 NR2
-          if(command[4]==';') {
-            sprintf(reply,"ZZNW%d;",receiver[1]->nr2);
-            send_resp(client->fd,reply);
-          } else if(command[5]==';') {
-            receiver[1]->nr2=atoi(&command[4]);
-            if(receiver[1]->nr2) {
-              receiver[1]->nr=0;
+          if (receivers == 2) {
+            if(command[4]==';') {
+              sprintf(reply,"ZZNW%d;",receiver[1]->nr2);
+              send_resp(client->fd,reply);
+            } else if(command[5]==';') {
+              receiver[1]->nr2=atoi(&command[4]);
+              if(receiver[1]->nr2) {
+                receiver[1]->nr=0;
+              }
+              update_noise();
             }
-            update_noise();
+          } else {
+            implemented=FALSE;
           }
           break;
         default:
@@ -2061,12 +2093,14 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           // reads the S Meter (in dB)
           if(command[5]==';') {
             int v=atoi(&command[4]);
-            if(v==VFO_A || v==VFO_B) {
+            if(v >= 0 && v < receivers) {
               double m=receiver[v]->meter;
               m=fmax(-140.0,m);
               m=fmin(-10.0,m);
               sprintf(reply,"ZZSM%d%03d;",v,(int)((m+140.0)*2));
               send_resp(client->fd,reply);
+            } else {
+              implemented=FALSE;
             }
           }
           break;
@@ -2435,6 +2469,8 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
               sprintf(reply,"ZZXO%04d;",status);
               send_resp(client->fd,reply);
             }
+          } else {
+            implemented=FALSE;
           }
           break;
         case 'S': //ZZXS
@@ -2500,12 +2536,10 @@ gboolean parse_extended_cmd (char *command,CLIENT *client) {
           // switch receivers
           if(command[5]==';') {
             int v=atoi(&command[4]);
-            if(v==0) {
-              active_receiver=receiver[0];
-            } else if(v==1) {
-              if(receivers==2) {
-                active_receiver=receiver[1];
-              }
+            if(v >= 0 && v < receivers) {
+              active_receiver=receiver[v];
+            } else {
+              implemented=FALSE;
             }
             g_idle_add(ext_vfo_update,NULL);
           }
@@ -2747,20 +2781,10 @@ int parse_cmd(void *data) {
             send_resp(client->fd,reply) ;
           } else if(command[3]==';') {
             int id=atoi(&command[2]);
-            switch(id) {
-              case 0:
+            if (id >= 0 && id < receivers) {
                 active_receiver=receiver[id];
-                break;
-              case 1:
-                if(receivers==2) {
-                  active_receiver=receiver[id];
-                } else {
-                  implemented=FALSE;
-                }
-                break;
-              default:
+            } else {
                 implemented=FALSE;
-                break;
             }
             g_idle_add(ext_vfo_update, NULL);
           }
@@ -3627,9 +3651,11 @@ int parse_cmd(void *data) {
           // read the S meter
           if(command[3]==';') {
             int id=atoi(&command[2]);
-            if(id==0 || id==1) {
+            if(id >= 0 && id < receivers) {
               sprintf(reply,"SM%04d;",(int)receiver[id]->meter);
               send_resp(client->fd,reply);
+            } else {
+              implemented=FALSE;
             }
           }
           break;

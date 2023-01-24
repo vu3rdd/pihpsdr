@@ -907,7 +907,7 @@ static void process_control_bytes() {
   dash=(control_in[0]&0x02)==0x02;
   dot=(control_in[0]&0x04)==0x04;
 
-  // Stops CAT cw transmission if paddle hit in "internal" CW
+  // Stops CAT cw transmission if radio reports "CW action"
   if (dash || dot) {
     cw_key_hit=1;
     CAT_cw_is_active=0;
@@ -917,6 +917,16 @@ static void process_control_bytes() {
     if (dash != previous_dash) keyer_event(0, dash);
     if (dot  != previous_dot ) keyer_event(1, dot );
   }
+#else
+    //
+    // Note that if an external keyer is connected to the "CW" jack of
+    // the ANAN-7000, it will report its state via the "dot" state
+    // so we can do CW directly. Only act on dot state changes so we
+    // do not intervene with CAT CW.
+    //
+    if (!cw_keyer_internal && dot != previous_dot) {
+      cw_key_down=dot ? 960000 : 0;
+    }
 #endif
 
   if(previous_ptt!=local_ptt) {
@@ -1540,7 +1550,12 @@ void ozy_send_buffer() {
 	break;
     }
 
-    output_buffer[C4]=0x04;  // duplex
+    //
+    // ALWAYS set the duplex bit "on". This bit indicates to the
+    // FPGA that the TX frequency can be different from the RX
+    // frequency, which is the case with Split, XIT, CTUN
+    //
+    output_buffer[C4]=0x04;
     //
     // This is used to phase-synchronize RX1 and RX2 on some boards
     // and enforces that the RX1 and RX2 frequencies are the same.
@@ -1637,12 +1652,7 @@ void ozy_send_buffer() {
 	// (it would be sufficient to do so only with internal CW).
 	//
         if(isTransmitting() || (txmode == modeCWU) || (txmode == modeCWL)) {
-          if(tune && !transmitter->tune_use_drive) {
-            double fac=sqrt((double)transmitter->tune_percent * 0.01);
-            power=(int)((double)transmitter->drive_level*fac);
-          } else {
-            power=transmitter->drive_level;
-          }
+          power=transmitter->drive_level;
           if (device == DEVICE_HERMES_LITE2) {
 	    //
 	    // from the "intended" drive level power, calculate the

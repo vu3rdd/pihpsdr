@@ -99,6 +99,7 @@ g_print("zoom_value_changed_cb\n");
 
 void set_zoom(int rx,double value) {
 //g_print("set_zoom: %f\n",value);
+  if (rx >= receivers) return;
   receiver[rx]->zoom=value;
   if(display_zoompan) {
     gtk_range_set_value (GTK_RANGE(zoom_scale),receiver[rx]->zoom);
@@ -171,6 +172,7 @@ g_print("pan_value_changed_cb\n");
 
 void set_pan(int rx,double value) {
 g_print("set_pan: %f\n",value);
+  if (rx >= receivers) return;
   receiver[rx]->pan=(int)value;
   if(display_zoompan) {
     gtk_range_set_value (GTK_RANGE(pan_scale),receiver[rx]->pan);
@@ -207,6 +209,7 @@ g_print("set_pan: %f\n",value);
 
 void remote_set_pan(int rx,double value) {
 g_print("remote_set_pan: rx=%d pan=%f\n",rx,value);
+  if (rx >= receivers) return;
   g_mutex_lock(&pan_zoom_mutex);
   g_signal_handler_block(G_OBJECT(pan_scale),pan_signal_id);
   gtk_range_set_range(GTK_RANGE(pan_scale),0.0,(double)(receiver[rx]->zoom==1?receiver[rx]->pixels:receiver[rx]->pixels-receiver[rx]->width));

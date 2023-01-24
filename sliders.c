@@ -287,6 +287,7 @@ static void agcgain_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 void set_agc_gain(int rx,double value) {
   g_print("%s\n",__FUNCTION__);
+  if (rx >= receivers) return;
   receiver[rx]->agc_gain=value;
   set_agc(receiver[rx], receiver[rx]->agc);
   if(display_sliders) {
@@ -346,6 +347,7 @@ void update_af_gain() {
 }
 
 void set_af_gain(int rx,double value) {
+  if (rx >= receivers) return;
   receiver[rx]->volume=value;
   SetRXAPanelGain1 (receiver[rx]->id, receiver[rx]->volume);
   if(display_sliders) {
@@ -406,6 +408,7 @@ void update_rf_gain() {
 }
 
 void set_rf_gain(int rx,double value) {
+  if (rx >= receivers) return;
   int rxadc=receiver[rx]->adc;
   g_print("%s rx=%d adc=%d val=%f\n",__FUNCTION__, rx, rxadc, value);
   if (!have_rx_gain) {

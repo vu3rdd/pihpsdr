@@ -1341,7 +1341,6 @@ void receiver_frequency_changed(RECEIVER *rx) {
   int id=rx->id;
 
   if(vfo[id].ctun) {
-    int ctun_ok=1;
     long long frequency=vfo[id].frequency;
     long long half=(long long)rx->sample_rate/2LL;
     long long rx_low=vfo[id].ctun_frequency+rx->filter_low;
@@ -1350,17 +1349,20 @@ void receiver_frequency_changed(RECEIVER *rx) {
       //
       // Perhaps this is paranoia, but a "legal" VFO might turn
       // into an "illegal" when when reducing the sample rate,
-      // thus narrowing the CTUN window
+      // thus narrowing the CTUN window.
+      // If the "filter window" has left the CTUN range, CTUN is
+      // reset such that the CTUN center frequency is placed at
+      // the new frequency
       //
       g_print("%s: CTUN freq out of range\n", __FUNCTION__);
       vfo[id].frequency=vfo[id].ctun_frequency;
-      ctun_ok=0;
     }
 
     if(rx->zoom>1) {
       //
       // Adjust PAN if new filter width has moved out of
       // current display range
+      // TODO: what if this happens with CTUN "off"?
       //
       long long min_display=frequency-half+(long long)((double)rx->pan*rx->hz_per_pixel);
       long long max_display=min_display+(long long)((double)rx->width*rx->hz_per_pixel);
@@ -1376,19 +1378,26 @@ void receiver_frequency_changed(RECEIVER *rx) {
     }
 
     //
-    // Compute new offset and tell WDSP about it
+    // Compute new offset
     //
     vfo[id].offset=vfo[id].ctun_frequency-vfo[id].frequency;
     if(vfo[id].rit_enabled) {
       vfo[id].offset+=vfo[id].rit;
     }
-    set_offset(rx,vfo[id].offset);
+  } else {
     //
-    // If we have changed the CTUN center frequency,
-    // we cannot return but must tell the radio about it
+    // This may be part of a CTUN ON->OFF transition
     //
-    if (ctun_ok) return;
+    vfo[id].offset=0;
+    if(vfo[id].rit_enabled) {
+      vfo[id].offset=vfo[id].rit;
+    }
   }
+  //
+  // To make this bullet-proof, report the (possibly new) offset to WDSP
+  // and send the (possibly changed) frequency to the radio in any case.
+  //
+  set_offset(rx,vfo[id].offset);
   switch(protocol) {
     case ORIGINAL_PROTOCOL:
       // P1 does this automatically
@@ -1411,6 +1420,9 @@ void receiver_filter_changed(RECEIVER *rx) {
       tx_set_filter(transmitter);
     }
   }
+  //
+  // TODO: Filter window has possibly moved outside CTUN range
+  //
 }
 
 void receiver_mode_changed(RECEIVER *rx) {

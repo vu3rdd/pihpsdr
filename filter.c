@@ -420,12 +420,11 @@ void filterRestoreState() {
 
 }
 
-void filter_width_changed(int rx,int increment) {
-  int id=receiver[rx]->id;
+void filter_width_changed(int id,int increment) {
   FILTER *mode_filters=filters[vfo[id].mode];
   FILTER *filter=&mode_filters[vfo[id].filter];
 
-fprintf(stderr,"filter_width_changed: rx=%d mode=%d filter=%d increment=%d\n",rx,vfo[id].mode,vfo[id].filter,increment);
+fprintf(stderr,"filter_width_changed: rx=%d mode=%d filter=%d increment=%d\n",id,vfo[id].mode,vfo[id].filter,increment);
 
   if(vfo[id].filter==filterVar1 || vfo[id].filter==filterVar2) {
 
@@ -450,12 +449,11 @@ fprintf(stderr,"filter_width_changed: rx=%d mode=%d filter=%d increment=%d\n",rx
   }
 }
 
-void filter_shift_changed(int rx,int increment) {
-  int id=receiver[rx]->id;
+void filter_shift_changed(int id,int increment) {
   FILTER *mode_filters=filters[vfo[id].mode];
   FILTER *filter=&mode_filters[vfo[id].filter];
 
-fprintf(stderr,"filter_shift_changed: rx=%d mode=%d filter=%d increment=%d\n",rx,vfo[id].mode,vfo[id].filter,increment);
+fprintf(stderr,"filter_shift_changed: rx=%d mode=%d filter=%d increment=%d\n",id,vfo[id].mode,vfo[id].filter,increment);
 
   if(vfo[id].filter==filterVar1 || vfo[id].filter==filterVar2) {
     switch(vfo[id].mode) {

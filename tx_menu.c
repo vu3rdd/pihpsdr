@@ -124,8 +124,8 @@ static void tune_use_drive_cb (GtkWidget *widget, gpointer data) {
   transmitter->tune_use_drive=gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 }
 
-static void tune_percent_cb (GtkWidget *widget, gpointer data) {
-  transmitter->tune_percent=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+static void tune_drive_cb (GtkWidget *widget, gpointer data) {
+  transmitter->tune_drive=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
 static void swr_protection_cb (GtkWidget *widget, gpointer data) {
@@ -220,12 +220,6 @@ static gboolean emp_cb (GtkWidget *widget, gpointer data) {
   tx_set_pre_emphasize(transmitter,pre_emphasize);
   return FALSE;
 }
-
-/*
-static void tune_value_changed_cb(GtkWidget *widget, gpointer data) {
-  setTuneDrive(gtk_range_get_value(GTK_RANGE(tune_scale)));
-}
-*/
 
 void tx_menu(GtkWidget *parent) {
   int i;
@@ -492,17 +486,17 @@ void tx_menu(GtkWidget *parent) {
 
   col++;
   
-  GtkWidget *tune_percent_label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(tune_percent_label), "<b>Tune Percent:</b>");
-  gtk_widget_set_halign(tune_percent_label, GTK_ALIGN_START);
-  gtk_widget_show(tune_percent_label);
-  gtk_grid_attach(GTK_GRID(grid),tune_percent_label,col,row,1,1);
+  GtkWidget *tune_drive_label=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(tune_drive_label), "<b>Drive for Tune:</b>");
+  gtk_widget_set_halign(tune_drive_label, GTK_ALIGN_START);
+  gtk_widget_show(tune_drive_label);
+  gtk_grid_attach(GTK_GRID(grid),tune_drive_label,col,row,1,1);
 
   col++;
-  GtkWidget *tune_percent=gtk_spin_button_new_with_range(1.0,100.0,1.0);
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(tune_percent),(double)transmitter->tune_percent);
-  gtk_grid_attach(GTK_GRID(grid),tune_percent,col,row,1,1);
-  g_signal_connect(tune_percent,"value-changed",G_CALLBACK(tune_percent_cb),NULL);
+  GtkWidget *tune_drive=gtk_spin_button_new_with_range(1.0,100.0,1.0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(tune_drive),(double)transmitter->tune_drive);
+  gtk_grid_attach(GTK_GRID(grid),tune_drive,col,row,1,1);
+  g_signal_connect(tune_drive,"value-changed",G_CALLBACK(tune_drive_cb),NULL);
 
   row++;
   col=0;

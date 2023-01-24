@@ -379,9 +379,11 @@ g_print("radio_stop: TX: CloseChannel: %d\n",transmitter->id);
   set_displaying(receiver[0],0);
 g_print("radio_stop: RX0: CloseChannel: %d\n",receiver[0]->id);
   CloseChannel(receiver[0]->id);
-  set_displaying(receiver[1],0);
+  if (RECEIVERS == 2) {
+    set_displaying(receiver[1],0);
 g_print("radio_stop: RX1: CloseChannel: %d\n",receiver[1]->id);
-  CloseChannel(receiver[1]->id);
+    CloseChannel(receiver[1]->id);
+  }
 }
 
 void reconfigure_radio() {
@@ -1420,7 +1422,7 @@ void radio_change_receivers(int r) {
 g_print("radio_change_receivers: from %d to %d\n",receivers,r);
   // The button in the radio menu will call this function even if the
   // number of receivers has not changed.
-  if (receivers == r) return;
+  if (receivers == r) return;  // This is always the case if RECEIVERS==1
   //
   // When changing the number of receivers, restart the
   // old protocol
@@ -1809,6 +1811,8 @@ void setTune(int state) {
           tx_set_mode(transmitter,modeUSB);
           break;
       }
+      tune=state;
+      calcDriveLevel();
       rxtx(state);
     } else {
       rxtx(state);
@@ -1828,8 +1832,9 @@ void setTune(int state) {
 	//
 	SetPSControl(transmitter->id, 0, 0, 1, 0);
       }
+      tune=state;
+      calcDriveLevel();
     }
-    tune=state;
   }
   if(protocol==NEW_PROTOCOL) {
     schedule_high_priority();
@@ -1873,11 +1878,16 @@ static int calcLevel(double d) {
 }
 
 void calcDriveLevel() {
-  transmitter->drive_level=calcLevel(transmitter->drive);
+  if (tune && !transmitter->tune_use_drive) {
+    transmitter->drive_level=calcLevel(transmitter->tune_drive);
+g_print("calcDriveLevel: tune=%d drive_level=%d\n",transmitter->tune_drive,transmitter->drive_level);
+  } else {
+    transmitter->drive_level=calcLevel(transmitter->drive);
+g_print("calcDriveLevel: drive=%d drive_level=%d\n",transmitter->drive,transmitter->drive_level);
+  }
   if(isTransmitting()  && protocol==NEW_PROTOCOL) {
     schedule_high_priority();
   }
-//g_print("calcDriveLevel: drive=%d drive_level=%d\n",transmitter->drive,transmitter->drive_level);
 }
 
 void setDrive(double value) {
@@ -1896,7 +1906,7 @@ void setDrive(double value) {
 }
 
 double getTuneDrive() {
-    return transmitter->tune_percent;
+    return transmitter->tune_drive;
 }
 
 void setSquelch(RECEIVER *rx) {
@@ -2386,7 +2396,7 @@ g_print("radioSaveState: %s\n",property_path);
   gpio_save_actions();
   sprintf(value,"%d",receivers);
   setProperty("receivers",value);
-  for(i=0;i<receivers;i++) {
+  for(i=0;i<RECEIVERS;i++) {
     receiver_save_state(receiver[i]);
   }
 

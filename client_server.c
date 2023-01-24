@@ -48,6 +48,10 @@
 #endif
 #include "ext.h"
 #include "audio.h"
+#include "zoompan.h"
+#include "noise_menu.h"
+#include "radio_menu.h"
+#include "sliders.h"
 
 #define DISCOVERY_PORT 4992
 #define LISTEN_PORT 50000
@@ -89,6 +93,7 @@ static gint listen_socket;
 static int audio_buffer_index=0;
 AUDIO_DATA audio_data;
 
+static int remote_command(void * data);
 
 GMutex accumulated_mutex;
 static int accumulated_steps=0;
@@ -481,7 +486,7 @@ g_print("server_client_thread: CMD_RESP_RX_FREQ\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,freq_command);
+         g_idle_add(remote_command,freq_command);
          }
          break;
        case CMD_RESP_RX_STEP:
@@ -498,7 +503,7 @@ g_print("server_client_thread: CMD_RESP_RX_STEP\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,step_command);
+         g_idle_add(remote_command,step_command);
          }
          break;
        case CMD_RESP_RX_MOVE:
@@ -515,7 +520,7 @@ g_print("server_client_thread: CMD_RESP_RX_MOVE\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,move_command);
+         g_idle_add(remote_command,move_command);
          }
          break;
        case CMD_RESP_RX_MOVETO:
@@ -532,7 +537,7 @@ g_print("server_client_thread: CMD_RESP_RX_MOVETO\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,move_to_command);
+         g_idle_add(remote_command,move_to_command);
          }
          break;
        case CMD_RESP_RX_ZOOM:
@@ -549,7 +554,7 @@ g_print("server_client_thread: CMD_RESP_RX_ZOOM\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,zoom_command);
+         g_idle_add(remote_command,zoom_command);
          }
          break;
        case CMD_RESP_RX_PAN:
@@ -566,7 +571,7 @@ g_print("server_client_thread: CMD_RESP_RX_PAN\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,pan_command);
+         g_idle_add(remote_command,pan_command);
          }
          break;
        case CMD_RESP_RX_VOLUME:
@@ -583,7 +588,7 @@ g_print("server_client_thread: CMD_RESP_RX_VOLUME\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,volume_command);
+         g_idle_add(remote_command,volume_command);
          }
          break;
        case CMD_RESP_RX_AGC:
@@ -601,7 +606,7 @@ g_print("server_client_thread: CMD_RESP_RX_AGC\n");
            return NULL;
          }
 g_print("CMD_RESP_RX_AGC: id=%d agc=%d\n",agc_command->id,ntohs(agc_command->agc));
-         g_idle_add(ext_remote_command,agc_command);
+         g_idle_add(remote_command,agc_command);
          }
          break;
        case CMD_RESP_RX_AGC_GAIN:
@@ -618,7 +623,7 @@ g_print("server_client_thread: CMD_RESP_RX_AGC_GAIN\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,agc_gain_command);
+         g_idle_add(remote_command,agc_gain_command);
          }
          break;
       case CMD_RESP_RX_GAIN:
@@ -635,7 +640,7 @@ g_print("server_client_thread: CMD_RESP_RX_GAIN\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,command);
+         g_idle_add(remote_command,command);
          }
          break;
       case CMD_RESP_RX_ATTENUATION:
@@ -652,7 +657,7 @@ g_print("server_client_thread: CMD_RESP_RX_ATTENUATION\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,attenuation_command);
+         g_idle_add(remote_command,attenuation_command);
          }
          break;
        case CMD_RESP_RX_SQUELCH:
@@ -669,7 +674,7 @@ g_print("server_client_thread: CMD_RESP_RX_SQUELCH\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,squelch_command);
+         g_idle_add(remote_command,squelch_command);
          }
          break;
        case CMD_RESP_RX_NOISE:
@@ -686,7 +691,7 @@ g_print("server_client_thread: CMD_RESP_RX_NOISE\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,noise_command);
+         g_idle_add(remote_command,noise_command);
          }
          break;
        case CMD_RESP_RX_BAND:
@@ -703,7 +708,7 @@ g_print("server_client_thread: CMD_RESP_RX_BAND\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,band_command);
+         g_idle_add(remote_command,band_command);
          }
          break;
        case CMD_RESP_RX_MODE:
@@ -720,7 +725,7 @@ g_print("server_client_thread: CMD_RESP_RX_MODE\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,mode_command);
+         g_idle_add(remote_command,mode_command);
          }
          break;
        case CMD_RESP_RX_FILTER:
@@ -737,7 +742,7 @@ g_print("server_client_thread: CMD_RESP_RX_FILTER\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,filter_command);
+         g_idle_add(remote_command,filter_command);
          }
          break;
        case CMD_RESP_SPLIT:
@@ -754,7 +759,7 @@ g_print("server_client_thread: CMD_RESP_RX_SPLIT\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,split_command);
+         g_idle_add(remote_command,split_command);
          }
          break;
        case CMD_RESP_SAT:
@@ -771,7 +776,7 @@ g_print("server_client_thread: CMD_RESP_RX_SAT\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,sat_command);
+         g_idle_add(remote_command,sat_command);
          }
          break;
        case CMD_RESP_DUP:
@@ -788,7 +793,7 @@ g_print("server_client_thread: CMD_RESP_DUP\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,dup_command);
+         g_idle_add(remote_command,dup_command);
          }
          break;
        case CMD_RESP_LOCK:
@@ -805,7 +810,7 @@ g_print("server_client_thread: CMD_RESP_LOCK\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,lock_command);
+         g_idle_add(remote_command,lock_command);
          }
          break;
        case CMD_RESP_CTUN:
@@ -822,7 +827,7 @@ g_print("server_client_thread: CMD_RESP_CTUN\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,ctun_command);
+         g_idle_add(remote_command,ctun_command);
          }
          break;
        case CMD_RESP_RX_FPS:
@@ -839,7 +844,7 @@ g_print("server_client_thread: CMD_RESP_RX_FPS\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,fps_command);
+         g_idle_add(remote_command,fps_command);
          }
          break;
        case CMD_RESP_RX_SELECT:
@@ -856,7 +861,7 @@ g_print("server_client_thread: CMD_RESP_RX_SELECT\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,rx_select_command);
+         g_idle_add(remote_command,rx_select_command);
          }
          break;
        case CMD_RESP_VFO:
@@ -873,7 +878,7 @@ g_print("server_client_thread: CMD_RESP_VFO\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,vfo_command);
+         g_idle_add(remote_command,vfo_command);
          }
          break;
        case CMD_RESP_RIT_UPDATE:
@@ -890,7 +895,7 @@ g_print("server_client_thread: CMD_RESP_RIT_UPDATE\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,rit_update_command);
+         g_idle_add(remote_command,rit_update_command);
          }
          break;
        case CMD_RESP_RIT_CLEAR:
@@ -907,7 +912,7 @@ g_print("server_client_thread: CMD_RESP_RIT_CLEAR\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,rit_clear_command);
+         g_idle_add(remote_command,rit_clear_command);
          }
          break;
        case CMD_RESP_RIT:
@@ -924,7 +929,7 @@ g_print("server_client_thread: CMD_RESP_RIT\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,rit_command);
+         g_idle_add(remote_command,rit_command);
          }
          break;
        case CMD_RESP_XIT_UPDATE:
@@ -934,7 +939,7 @@ g_print("server_client_thread: CMD_RESP_XIT_UPDATE\n");
          xit_update_command->header.data_type=header.data_type;
          xit_update_command->header.version=header.version;
          xit_update_command->header.context.client=client;
-         g_idle_add(ext_remote_command,xit_update_command);
+         g_idle_add(remote_command,xit_update_command);
          }
          break;
        case CMD_RESP_XIT_CLEAR:
@@ -944,7 +949,7 @@ g_print("server_client_thread: CMD_RESP_XIT_CLEAR\n");
          xit_clear_command->header.data_type=header.data_type;
          xit_clear_command->header.version=header.version;
          xit_clear_command->header.context.client=client;
-         g_idle_add(ext_remote_command,xit_clear_command);
+         g_idle_add(remote_command,xit_clear_command);
          }
          break;
        case CMD_RESP_XIT:
@@ -954,7 +959,7 @@ g_print("server_client_thread: CMD_RESP_XIT\n");
          xit_command->header.data_type=header.data_type;
          xit_command->header.version=header.version;
          xit_command->header.context.client=client;
-         g_idle_add(ext_remote_command,xit_command);
+         g_idle_add(remote_command,xit_command);
          }
          break;
        case CMD_RESP_SAMPLE_RATE:
@@ -971,7 +976,7 @@ g_print("server_client_thread: CMD_RESP_SAMPLE_RATE\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,sample_rate_command);
+         g_idle_add(remote_command,sample_rate_command);
          }
          break;
        case CMD_RESP_RECEIVERS:
@@ -988,7 +993,7 @@ g_print("server_client_thread: CMD_RESP_RECEIVERS\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,receivers_command);
+         g_idle_add(remote_command,receivers_command);
          }
          break;
        case CMD_RESP_RIT_INCREMENT:
@@ -1005,7 +1010,7 @@ g_print("server_client_thread: CMD_RESP_RIT_INCREMENT\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,rit_increment_command);
+         g_idle_add(remote_command,rit_increment_command);
          }
          break;
        case CMD_RESP_FILTER_BOARD:
@@ -1022,7 +1027,7 @@ g_print("server_client_thread: CMD_RESP_FILTER_BOARD\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,filter_board_command);
+         g_idle_add(remote_command,filter_board_command);
          }
          break;
        case CMD_RESP_SWAP_IQ:
@@ -1039,7 +1044,7 @@ g_print("server_client_thread: CMD_RESP_SWAP_IQ\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,swap_iq_command);
+         g_idle_add(remote_command,swap_iq_command);
          }
          break;
        case CMD_RESP_REGION:
@@ -1056,7 +1061,7 @@ g_print("server_client_thread: CMD_RESP_REGION\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,region_command);
+         g_idle_add(remote_command,region_command);
          }
          break;
        case CMD_RESP_MUTE_RX:
@@ -1073,7 +1078,7 @@ g_print("server_client_thread: CMD_RESP_MUTE_RX\n");
            // dialog box?
            return NULL;
          }
-         g_idle_add(ext_remote_command,mute_rx_command);
+         g_idle_add(remote_command,mute_rx_command);
          }
          break;
 
@@ -2535,5 +2540,405 @@ g_print("radio_connect_remote: %s:%d\n",host,port);
 g_print("radio_connect_remote: socket %d bound to %s:%d\n",client_socket,host,port);
   sprintf(server_host,"%s:%d",host,port);
   client_thread_id=g_thread_new("remote_client",client_thread,&server_host);
+  return 0;
+}
+
+//
+// Execute a remote command throuth the GTK idle queue
+// and send a response.
+// Because of the response required, we cannot just
+// delegate to actions.c
+//
+
+//
+// A proper handling may be required if the "remote command" refers to
+// the second receiver while only 1 RX is present (this should probably
+// not happen, but who knows?
+// Therefore the CHECK_RX macro defined here logs such events
+//
+
+#define CHECK_RX(rx) if (rx > receivers) g_print("CHECK_RX %s:%d RX=%d > receivers=%d\n", \
+                        __FUNCTION__, __LINE__, rx, receivers);
+
+static int remote_command(void *data) {
+  HEADER *header=(HEADER *)data;
+  REMOTE_CLIENT *client=header->context.client;
+  int temp;
+  switch(ntohs(header->data_type)) {
+    case CMD_RESP_RX_FREQ:
+      {
+      FREQ_COMMAND *freq_command=(FREQ_COMMAND *)data;
+      temp=active_receiver->pan;
+      int vfo=freq_command->id;
+      long long f=ntohll(freq_command->hz);
+      vfo_set_frequency(vfo,f);
+      vfo_update();
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      if(temp!=active_receiver->pan) {
+        send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      }
+      break;
+    case CMD_RESP_RX_STEP:
+      {
+      STEP_COMMAND *step_command=(STEP_COMMAND *)data;
+      temp=active_receiver->pan;
+      short steps=ntohs(step_command->steps);
+      vfo_step(steps);
+      //send_vfo_data(client,VFO_A);
+      //send_vfo_data(client,VFO_B);
+      if(temp!=active_receiver->pan) {
+        send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      }
+      break;
+    case CMD_RESP_RX_MOVE:
+      {
+      MOVE_COMMAND *move_command=(MOVE_COMMAND *)data;
+      temp=active_receiver->pan;
+      long long hz=ntohll(move_command->hz);
+      vfo_move(hz,move_command->round);
+      //send_vfo_data(client,VFO_A);
+      //send_vfo_data(client,VFO_B);
+      if(temp!=active_receiver->pan) {
+        send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      }
+      break;
+    case CMD_RESP_RX_MOVETO:
+      {
+      MOVE_TO_COMMAND *move_to_command=(MOVE_TO_COMMAND *)data;
+      temp=active_receiver->pan;
+      long long hz=ntohll(move_to_command->hz);
+      vfo_move_to(hz);
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      if(temp!=active_receiver->pan) {
+        send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      }
+      break;
+    case CMD_RESP_RX_ZOOM:
+      {
+      ZOOM_COMMAND *zoom_command=(ZOOM_COMMAND *)data;
+      temp=ntohs(zoom_command->zoom);
+      set_zoom(zoom_command->id,(double)temp);
+      send_zoom(client->socket,active_receiver->id,active_receiver->zoom);
+      send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      break;
+    case CMD_RESP_RX_PAN:
+      {
+      PAN_COMMAND *pan_command=(PAN_COMMAND *)data;
+      temp=ntohs(pan_command->pan);
+      set_pan(pan_command->id,(double)temp);
+      send_pan(client->socket,active_receiver->id,active_receiver->pan);
+      }
+      break;
+    case CMD_RESP_RX_VOLUME:
+      {
+      VOLUME_COMMAND *volume_command=(VOLUME_COMMAND *)data;
+      temp=ntohs(volume_command->volume);
+      set_af_gain(volume_command->id,(double)temp/100.0);
+      }
+      break;
+    case CMD_RESP_RX_AGC:
+      {
+      AGC_COMMAND *agc_command=(AGC_COMMAND *)data;
+      int r=agc_command->id;
+      CHECK_RX(r);
+      RECEIVER *rx=receiver[r];
+      rx->agc=ntohs(agc_command->agc);
+      set_agc(rx,rx->agc);
+      send_agc(client->socket,rx->id,rx->agc);
+      g_idle_add(ext_vfo_update, NULL);
+      }
+      break;
+    case CMD_RESP_RX_AGC_GAIN:
+      {
+      AGC_GAIN_COMMAND *agc_gain_command=(AGC_GAIN_COMMAND *)data;
+      int r=agc_gain_command->id;
+      CHECK_RX(r);
+      temp=ntohs(agc_gain_command->gain);
+      set_agc_gain(r,(double)temp);
+      RECEIVER *rx=receiver[r];
+      send_agc_gain(client->socket,rx->id,(int)rx->agc_gain,(int)rx->agc_hang,(int)rx->agc_thresh);
+      }
+      break;
+    case CMD_RESP_RX_GAIN:
+      {
+      RFGAIN_COMMAND *command=(RFGAIN_COMMAND *) data;
+      double td=ntohd(command->gain);
+      set_rf_gain(command->id, td);
+      }
+      break;
+    case CMD_RESP_RX_ATTENUATION:
+      {
+      ATTENUATION_COMMAND *attenuation_command=(ATTENUATION_COMMAND *)data;
+      temp=ntohs(attenuation_command->attenuation);
+      set_attenuation(temp);
+      }
+      break;
+    case CMD_RESP_RX_SQUELCH:
+      {
+      SQUELCH_COMMAND *squelch_command=(SQUELCH_COMMAND *)data;
+      int r=squelch_command->id;
+      CHECK_RX(r);
+      receiver[r]->squelch_enable=squelch_command->enable;
+      temp=ntohs(squelch_command->squelch);
+      receiver[r]->squelch=(double)temp;
+      set_squelch(receiver[r]);
+      }
+      break;
+    case CMD_RESP_RX_NOISE:
+      {
+      NOISE_COMMAND *noise_command=(NOISE_COMMAND *)data;
+      int r=noise_command->id;
+      CHECK_RX(r);
+      RECEIVER *rx=receiver[r];
+      rx->nb=noise_command->nb;
+      rx->nb2=noise_command->nb2;
+      mode_settings[vfo[rx->id].mode].nb=rx->nb;
+      mode_settings[vfo[rx->id].mode].nb2=rx->nb2;
+      rx->nr=noise_command->nr;
+      rx->nr2=noise_command->nr2;
+      mode_settings[vfo[rx->id].mode].nr=rx->nr;
+      mode_settings[vfo[rx->id].mode].nr2=rx->nr2;
+      rx->anf=noise_command->anf;
+      mode_settings[vfo[rx->id].mode].anf=rx->anf;
+      rx->snb=noise_command->snb;
+      mode_settings[vfo[rx->id].mode].snb=rx->snb;
+      set_noise();
+      send_noise(client->socket,rx->id,rx->nb,rx->nb2,rx->nr,rx->nr2,rx->anf,rx->snb);
+      }
+      break;
+    case CMD_RESP_RX_BAND:
+      {
+      BAND_COMMAND *band_command=(BAND_COMMAND *)data;
+      int r=band_command->id;
+      CHECK_RX(r);
+      RECEIVER *rx=receiver[r];
+      short b=htons(band_command->band);
+      vfo_band_changed(r,b);
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      }
+      break;
+    case CMD_RESP_RX_MODE:
+      {
+      MODE_COMMAND *mode_command=(MODE_COMMAND *)data;
+      int r=mode_command->id;
+      CHECK_RX(r);
+      RECEIVER *rx=receiver[r];
+      short m=htons(mode_command->mode);
+      vfo_mode_changed(m);
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      send_filter(client->socket,r,m);
+      }
+      break;
+    case CMD_RESP_RX_FILTER:
+      {
+      FILTER_COMMAND *filter_command=(FILTER_COMMAND *)data;
+      int r=filter_command->id;
+      short f=htons(filter_command->filter);
+      vfo_filter_changed(f);
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      send_filter(client->socket,r,f);
+      }
+      break;
+    case CMD_RESP_SPLIT:
+      {
+      SPLIT_COMMAND *split_command=(SPLIT_COMMAND *)data;
+      if(can_transmit) {
+        split=split_command->split;
+        tx_set_mode(transmitter,get_tx_mode());
+        g_idle_add(ext_vfo_update, NULL);
+      }
+      send_split(client->socket,split);
+      }
+      break;
+    case CMD_RESP_SAT:
+      {
+      SAT_COMMAND *sat_command=(SAT_COMMAND *)data;
+      sat_mode=sat_command->sat;
+      g_idle_add(ext_vfo_update, NULL);
+      send_sat(client->socket,sat_mode);
+      }
+      break;
+    case CMD_RESP_DUP:
+      {
+      DUP_COMMAND *dup_command=(DUP_COMMAND *)data;
+      duplex=dup_command->dup;
+      g_idle_add(ext_vfo_update, NULL);
+      send_dup(client->socket,duplex);
+      }
+      break;
+    case CMD_RESP_LOCK:
+      {
+      LOCK_COMMAND *lock_command=(LOCK_COMMAND *)data;
+      locked=lock_command->lock;
+      g_idle_add(ext_vfo_update, NULL);
+      send_lock(client->socket,locked);
+      }
+      break;
+    case CMD_RESP_CTUN:
+      {
+      CTUN_COMMAND *ctun_command=(CTUN_COMMAND *)data;
+      int v=ctun_command->id;
+      vfo[v].ctun=ctun_command->ctun;
+      if(!vfo[v].ctun) {
+        vfo[v].offset=0;
+      }
+      vfo[v].ctun_frequency=vfo[v].frequency;
+      set_offset(active_receiver,vfo[v].offset);
+      g_idle_add(ext_vfo_update, NULL);
+      send_ctun(client->socket,v,vfo[v].ctun);
+      send_vfo_data(client,v);
+      }
+      break;
+    case CMD_RESP_RX_FPS:
+      {
+      FPS_COMMAND *fps_command=(FPS_COMMAND *)data;
+      int rx=fps_command->id;
+      CHECK_RX(rx);
+      receiver[rx]->fps=fps_command->fps;
+      calculate_display_average(receiver[rx]);
+      set_displaying(receiver[rx],1);
+      send_fps(client->socket,rx,receiver[rx]->fps);
+      }
+      break;
+    case CMD_RESP_RX_SELECT:
+      {
+      RX_SELECT_COMMAND *rx_select_command=(RX_SELECT_COMMAND *)data;
+      int rx=rx_select_command->id;
+      CHECK_RX(rx);
+      receiver_set_active(receiver[rx]);
+      send_rx_select(client->socket,rx);
+      }
+      break;
+    case CMD_RESP_VFO:
+      {
+      VFO_COMMAND *vfo_command=(VFO_COMMAND *)data;
+      int action=vfo_command->id;
+      switch(action) {
+        case VFO_A_TO_B:
+          vfo_a_to_b();
+          break;
+        case VFO_B_TO_A:
+          vfo_b_to_a();
+          break;
+        case VFO_A_SWAP_B:
+          vfo_a_swap_b();
+          break;
+      }
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      }
+      break;
+    case CMD_RESP_RIT_UPDATE:
+      {
+      RIT_UPDATE_COMMAND *rit_update_command=(RIT_UPDATE_COMMAND *)data;
+      int rx=rit_update_command->id;
+      vfo_rit_update(rx);
+      send_vfo_data(client,rx);
+      }
+      break;
+    case CMD_RESP_RIT_CLEAR:
+      {
+      RIT_CLEAR_COMMAND *rit_clear_command=(RIT_CLEAR_COMMAND *)data;
+      int rx=rit_clear_command->id;
+      vfo_rit_clear(rx);
+      send_vfo_data(client,rx);
+      }
+      break;
+    case CMD_RESP_RIT:
+      {
+      RIT_COMMAND *rit_command=(RIT_COMMAND *)data;
+      int rx=rit_command->id;
+      short rit=ntohs(rit_command->rit);
+      vfo_rit(rx,(int)rit);
+      send_vfo_data(client,rx);
+      }
+      break;
+    case CMD_RESP_XIT_UPDATE:
+      {
+      XIT_UPDATE_COMMAND *xit_update_command=(XIT_UPDATE_COMMAND *)data;
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      }
+      break;
+    case CMD_RESP_XIT_CLEAR:
+      {
+      XIT_CLEAR_COMMAND *xit_clear_command=(XIT_CLEAR_COMMAND *)data;
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      }
+      break;
+    case CMD_RESP_XIT:
+      {
+      XIT_COMMAND *xit_command=(XIT_COMMAND *)data;
+      short xit=ntohs(xit_command->xit);
+      send_vfo_data(client,VFO_A);
+      send_vfo_data(client,VFO_B);
+      }
+      break;
+    case CMD_RESP_SAMPLE_RATE:
+      {
+      SAMPLE_RATE_COMMAND *sample_rate_command=(SAMPLE_RATE_COMMAND *)data;
+      int rx=(int)sample_rate_command->id;
+      CHECK_RX(rx);
+      long long rate=ntohll(sample_rate_command->sample_rate);
+      if(rx==-1) {
+        radio_change_sample_rate((int)rate);
+        send_sample_rate(client->socket,-1,radio_sample_rate);
+      } else {
+        receiver_change_sample_rate(receiver[rx],(int)rate);
+        send_sample_rate(client->socket,rx,receiver[rx]->sample_rate);
+      }
+      }
+      break;
+    case CMD_RESP_RECEIVERS:
+      {
+      RECEIVERS_COMMAND *receivers_command=(RECEIVERS_COMMAND *)data;
+      int r=receivers_command->receivers;
+      radio_change_receivers(r);
+      send_receivers(client->socket,receivers);
+      }
+      break;
+    case CMD_RESP_RIT_INCREMENT:
+      {
+      RIT_INCREMENT_COMMAND *rit_increment_command=(RIT_INCREMENT_COMMAND *)data;
+      short increment=ntohs(rit_increment_command->increment);
+      rit_increment=(int)increment;
+      send_rit_increment(client->socket,rit_increment);
+      }
+      break;
+    case CMD_RESP_FILTER_BOARD:
+      {
+      FILTER_BOARD_COMMAND *filter_board_command=(FILTER_BOARD_COMMAND *)data;
+      filter_board=(int)filter_board_command->filter_board;
+      load_filters();
+      send_filter_board(client->socket,filter_board);
+      }
+      break;
+    case CMD_RESP_SWAP_IQ:
+      {
+      SWAP_IQ_COMMAND *swap_iq_command=(SWAP_IQ_COMMAND *)data;
+      iqswap=(int)swap_iq_command->iqswap;
+      send_swap_iq(client->socket,iqswap);
+      }
+      break;
+    case CMD_RESP_REGION:
+      {
+      REGION_COMMAND *region_command=(REGION_COMMAND *)data;
+      iqswap=(int)region_command->region;
+      send_region(client->socket,region);
+      }
+      break;
+  }
+  g_free(data);
   return 0;
 }

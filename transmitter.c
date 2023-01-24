@@ -235,8 +235,8 @@ void transmitter_save_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.drive",tx->id);
   sprintf(value,"%d",tx->drive);
   setProperty(name,value);
-  sprintf(name,"transmitter.%d.tune_percent",tx->id);
-  sprintf(value,"%d",tx->tune_percent);
+  sprintf(name,"transmitter.%d.tune_drive",tx->id);
+  sprintf(value,"%d",tx->tune_drive);
   setProperty(name,value);
   sprintf(name,"transmitter.%d.tune_use_drive",tx->id);
   sprintf(value,"%d",tx->tune_use_drive);
@@ -342,9 +342,9 @@ void transmitter_restore_state(TRANSMITTER *tx) {
   sprintf(name,"transmitter.%d.drive",tx->id);
   value=getProperty(name);
   if(value) tx->drive=atoi(value);
-  sprintf(name,"transmitter.%d.tune_percent",tx->id);
+  sprintf(name,"transmitter.%d.tune_drive",tx->id);
   value=getProperty(name);
-  if(value) tx->tune_percent=atoi(value);
+  if(value) tx->tune_drive=atoi(value);
   sprintf(name,"transmitter.%d.tune_use_drive",tx->id);
   value=getProperty(name);
   if(value) tx->tune_use_drive=atoi(value);
@@ -882,7 +882,7 @@ fprintf(stderr,"create_transmitter: id=%d buffer_size=%d mic_sample_rate=%d mic_
   tx->am_carrier_level=0.5;
 
   tx->drive=50;
-  tx->tune_percent=10;
+  tx->tune_drive=10;
   tx->tune_use_drive=0;
 
   tx->compressor=0;
@@ -1240,12 +1240,7 @@ static void full_tx_buffer(TRANSMITTER *tx) {
       //
       // "The magic factor" 0.00392 is slightly less than 1/255.
       //
-      if(tune && !tx->tune_use_drive) {
-        double fac=sqrt((double)tx->tune_percent * 0.01);
-        gain=gain*(double)tx->drive_level*fac*0.00392;
-      } else {
-        gain=gain*(double)tx->drive_level*0.00392;
-      }
+      gain=gain*(double)tx->drive_level*0.00392;
     }
 
     if (txflag == 0 && protocol == NEW_PROTOCOL) {

@@ -867,15 +867,7 @@ static void new_protocol_high_priority() {
     high_priority_buffer_to_radio[331]=phase>>8;
     high_priority_buffer_to_radio[332]=phase;
 
-    int power=0;
-    if (xmit) {
-      if(tune && !transmitter->tune_use_drive) {
-        double fac=sqrt((double)transmitter->tune_percent * 0.01);
-        power=(int)((double)transmitter->drive_level*fac);
-      } else {
-        power=transmitter->drive_level;
-      }
-    }
+    int power=transmitter->drive_level;
 
     high_priority_buffer_to_radio[345]=power&0xFF;
 
@@ -1942,7 +1934,7 @@ static void process_high_priority() {
     alex_reverse_power_average = (alex_reverse_power + 3*alex_reverse_power_average) >> 2;
     supply_volts=((buffer[49]&0xFF)<<8)|(buffer[50]&0xFF);
 
-    // Stops CAT cw transmission if paddle hit
+    // Stops CAT cw transmission if radio reports "CW action"
     if (dash || dot) {
       CAT_cw_is_active=0;
       cw_key_hit=1;
@@ -1951,6 +1943,16 @@ static void process_high_priority() {
     if (!cw_keyer_internal) {
       if (dash != previous_dash) keyer_event(0, dash);
       if (dot  != previous_dot ) keyer_event(1, dot );
+    }
+#else
+    //
+    // Note that if an external keyer is connected to the "CW" jack of
+    // the ANAN-7000, it will report its state via the "dot" state
+    // so we can do CW directly. Only act on dot state changes so we
+    // do not intervene with CAT CW.
+    //
+    if (!cw_keyer_internal && dot != previous_dot) {
+      cw_key_down=dot ? 960000 : 0;
     }
 #endif
 
