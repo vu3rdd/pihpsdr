@@ -1,7 +1,7 @@
 use libc::{size_t};
 
 #[no_mangle]
-pub extern fn add(left: size_t, right: size_t) -> size_t {
+pub extern "C" fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
