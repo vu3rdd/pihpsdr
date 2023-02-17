@@ -233,8 +233,11 @@ ifeq ($(UNAME_S), Darwin)
 SYSLIBS=-framework IOKit
 endif
 
+RUST_LIB=-Lrust/target/debug -lhpsdr
+
 LIBS=	$(LDFLAGS) $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(SOAPYSDRLIBS) $(STEMLAB_LIBS) \
-	$(MIDI_LIBS) -lwdsp -lpthread -lm $(SYSLIBS)
+	$(MIDI_LIBS) $(RUST_LIB) -lwdsp -lpthread -lm $(SYSLIBS)
+
 INCLUDES=$(GTKINCLUDES)
 
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
@@ -320,7 +323,8 @@ switch_menu.c \
 toolbar_menu.c \
 sintab.c
 
-
+RUST_SRC=\
+rust/lib.rs
 
 HEADERS= \
 MacOS.h \
@@ -480,7 +484,8 @@ sintab.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) $(SOAPYSDR_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS)
+		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) \
+		libhpsdr
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(SOAPYSDR_OBJS) $(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
 		$(MIDI_OBJS) $(STEMLAB_OBJS) $(SERVER_OBJS) $(LIBS)
@@ -569,7 +574,7 @@ controller2v2: clean $(PROGRAM)
 
 hpsdrsim.o:     hpsdrsim.c  hpsdrsim.h
 	$(CC) -c -O hpsdrsim.c
-	
+
 newhpsdrsim.o:	newhpsdrsim.c hpsdrsim.h
 	$(CC) -c -O newhpsdrsim.c
 
@@ -597,6 +602,10 @@ debian:
 	cp release/pihpsdr/pihpsdr.desktop pkg/pihpsdr/usr/share/applications
 	cd pkg; dpkg-deb --build pihpsdr
 
+libhpsdr:
+	cd rust && \
+	cargo build && \
+	cd ..
 #############################################################################
 #
 # This is for MacOS "app" creation ONLY

@@ -70,6 +70,8 @@ gint display_width;
 gint display_height;
 gint full_screen=1;
 
+extern size_t add(size_t left, size_t right);
+
 static GtkWidget *discovery_dialog;
 
 static GdkCursor *cursor_arrow;
@@ -346,6 +348,8 @@ int main(int argc,char **argv) {
   int status;
 
   char name[1024];
+
+  printf("calling rust add fn: %d\n", add(40, 2));
 
 #ifdef __APPLE__
   void MacOSstartup(char *path);
