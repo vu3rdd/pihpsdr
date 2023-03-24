@@ -42,9 +42,6 @@ LOCALCW_INCLUDE=LOCALCW
 # very early code not included yet
 #SERVER_INCLUDE=SERVER
 
-CC=gcc
-LINK=gcc
-
 ifeq ($(LEVEL_CTRL),SW_LEVEL_CTRL)
 LEVEL_OPTIONS=-D SW_LEVEL_CTRL
 endif
