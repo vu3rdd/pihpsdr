@@ -1091,10 +1091,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	      qsample=floor(gain*ramp+0.5);         // always non-negative, isample is just the pulse envelope
 	      sidetone=sidevol * ramp * getNextInternalSideToneSample();
 
-#ifdef SW_LEVEL_CTRL
-              isample = isample >= 0.0 ? (long)floor(isample * gain + 0.5) : (long)ceil(isample * gain - 0.5);
-              qsample = qsample >= 0.0 ? (long)floor(qsample * gain + 0.5) : (long)ceil(qsample * gain - 0.5);
-#endif
+              // isample = isample >= 0.0 ? (long)floor(isample * gain + 0.5) : (long)ceil(isample * gain - 0.5);
+              // qsample = qsample >= 0.0 ? (long)floor(qsample * gain + 0.5) : (long)ceil(qsample * gain - 0.5);
+
 	      old_protocol_iq_samples_with_sidetone(isample,qsample,sidetone);
 	    }
 	    break;
@@ -1108,10 +1107,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
 	      ramp=cw_shape_buffer192[j];	    		// between 0.0 and 1.0
 	      qsample=floor(gain*ramp+0.5);         	    	// always non-negative, isample is just the pulse envelope
 
-#ifdef SW_LEVEL_CTRL
-              isample = isample >= 0.0 ? (long)floor(isample * gain + 0.5) : (long)ceil(isample * gain - 0.5);
-              qsample = qsample >= 0.0 ? (long)floor(qsample * gain + 0.5) : (long)ceil(qsample * gain - 0.5);
-#endif
+              // isample = isample >= 0.0 ? (long)floor(isample * gain + 0.5) : (long)ceil(isample * gain - 0.5);
+              // qsample = qsample >= 0.0 ? (long)floor(qsample * gain + 0.5) : (long)ceil(qsample * gain - 0.5);
+
 	      new_protocol_iq_samples(isample,qsample);
 	    }
 	    break;
