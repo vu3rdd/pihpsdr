@@ -64,9 +64,6 @@ static cairo_surface_t *vfo_surface = NULL;
 int steps[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 char *step_labels[] = { "1Hz", "10Hz", "100Hz", "1kHz", "10kHz", "100kHz", "1MHz" };
 
-static GtkWidget* menu=NULL;
-static GtkWidget* band_menu=NULL;
-
 struct _vfo vfo[MAX_VFOS];
 struct _mode_settings mode_settings[MODES];
 
@@ -952,7 +949,7 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
     //   ["VFO A: 7.123", "456"]
     int l = strlen(vfo_str);
 
-    char **s = malloc(2 * sizeof(char *));
+    char **s = malloc(3 * sizeof(char *));
 
     char *s1 = malloc(sizeof(char) * 20);
     char *s2 = malloc(sizeof(char) * 20);
