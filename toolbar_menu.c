@@ -39,31 +39,8 @@
 #include "gpio.h"
 #include "i2c.h"
 
-static GtkWidget *parent_window=NULL;
-
 static GtkWidget *dialog=NULL;
-
 static SWITCH *temp_switches;
-
-
-static void cleanup() {
-  if(dialog!=NULL) {
-    gtk_widget_destroy(dialog);
-    dialog=NULL;
-    active_menu=NO_MENU;
-    sub_menu=NULL;
-  }
-}
-
-static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  cleanup();
-  return TRUE;
-}
-
-static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  cleanup();
-  return FALSE;
-}
 
 static void switch_page_cb(GtkNotebook *notebook,GtkWidget *page,guint page_num,gpointer user_data) {
   temp_switches=switches_controller1[page_num];
