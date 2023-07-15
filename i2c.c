@@ -49,20 +49,14 @@ unsigned int i2c_sw[16]=
       SW_12,SW_11,SW_10,SW_9,SW_7,SW_8,SW_16,SW_17 };
 
 static int write_byte_data(unsigned char reg, unsigned char data) {
-  int rc;
+  int rc = 0;
 
-  if(i2c_smbus_write_byte_data(fd,reg,data&0xFF)<0) {
+  rc = i2c_smbus_write_byte_data(fd,reg,data&0xFF);
+  if(rc < 0) {
     g_print("%s: write REG_GCONF config failed: addr=%02X %s\n",__FUNCTION__,i2c_address_1,g_strerror(errno));
   }
   
   return rc;
-}
-
-static unsigned char read_byte_data(unsigned char reg) {
-  __s32 data;
-
-  data=i2c_smbus_read_byte_data(fd,reg);
-  return data&0xFF;
 }
 
 static unsigned int read_word_data(unsigned char reg) {
@@ -72,10 +66,6 @@ static unsigned int read_word_data(unsigned char reg) {
   return data&0xFFFF;
 }
 
-
-static void frequencyStep(int pos) {
-  vfo_step(pos);
-}
 
 void i2c_interrupt() {
   unsigned int flags;
