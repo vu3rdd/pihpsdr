@@ -343,7 +343,7 @@ static void* keyer_thread(void *arg) {
     int interval = 1000000; // 1 ms
     int i;
     int kdelay;
-    int old_volume;
+    int old_volume = 0;
     int txmode;
 #ifdef __APPLE__
     struct timespec now;

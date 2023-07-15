@@ -215,12 +215,12 @@ static void *mic_read_thread(gpointer arg) {
     g_mutex_unlock(&audio_mutex);
   }
   g_print("%s: exit\n",__FUNCTION__);
+  return NULL;
 }
 
 int audio_open_input() {
   pa_sample_spec sample_spec;
   int result=0;
-  int err;
 
   if(transmitter->microphone_name==NULL) {
     return -1;

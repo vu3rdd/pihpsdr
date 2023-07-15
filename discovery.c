@@ -268,7 +268,7 @@ void discovery() {
   // Try to locate IP addr
   FILE *fp=fopen("ip.addr","r");
   if (fp) {
-    char *c=fgets(ipaddr_tcp, IPADDR_LEN,fp);
+    fgets(ipaddr_tcp, IPADDR_LEN,fp);
     fclose(fp);
     ipaddr_tcp[IPADDR_LEN-1]=0;
     // remove possible trailing newline char in ipaddr_tcp
