@@ -160,6 +160,7 @@ AUDIO_OBJS=portaudio.o
 endif
 
 CFLAGS=	-Wno-deprecated-declarations -Wall -O3
+LINK?=   $(CC)
 # CFLAGS=	-Wno-deprecated-declarations -O3 -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits
 OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(LEVEL_OPTIONS) $(PURESIGNAL_OPTIONS) $(REMOTE_OPTIONS) $(USBOZY_OPTIONS) \
 	$(GPIO_OPTIONS) $(GPIOD_OPTIONS) $(LOCALCW_OPTIONS) \
