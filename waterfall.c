@@ -78,8 +78,10 @@ static gboolean waterfall_configure_event_cb(GtkWidget *widget,
 static gboolean waterfall_draw_cb(GtkWidget *widget, cairo_t *cr,
                                   gpointer data) {
     RECEIVER *rx = (RECEIVER *)data;
+    g_mutex_lock(&rx->display_mutex);
     gdk_cairo_set_source_pixbuf(cr, rx->pixbuf, 0, 0);
     cairo_paint(cr);
+    g_mutex_unlock(&rx->display_mutex);
     return FALSE;
 }
 
@@ -108,7 +110,6 @@ static gboolean waterfall_scroll_event_cb(GtkWidget *widget,
 }
 
 void waterfall_update(RECEIVER *rx) {
-
     int i;
 
     float *samples;
