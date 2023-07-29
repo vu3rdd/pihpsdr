@@ -142,25 +142,28 @@ void waterfall_update(RECEIVER *rx) {
                     // %lld to %lld
                     // pixels=%d\n",rx->waterfall_frequency,vfo[rx->id].frequency,rotate_pixels);
                     if (rotate_pixels < 0) {
-                        memmove(
-                            pixels, &pixels[-rotate_pixels * 3],
-                            ((display_width * display_height) + rotate_pixels) *
-                                3);
-                        // now clear the right hand side
-                        for (i = 0; i < display_height; i++) {
-                            memset(&pixels[((i * display_width) +
-                                            (width + rotate_pixels)) *
-                                           3],
-                                   0, -rotate_pixels * 3);
+                        for (size_t h = 0; h < display_height; h++) {
+                            // Move each line to the left by rotate_pixels * 3 bytes.
+                            // Each pixel is 3 bytes, hence the 3.
+                            // note: rotate_pixel is negative.
+                            memmove(&pixels[h * rowstride],
+                                    &pixels[h * rowstride - (rotate_pixels * 3)],
+                                    rowstride + (rotate_pixels * 3));
+                            // clear the right side
+                            memset(&pixels[h * rowstride + rowstride + (rotate_pixels * 3)],
+                                   0,
+                                   -rotate_pixels * 3);
                         }
                     } else {
-                        memmove(
-                            &pixels[rotate_pixels * 3], pixels,
-                            ((display_width * display_height) - rotate_pixels) *
-                                3);
-                        // now clear the left hand side
-                        for (i = 0; i < display_height; i++) {
-                            memset(&pixels[(i * display_width) * 3], 0,
+                        for (size_t h = 0; h < display_height; h++) {
+                            // Move each line to the right, overwrite
+                            // the last rotate_pixels * 3 bytes in each line.
+                            memmove(&pixels[h * rowstride + (rotate_pixels * 3)],
+                                    &pixels[h * rowstride],
+                                    rowstride - (rotate_pixels * 3));
+                            // clear the left side
+                            memset(&pixels[h * rowstride],
+                                   0,
                                    rotate_pixels * 3);
                         }
                     }
