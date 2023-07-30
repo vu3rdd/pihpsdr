@@ -121,14 +121,15 @@ void waterfall_update(RECEIVER *rx) {
         int rowstride = gdk_pixbuf_get_rowstride(rx->pixbuf);
 
         hz_per_pixel = (double)rx->sample_rate / (double)display_width;
+        int vfo_freq = vfo[rx->id].frequency;
 
         if (rx->waterfall_frequency != 0 &&
             (rx->sample_rate == rx->waterfall_sample_rate)) {
-            if (rx->waterfall_frequency != vfo[rx->id].frequency) {
+            if (rx->waterfall_frequency != vfo_freq) {
                 // scrolled or band change
                 long long half = (long long)(rx->sample_rate / 2);
-                if (rx->waterfall_frequency < (vfo[rx->id].frequency - half) ||
-                    rx->waterfall_frequency > (vfo[rx->id].frequency + half)) {
+                if (rx->waterfall_frequency < (vfo_freq - half) ||
+                    rx->waterfall_frequency > (vfo_freq + half)) {
                     // outside of the range - blank waterfall
                     // fprintf(stderr,"waterfall_update: clear waterfall from
                     // %lld to
@@ -137,7 +138,7 @@ void waterfall_update(RECEIVER *rx) {
                 } else {
                     // rotate waterfall
                     int rotate_pixels = (int)((double)(rx->waterfall_frequency -
-                                                       vfo[rx->id].frequency) /
+                                                       vfo_freq) /
                                               hz_per_pixel);
                     // fprintf(stderr,"waterfall_update: rotate waterfall from
                     // %lld to %lld
@@ -174,7 +175,7 @@ void waterfall_update(RECEIVER *rx) {
             memset(pixels, 0, display_width * display_height * 3);
         }
 
-        rx->waterfall_frequency = vfo[rx->id].frequency;
+        rx->waterfall_frequency = vfo_freq;
         rx->waterfall_sample_rate = rx->sample_rate;
 
         memmove(&pixels[rowstride], pixels, (height - 1) * rowstride);
