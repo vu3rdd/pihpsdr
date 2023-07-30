@@ -131,10 +131,7 @@ void waterfall_update(RECEIVER *rx) {
                 if (rx->waterfall_frequency < (vfo_freq - half) ||
                     rx->waterfall_frequency > (vfo_freq + half)) {
                     // outside of the range - blank waterfall
-                    // fprintf(stderr,"waterfall_update: clear waterfall from
-                    // %lld to
-                    // %lld\n",rx->waterfall_frequency,vfo[rx->id].frequency);
-                    memset(pixels, 0, display_width * display_height * 3);
+                    memset(pixels, 0, rowstride);
                 } else {
                     // rotate waterfall
                     int rotate_pixels = (int)((double)(rx->waterfall_frequency -
@@ -144,7 +141,7 @@ void waterfall_update(RECEIVER *rx) {
                     // %lld to %lld
                     // pixels=%d\n",rx->waterfall_frequency,vfo[rx->id].frequency,rotate_pixels);
                     if (rotate_pixels < 0) {
-                        for (size_t h = 0; h < display_height; h++) {
+                        for (size_t h = 0; h < display_height/2; h++) {
                             // Move each line to the left by rotate_pixels * 3 bytes.
                             // Each pixel is 3 bytes, hence the 3.
                             // note: rotate_pixel is negative.
@@ -156,8 +153,8 @@ void waterfall_update(RECEIVER *rx) {
                                    0,
                                    -rotate_pixels * 3);
                         }
-                    } else {
-                        for (size_t h = 0; h < display_height; h++) {
+                    } else if (rotate_pixels > 0) {
+                        for (size_t h = 0; h < display_height/2; h++) {
                             // Move each line to the right, overwrite
                             // the last rotate_pixels * 3 bytes in each line.
                             memmove(&pixels[h * rowstride + (rotate_pixels * 3)],
@@ -178,7 +175,7 @@ void waterfall_update(RECEIVER *rx) {
         rx->waterfall_frequency = vfo_freq;
         rx->waterfall_sample_rate = rx->sample_rate;
 
-        memmove(&pixels[rowstride], pixels, (height - 1) * rowstride);
+        memmove(&pixels[rowstride], pixels, (height/2 - 1) * rowstride);
 
         float sample;
         int average = 0;
