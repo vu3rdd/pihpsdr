@@ -174,8 +174,11 @@ ifeq ($(UNAME_S), Linux)
 RT_OPTION=-lrt
 endif
 
-LIBS=$(RT_OPTION) -lfftw3 -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS)
-INCLUDES=$(GTKINCLUDES)
+RUST_LIB=-Lrust/target/debug -lhpsdr
+RUST_INCLUDES=-Irust/target/debug
+
+LIBS=$(RT_OPTION) -lfftw3 -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS) $(RUST_LIB)
+INCLUDES=$(GTKINCLUDES) $(RUST_INCLUDES)
 
 COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 
@@ -419,10 +422,11 @@ toolbar_menu.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(SERVER_OBJS)
+		$(MIDI_OBJS) $(SERVER_OBJS) \
+		libhpsdr
 	$(LINK) -o $(PROGRAM) $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
-		$(MIDI_OBJS) $(SERVER_OBJS) $(LIBS)
+		$(MIDI_OBJS) $(SERVER_OBJS) $(LIBS)		
 
 .PHONY:	all
 all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) \
@@ -506,6 +510,10 @@ newhpsdrsim.o:	newhpsdrsim.c hpsdrsim.h
 hpsdrsim:	hpsdrsim.o newhpsdrsim.o
 	$(LINK) -o hpsdrsim hpsdrsim.o newhpsdrsim.o -lasound -lm -lpthread
 
+libhpsdr:
+	cd rust && \
+	cargo build && \
+	cd ..
 
 debian:
 	cp $(PROGRAM) pkg/pihpsdr/usr/local/bin

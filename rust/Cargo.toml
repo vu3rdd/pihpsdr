@@ -1,0 +1,12 @@
+[package]
+name = "hpsdr"
+version = "0.1.0"
+edition = "2021"
+authors = ["Ramakrishnan Muthukrishnan <ram@rkrishnan.org>"]
+
+[dependencies]
+libc = "0.2"
+
+[lib]
+name = "hpsdr"
+crate-type = ["staticlib"]
