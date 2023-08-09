@@ -112,6 +112,12 @@ static gboolean waterfall_scroll_event_cb(GtkWidget *widget,
 void waterfall_update(RECEIVER *rx) {
     int i;
 
+    // New idea:
+    // 1. make a copy of the pixbuf using gdk_pixbuf_copy()
+    // 2. shift the waterfall left or right with gdk_pixbuf_copy_area()
+    // 3. fill the new line.
+    // 4. copy the new pixbuf to old (for now)
+    // 5. later try to get rid of the copy.
     float *samples;
     if (rx->pixbuf) {
         unsigned char *pixels = gdk_pixbuf_get_pixels(rx->pixbuf);
