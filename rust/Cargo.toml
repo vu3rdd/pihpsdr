@@ -6,7 +6,11 @@ authors = ["Ramakrishnan Muthukrishnan <ram@rkrishnan.org>"]
 
 [dependencies]
 libc = "0.2"
+cbindgen = "0.24.3"
 
 [lib]
 name = "hpsdr"
 crate-type = ["staticlib"]
+
+[build-dependencies]
+cbindgen = "0.20.0"

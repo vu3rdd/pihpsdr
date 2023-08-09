@@ -1,0 +1,3 @@
+[parse.expand]
+crates = ["libhpsdr"]
+features = ["cbindgen"]
