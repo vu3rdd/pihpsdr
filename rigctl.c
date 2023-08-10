@@ -59,6 +59,8 @@
 #endif
 #include <math.h>
 
+#include "libhpsdr.h"
+
 #define NEW_PARSER
 
 // IP stuff below
@@ -661,19 +663,6 @@ long long rigctl_getFrequency() {
     return vfo[active_receiver->id].frequency;
   }
 }
-// Looks up entry INDEX_NUM in the command structure and
-// returns the command string
-//
-void send_resp(int fd, char *msg) {
-  if (rigctl_debug)
-    g_print("RIGCTL: RESP=%s\n", msg);
-  int length = strlen(msg);
-  int written = 0;
-
-  while (written < length) {
-    written += write(fd, &msg[written], length - written);
-  }
-}
 
 //
 // 2-25-17 - K5JAE - removed duplicate rigctl
@@ -770,7 +759,7 @@ static gpointer rigctl_client(gpointer data) {
   g_mutex_lock(&mutex_a->m);
   cat_control++;
   if (rigctl_debug)
-    g_print("RIGCTL: CTLA INC cat_contro=%d\n", cat_control);
+    g_print("RIGCTL: CTLA INC cat_control=%d\n", cat_control);
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update, NULL);
 
