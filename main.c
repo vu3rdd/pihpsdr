@@ -60,6 +60,7 @@
 #include "css.h"
 #include "ext.h"
 #include "vfo.h"
+#include "ws_srv.h"
 
 struct utsname unameData;
 
@@ -203,6 +204,9 @@ static int init(void *data) {
     }
     status_text(wisdom_get_status());
   }
+
+  pthread_t ws_srv_thread_id;
+  pthread_create(&ws_srv_thread_id, NULL, ws_server, NULL);
 
   g_idle_add(ext_discovery, NULL);
   return 0;

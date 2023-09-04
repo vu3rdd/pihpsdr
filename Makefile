@@ -159,6 +159,8 @@ AUDIO_SOURCES=portaudio.c
 AUDIO_OBJS=portaudio.o
 endif
 
+CFLAGS_MONGOOSE = -DMG_ENABLE_LINES
+
 CFLAGS=	-Wno-deprecated-declarations -Wall -O3
 LINK?=   $(CC)
 # CFLAGS=	-Wno-deprecated-declarations -O3 -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -mneon-for-64bits
@@ -177,7 +179,7 @@ endif
 LIBS=$(RT_OPTION) -lfftw3 -lm -lwdsp -lpthread $(AUDIO_LIBS) $(USBOZY_LIBS) $(GTKLIBS) $(GPIO_LIBS) $(MIDI_LIBS)
 INCLUDES=$(GTKINCLUDES)
 
-COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
+COMPILE=$(CC) $(CFLAGS) $(CFLAGS_MONGOOSE) $(OPTIONS) $(INCLUDES)
 
 .c.o:
 	$(COMPILE) -c -o $@ $<
@@ -258,8 +260,9 @@ i2c.c \
 gpio.c \
 encoder_menu.c \
 switch_menu.c \
-toolbar_menu.c
-
+toolbar_menu.c \
+mongoose.c \
+ws_srv.c
 
 
 HEADERS= \
@@ -337,9 +340,9 @@ i2c.h \
 gpio.h \
 encoder_menu.h \
 switch_menu.h \
-toolbar_menu.h
-
-
+toolbar_menu.h \
+mongoose.h \
+ws_srv.h
 
 OBJS= \
 band.o \
@@ -415,7 +418,9 @@ i2c.o \
 gpio.o \
 encoder_menu.o \
 switch_menu.o \
-toolbar_menu.o
+toolbar_menu.o \
+mongoose.o \
+ws_srv.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
