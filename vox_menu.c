@@ -42,8 +42,8 @@ static GtkWidget *led;
 static GdkRGBA led_color={0.0,0.0,0.0,1.0};
 
 static GdkRGBA white={1.0,1.0,1.0,1.0};
-static GdkRGBA red={1.0,0.0,0.0,1.0};
-static GdkRGBA green={0.0,1.0,0.1,1.0};
+// static GdkRGBA red={1.0,0.0,0.0,1.0};
+// static GdkRGBA green={0.0,1.0,0.1,1.0};
 
 static GThread *level_thread_id;
 static int run_level=0;
@@ -135,10 +135,6 @@ static void destroy_cb(GtkWidget *widget, gpointer data) {
 
 static void vox_value_changed_cb(GtkWidget *widget, gpointer data) {
   vox_threshold=gtk_range_get_value(GTK_RANGE(widget))/1000.0;
-}
-
-static void vox_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
-  vox_gain=gtk_range_get_value(GTK_RANGE(widget));
 }
 
 static void vox_hang_value_changed_cb(GtkWidget *widget, gpointer data) {

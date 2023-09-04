@@ -32,15 +32,12 @@
 #include "vfo.h"
 
 static GtkWidget *parent_window=NULL;
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *title[BANDS+XVTRS];
 static GtkWidget *min_frequency[BANDS+XVTRS];
 static GtkWidget *max_frequency[BANDS+XVTRS];
 static GtkWidget *lo_frequency[BANDS+XVTRS];
 static GtkWidget *lo_error[BANDS+XVTRS];
-static GtkWidget *tx_lo_frequency[BANDS+XVTRS];
-static GtkWidget *tx_lo_error[BANDS+XVTRS];
 static GtkWidget *disable_pa[BANDS+XVTRS];
 
 static void save_xvtr () {

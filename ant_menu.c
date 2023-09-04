@@ -31,11 +31,8 @@
 #include "new_protocol.h"
 
 static GtkWidget *parent_window=NULL;
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *grid=NULL;
-static GtkWidget *adc0_antenna_combo_box;
-static GtkWidget *dac0_antenna_combo_box;
 
 static void cleanup() {
   if(dialog!=NULL) {
@@ -64,22 +61,6 @@ static void rx_ant_cb(GtkToggleButton *widget, gpointer data) {
     if(active_receiver->id==0) {
       set_alex_rx_antenna(ant);
     }
-  }
-}
-
-static void adc0_antenna_cb(GtkComboBox *widget,gpointer data) {
-  ADC *adc=(ADC *)data;
-  adc->antenna=gtk_combo_box_get_active(widget);
-  if(radio->protocol==NEW_PROTOCOL) {
-    schedule_high_priority();
-  }
-}
-
-static void dac0_antenna_cb(GtkComboBox *widget,gpointer data) {
-  DAC *dac=(DAC *)data;
-  dac->antenna=gtk_combo_box_get_active(widget);
-  if(radio->protocol==NEW_PROTOCOL) {
-    schedule_high_priority();
   }
 }
 

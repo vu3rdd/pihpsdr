@@ -39,7 +39,6 @@ int serial_parity = 0; // 0=none, 1=even, 2=odd
 gboolean rigctl_debug=FALSE;
 
 static GtkWidget *parent_window=NULL;
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
 static GtkWidget *serial_port_entry;
 
@@ -63,11 +62,6 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 static void rigctl_value_changed_cb(GtkWidget *widget, gpointer data) {
    rigctl_port_base = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget)); 
-}
-
-static void serial_value_changed_cb(GtkWidget *widget, gpointer data) {
-     sprintf(ser_port,"/dev/ttyACM%0d",(int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget))); 
-     fprintf(stderr,"RIGCTL_MENU: New Serial port=%s\n",ser_port);
 }
 
 static void rigctl_debug_cb(GtkWidget *widget, gpointer data) {
@@ -100,12 +94,6 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
 static void baud_rate_cb(GtkWidget *widget, gpointer data) {
    serial_baud_rate = GPOINTER_TO_INT(data);
    fprintf(stderr,"RIGCTL_MENU: Baud rate changed: %d\n",serial_baud_rate);
-}
-
-// Set Parity 0=None, 1=Even, 2=0dd
-static void parity_cb(GtkWidget *widget, gpointer data) {
-   serial_parity = GPOINTER_TO_INT(data);
-   fprintf(stderr,"RITCTL_MENU: Serial Parity changed=%d\n", serial_parity);
 }
 
 void rigctl_menu(GtkWidget *parent) {

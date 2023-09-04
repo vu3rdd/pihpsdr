@@ -36,8 +36,6 @@
 
 static GtkWidget *parent_window=NULL;
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {
@@ -46,28 +44,6 @@ static void cleanup() {
     dialog=NULL;
     sub_menu=NULL;
   }
-}
-
-static gboolean discovery_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  cleanup();
-#ifdef GPIO
-  gpio_close();
-#endif
-  switch(protocol) {
-    case ORIGINAL_PROTOCOL:
-      old_protocol_stop();
-      break;
-    case NEW_PROTOCOL:
-      new_protocol_stop();
-      break;
-  }
-  radioSaveState();
-  radio_stop();
-  gtk_container_remove(GTK_CONTAINER(top_window), fixed);
-  gtk_widget_destroy(fixed);
-  gtk_container_add(GTK_CONTAINER(top_window), grid);
-  discovery();
-  return TRUE;
 }
 
 static gboolean close_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {

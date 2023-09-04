@@ -34,8 +34,6 @@
 
 static GtkWidget *parent_window=NULL;
 
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 static void cleanup() {

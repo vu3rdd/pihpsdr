@@ -40,8 +40,6 @@ static GtkWidget *parent_window=NULL;
 
 static GtkWidget *dialog=NULL;
 
-static GtkWidget *last_filter;
-
 static void cleanup() {
   if(dialog!=NULL) {
     gtk_widget_destroy(dialog);

@@ -38,8 +38,6 @@
 
 #ifdef GPIO
 
-static GtkWidget *dialog;
-
 static GtkWidget *i2c_sw_text[16];
 
 static void response_event(GtkWidget *dialog,gint id,gpointer user_data) {

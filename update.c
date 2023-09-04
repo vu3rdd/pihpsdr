@@ -24,6 +24,9 @@ int check_update() {
   FILE* f=fopen("latest","r");
   if(f) {
     char *c=fgets(new_version,sizeof(new_version),f);
+    if (c == NULL) {
+        return -1;
+    }
     fclose(f);
   } else {
     fprintf(stderr,"check_update: could not read latest version\n");

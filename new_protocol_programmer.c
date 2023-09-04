@@ -52,9 +52,6 @@ static char* source;
 static long blocks;
 
 static pthread_t programmer_thread_id;
-static pthread_t programmer_response_thread_id;
-
-static int running;
 
 void *programmer_thread(void *arg);
 void *programmer_response_thread(void *arg);

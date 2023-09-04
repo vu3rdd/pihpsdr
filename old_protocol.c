@@ -154,11 +154,6 @@ static int proto_val;
 
 static int display_width;
 
-static int speed;
-
-static int dsp_rate=48000;
-static int output_rate=48000;
-
 static int data_socket=-1;
 static int tcp_socket=-1;
 static struct sockaddr_in data_addr;
@@ -167,31 +162,19 @@ static int output_buffer_size;
 
 static unsigned char control_in[5]={0x00,0x00,0x00,0x00,0x00};
 
-static double tuning_phase;
-static double phase=0.0;
-
 static int running;
-static long ep4_sequence;
 
 static uint32_t last_seq_num=-0xffffffff;
 static int suppress_ozy_packet = 0;
 
 static int current_rx=0;
 
-static int samples=0;
 static int mic_samples=0;
 static int mic_sample_divisor=1;
 
 static int local_ptt=0;
 static int dash=0;
 static int dot=0;
-
-static double micinputbuffer[MAX_BUFFER_SIZE*2];
-
-static int left_rx_sample;
-static int right_rx_sample;
-static int left_tx_sample;
-static int right_tx_sample;
 
 static unsigned char output_buffer[OZY_BUFFER_SIZE];
 static int output_buffer_index=8;
@@ -201,7 +184,6 @@ static int command=1;
 static GThread *receive_thread_id;
 static gpointer receive_thread(gpointer arg);
 static void process_ozy_input_buffer(unsigned char  *buffer);
-static void process_bandscope_buffer(char  *buffer);
 void ozy_send_buffer();
 
 static unsigned char metis_buffer[1032];
@@ -1165,7 +1147,6 @@ static int rx1channel;
 static int rx2channel;
 
 static void process_ozy_byte(int b) {
-  int i,j;
   float fsample;
   switch(state) {
     case SYNC_0:
@@ -1643,8 +1624,7 @@ void ozy_send_buffer() {
         {
         BAND *band=band_get_current_band();
         int power=0;
-	static int last_power=0;
-	//
+
 	// Some HPSDR apps for the RedPitaya generate CW inside the FPGA, but while
 	// doing this, DriveLevel changes are processed by the server, but do not become effective.
 	// If the CW paddle is hit, the new PTT state is sent to piHPSDR, then the TX drive

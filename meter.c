@@ -47,18 +47,6 @@ static double max_level=-200.0;
 static int max_count=0;
 static int max_reverse=0;
 
-static void
-meter_clear_surface (void)
-{
-  cairo_t *cr;
-  cr = cairo_create (meter_surface);
-
-  cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-  cairo_fill (cr);
-
-  cairo_destroy (cr);
-}
-
 static gboolean
 meter_configure_event_cb (GtkWidget         *widget,
             GdkEventConfigure *event,

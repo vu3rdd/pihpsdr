@@ -47,13 +47,7 @@
 #endif
 
 static GtkWidget *parent_window=NULL;
-static GtkWidget *menu_b=NULL;
 static GtkWidget *dialog=NULL;
-static GtkWidget *rx_gains[3];
-static GtkWidget *tx_gain;
-static GtkWidget *tx_gains[2];
-static GtkWidget *sat_b;
-static GtkWidget *rsat_b;
 
 static GtkWidget *receivers_1;
 static GtkWidget *receivers_2;
@@ -90,12 +84,6 @@ static void rx_gain_calibration_value_changed_cb(GtkWidget *widget, gpointer dat
 static void vfo_divisor_value_changed_cb(GtkWidget *widget, gpointer data) {
   vfo_encoder_divisor=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
-
-#ifdef GPIO
-static void gpio_settle_value_changed_cb(GtkWidget *widget, gpointer data) {
-  settle_time=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-}
-#endif
 
 /*
 static void toolbar_dialog_buttons_cb(GtkWidget *widget, gpointer data) {

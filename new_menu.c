@@ -70,9 +70,6 @@
 #include "midi_menu.h"
 #endif
 
-
-static GtkWidget *menu_b=NULL;
-
 static GtkWidget *dialog=NULL;
 
 GtkWidget *sub_menu=NULL;
@@ -269,11 +266,6 @@ void start_band() {
   }
 }
 
-static gboolean band_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_band();
-  return TRUE;
-}
-
 void start_bandstack() {
   int old_menu=active_menu;
   cleanup();
@@ -281,11 +273,6 @@ void start_bandstack() {
     bandstack_menu(top_window);
     active_menu=BANDSTACK_MENU;
   }
-}
-
-static gboolean bandstack_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_bandstack();
-  return TRUE;
 }
 
 void start_mode() {
@@ -297,11 +284,6 @@ void start_mode() {
   }
 }
 
-static gboolean mode_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_mode();
-  return TRUE;
-}
-
 void start_filter() {
   int old_menu=active_menu;
   cleanup();
@@ -309,11 +291,6 @@ void start_filter() {
     filter_menu(top_window);
     active_menu=FILTER_MENU;
   }
-}
-
-static gboolean filter_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_filter();
-  return TRUE;
 }
 
 void start_noise() {
@@ -325,11 +302,6 @@ void start_noise() {
   }
 }
 
-static gboolean noise_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_noise();
-  return TRUE;
-}
-
 void start_agc() {
   int old_menu=active_menu;
   cleanup();
@@ -337,11 +309,6 @@ void start_agc() {
     agc_menu(top_window);
     active_menu=AGC_MENU;
   }
-}
-
-static gboolean agc_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_agc();
-  return TRUE;
 }
 
 void start_vox() {
@@ -383,19 +350,9 @@ void start_vfo(int vfo) {
   }
 }
 
-static gboolean vfo_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_vfo(active_receiver->id);
-  return TRUE;
-}
-
 void start_store() {
   cleanup();
   store_menu(top_window);
-}
-
-static gboolean store_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_store();
-  return TRUE;
 }
 
 void start_tx() {
@@ -423,11 +380,6 @@ static gboolean ps_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) 
 void start_test() {
   cleanup();
   test_menu(top_window);
-}
-
-static gboolean test_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-  start_test();
-  return TRUE;
 }
 
 #ifdef CLIENT_SERVER

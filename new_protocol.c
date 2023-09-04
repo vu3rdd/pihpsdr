@@ -121,27 +121,13 @@ static long rx_specific_sequence = 0;
 static long tx_specific_sequence = 0;
 static long ddc_sequence[7/*MAX_DDC*/];
 
-//static int buffer_size=BUFFER_SIZE;
-//static int fft_size=4096;
-static int dspRate=48000;
-static int outputRate=48000;
-
-static int micSampleRate=48000;
-static int micDspRate=48000;
-static int micOutputRate=192000;
 static int micoutputsamples;  // 48000 in, 192000 out
-
-static double micinputbuffer[MAX_BUFFER_SIZE*2]; // 48000
-static double iqoutputbuffer[MAX_BUFFER_SIZE*4*2]; //192000
 
 static long tx_iq_sequence=0;
 static unsigned char iqbuffer[1444];
 static int iqindex;
 
 static int spectrumWIDTH=800;
-static int SPECTRUM_UPDATES_PER_SECOND=10;
-
-static float phase = 0.0F;
 
 static long response_sequence=0;
 static long highprio_rcvd_sequence=0;
@@ -187,8 +173,6 @@ static GThread *iq_thread_id[7/*MAX_DDC*/];
 static int outputsamples;
 #endif
 
-static int leftaudiosample;
-static int rightaudiosample;
 static long audiosequence;
 static unsigned char audiobuffer[260]; // was 1444
 static int audioindex;
@@ -1543,6 +1527,7 @@ static gpointer command_response_thread(gpointer data) {
     process_command_response();
     free(command_response_buffer);
   }
+  return NULL;
 }
 
 static gpointer high_priority_thread(gpointer data) {
@@ -1558,6 +1543,7 @@ g_print("high_priority_thread\n");
     process_high_priority();
     free(high_priority_buffer);
   }
+  return NULL;
 }
 
 static gpointer mic_line_thread(gpointer data) {
@@ -1577,6 +1563,7 @@ g_print("mic_line_thread\n");
     process_mic_data(mic_bytes_read);
     free(mic_line_buffer);
   }
+  return NULL;
 }
 
 static gpointer iq_thread(gpointer data) {
@@ -1624,6 +1611,8 @@ static gpointer iq_thread(gpointer data) {
     }
     free(buffer);
   }
+
+  return NULL;
 }
 
 static void process_iq_data(unsigned char *buffer, RECEIVER *rx) {

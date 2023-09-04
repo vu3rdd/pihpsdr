@@ -59,9 +59,6 @@ static gboolean has_moved = FALSE;
 static gboolean pressed = FALSE;
 static gboolean making_active = FALSE;
 
-static int waterfall_samples = 0;
-static int waterfall_resample = 6;
-
 void receiver_weak_notify(gpointer data, GObject *obj) {
     RECEIVER *rx = (RECEIVER *)data;
     g_print("%s: id=%d obj=%p\n", __FUNCTION__, rx->id, obj);
@@ -1640,9 +1637,6 @@ void full_rx_buffer(RECEIVER *rx) {
     process_rx_buffer(rx);
     g_mutex_unlock(&rx->mutex);
 }
-
-static int rx_buffer_seen = 0;
-static int tx_buffer_seen = 0;
 
 void add_iq_samples(RECEIVER *rx, double i_sample, double q_sample) {
     rx->iq_input_buffer[rx->samples * 2] = i_sample;

@@ -54,10 +54,6 @@ double getNextInternalSideToneSample();
 #define min(x,y) (x<y?x:y)
 #define max(x,y) (x<y?y:x)
 
-static int waterfall_samples=0;
-static int waterfall_resample=8;
-
-//
 // CW (CAT-CW and LOCALCW) in the "old protocol" is timed by the
 // heart-beat of the mic samples. The communication with rigctl.c
 // and iambic.c is done via some global variables. Their use is:
@@ -970,7 +966,6 @@ static void full_tx_buffer(TRANSMITTER *tx) {
   int cwmode;
   int sidetone=0;
   static int txflag=0;
-  static long last_qsample=0;
 
   // It is important to query tx->mode and tune only *once* within this function, to assure that
   // the two "if (cwmode)" clauses give the same result.
@@ -985,6 +980,9 @@ static void full_tx_buffer(TRANSMITTER *tx) {
     case NEW_PROTOCOL:
       gain=8388607.0; // 24 bit
       break;
+    default:
+        gain=32767.0;
+        break;
   }
 
   if (cwmode) {

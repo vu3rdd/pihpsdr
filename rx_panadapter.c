@@ -56,7 +56,6 @@ static gfloat filter_right;
 static gfloat cw_frequency;
 
 static gint sequence_error_count=0;
-static gint fexchange_error_count=0;
 
 /* Create a new surface of the appropriate size to store our scribbles */
 static gboolean
@@ -520,7 +519,7 @@ void rx_panadapter_update(RECEIVER *rx) {
     cairo_line_to(cr, (double)i, s2);
   }
 
-  cairo_pattern_t *gradient;
+  cairo_pattern_t *gradient = NULL;
   if(display_gradient) {
     gradient = cairo_pattern_create_linear(0.0, display_height, 0.0, 0.0);
     // calculate where S9 is

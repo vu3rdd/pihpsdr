@@ -86,17 +86,11 @@ static GtkWidget *drive_scale;
 static GtkWidget *squelch_label;
 static GtkWidget *squelch_scale;
 static GtkWidget *squelch_enable;
-static GtkWidget *comp_label;
 static GtkWidget *comp_scale;
-static GtkWidget *comp_enable;
-static GtkWidget *dummy_label;
 static GtkWidget *filter_width_scale;
 static GtkWidget *filter_shift_scale;
 static GtkWidget *diversity_gain_scale;
 static GtkWidget *diversity_phase_scale;
-
-static GdkRGBA white;
-static GdkRGBA gray;
 
 void sliders_update() {
   if(display_sliders) {
@@ -648,19 +642,6 @@ static void squelch_enable_cb(GtkWidget *widget, gpointer data) {
 #ifdef CLIENT_SERVER
   }
 #endif
-}
-
-static void compressor_value_changed_cb(GtkWidget *widget, gpointer data) {
-  transmitter_set_compressor_level(transmitter,gtk_range_get_value(GTK_RANGE(widget)));
-  // This value is now also reflected in the VFO panel
-  g_idle_add(ext_vfo_update, NULL);
-
-}
-
-static void compressor_enable_cb(GtkWidget *widget, gpointer data) {
-  transmitter_set_compressor(transmitter,gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)));
-  // This value is now also reflected in the VFO panel
-  g_idle_add(ext_vfo_update, NULL);
 }
 
 void set_squelch() {

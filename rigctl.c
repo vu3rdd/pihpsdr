@@ -70,9 +70,9 @@ int rigctl_enable = 0;
 
 // the port client will be connecting to
 // 2-26-17 K5JAE - Changed the defines to const ints to allow use via pointers.
-static const int TelnetPortA = 19090;
-static const int TelnetPortB = 19091;
-static const int TelnetPortC = 19092;
+//static const int TelnetPortA = 19090;
+//static const int TelnetPortB = 19091;
+//static const int TelnetPortC = 19092;
 
 #define RIGCTL_THROTTLE_NSEC 15000000L
 #define NSEC_PER_SEC 1000000000L
@@ -116,10 +116,7 @@ static GThread *serial_server_thread_id = NULL;
 static gboolean serial_running = FALSE;
 
 static int server_socket = -1;
-static int server_address_length;
 static struct sockaddr_in server_address;
-
-static int rigctl_timer = 0;
 
 typedef struct _client {
   int fd;
@@ -774,14 +771,9 @@ static gpointer rigctl_client(gpointer data) {
   g_mutex_unlock(&mutex_a->m);
   g_idle_add(ext_vfo_update, NULL);
 
-  int save_flag = 0; // Used to concatenate two cmd lines together
-  int semi_number = 0;
   int i;
-  char *work_ptr;
-  char work_buf[MAXDATASIZE];
   int numbytes;
   char cmd_input[MAXDATASIZE];
-  char cmd_save[80];
 
   char *command = g_new(char, MAXDATASIZE);
   int command_index = 0;
@@ -2180,7 +2172,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       // read meter value
       if (command[5] == ';') {
         int m = atoi(&command[4]);
-        sprintf(reply, "ZZRM%d%20d;", smeter, (int)receiver[0]->meter);
+        sprintf(reply, "ZZRM%d%20d;", m, (int)receiver[0]->meter);
         send_resp(client->fd, reply);
       }
       break;
@@ -2760,7 +2752,6 @@ int parse_cmd(void *data) {
   char reply[80];
   reply[0] = '\0';
   gboolean implemented = TRUE;
-  gboolean errord = FALSE;
 
   switch (command[0]) {
   case '#':
@@ -2773,7 +2764,7 @@ int parse_cmd(void *data) {
         } else {
           new_protocol_stop();
         }
-        int rc = system("shutdown -h -P now");
+        system("shutdown -h -P now");
         _exit(0);
       }
       break;
@@ -3039,7 +3030,7 @@ int parse_cmd(void *data) {
         }
       } else if (command[6] == ';') {
         int fw = atoi(&command[2]);
-        int val = filter->low = fw;
+        filter->low = fw;
         switch (vfo[active_receiver->id].mode) {
         case modeCWL:
         case modeCWU:
@@ -3565,7 +3556,7 @@ int parse_cmd(void *data) {
       // set/read stallite mode status
       if (command[2] == ';') {
         sprintf(reply, "SA%d%d%d%d%d%d%dSAT?    ;",
-                sat_mode == SAT_MODE | sat_mode == RSAT_MODE, 0, 0, 0,
+                sat_mode == SAT_MODE || sat_mode == RSAT_MODE, 0, 0, 0,
                 sat_mode == SAT_MODE, sat_mode == RSAT_MODE, 0);
         send_resp(client->fd, reply);
       } else if (command[9] == ';') {
