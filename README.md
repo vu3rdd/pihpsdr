@@ -25,6 +25,9 @@ pihpsdr itself. It does not install radioberry kernel module and
 install the rbf file etc. For that, please use Johan's scripts for
 now. Please email me if you encounter any problems installing it.
 
+Ideally these should possibly go into the makefile and the dependent
+libraries should be git submodules. I may make that change soon.
+
 # logging via a program on another computer (via network)
 
 The idea is that `rigctld` would connect to the radio via network. All
