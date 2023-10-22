@@ -1987,32 +1987,75 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
       case 'R': // ZZNR
           // set/read RX1 NR
           if (command[4] == ';') {
-              sprintf(reply, "ZZNR%d;", receiver[0]->nr);
+	      // reply with 0 if none of the NR/NR2/NR3/NR4 are off
+	      // or with 1 if nr is on, 2 if nr2 ...
+	      int nr_bitmap = (receiver[0]->nr << 0) |
+		  (receiver[0]->nr2 << 1) |
+		  (receiver[0]->nr3 << 2) |
+		  (receiver[0]->nr4 << 3);
+	      switch (nr_bitmap) {
+	      case 0:
+		  // none of the NR algorithms is set
+		  sprintf(reply, "ZZNR%d;", 0);
+		  break;
+	      case 1:
+		  // NR is set
+		  sprintf(reply, "ZZNR%d;", 1);
+		  break;
+	      case 2:
+		  // NR2 is set, others are off
+		  sprintf(reply, "ZZNR%d;", 2);
+		  break;
+	      case 4:
+		  // NR3 is set
+		  sprintf(reply, "ZZNR%d;", 3);
+		  break;
+	      case 8:
+		  // NR4 is set
+		  sprintf(reply, "ZZNR%d;", 4);
+		  break;
+	      }
               send_resp(client->fd, reply);
           } else if (command[5] == ';') {
-              receiver[0]->nr = atoi(&command[4]);
-              if (receiver[0]->nr) {
-                  receiver[0]->nr2 = 0;
-                  receiver[0]->nr3 = 0;
-                  receiver[0]->nr4 = 0;
-              }
+	      int nr_algo_set = atoi(&command[4]);
+	      switch (nr_algo_set) {
+	      case 0:
+		  // no NR is set
+		  receiver[0]->nr = 0;
+		  receiver[0]->nr2 = 0;
+		  receiver[0]->nr3 = 0;
+		  receiver[0]->nr4 = 0;
+		  break;
+	      case 1:
+		  receiver[0]->nr = 1;
+		  receiver[0]->nr2 = 0;
+		  receiver[0]->nr3 = 0;
+		  receiver[0]->nr4 = 0;
+		  break;
+	      case 2:
+		  receiver[0]->nr = 0;
+		  receiver[0]->nr2 = 1;
+		  receiver[0]->nr3 = 0;
+		  receiver[0]->nr4 = 0;
+		  break;
+	      case 3:
+		  receiver[0]->nr = 0;
+		  receiver[0]->nr2 = 0;
+		  receiver[0]->nr3 = 1;
+		  receiver[0]->nr4 = 0;
+		  break;
+	      case 4:
+		  receiver[0]->nr = 0;
+		  receiver[0]->nr2 = 0;
+		  receiver[0]->nr3 = 0;
+		  receiver[0]->nr4 = 1;
+		  break;
+	      }
               update_noise();
-          }
+	  }
           break;
       case 'S': // ZZNS
-          // set/read RX1 NR2
-          if (command[4] == ';') {
-              sprintf(reply, "ZZNS%d;", receiver[0]->nr2);
-              send_resp(client->fd, reply);
-          } else if (command[5] == ';') {
-              receiver[0]->nr2 = atoi(&command[4]);
-              if (receiver[0]->nr2) {
-                  receiver[0]->nr = 0;
-                  receiver[0]->nr3 = 0;
-                  receiver[0]->nr4 = 0;
-              }
-              update_noise();
-          }
+	  // No-op
           break;
       case 'T': // ZZNT
           // set/read RX1 ANF
