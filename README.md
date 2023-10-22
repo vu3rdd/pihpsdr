@@ -13,6 +13,18 @@ If you encounter any error, copy the error and paste it into your
 favourite search engine and try to understand the problem. Ham radio
 is all about experimentation and self education.
 
+# Installation
+
+At the moment, this fork depends on a few libraries for noise
+cancellation (NR3 and NR4). I suggest using the installation
+[script](https://raw.githubusercontent.com/vu3rdd/radioberry-controller-pi-config/master/pihpsdr_install.sh)
+from the above
+[radioberry-controller-pi-config](https://github.com/vu3rdd/radioberry-controller-pi-config)
+repo. It takes care of installing everything needed for pihpsdr and
+pihpsdr itself. It does not install radioberry kernel module and
+install the rbf file etc. For that, please use Johan's scripts for
+now. Please email me if you encounter any problems installing it.
+
 # logging via a program on another computer (via network)
 
 The idea is that `rigctld` would connect to the radio via network. All
