@@ -166,8 +166,8 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
     }
 
     if (active_receiver->local_audio) {
-        if (audio_open_output(active_receiver) <
-            0) { // audio_open with NEW device
+        if (audio_open_output(active_receiver) < 0) {
+            // audio_open with NEW device
             active_receiver->local_audio = 0;
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(local_audio_b),
                                          FALSE);

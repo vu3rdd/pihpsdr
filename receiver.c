@@ -840,7 +840,6 @@ void set_deviation(RECEIVER *rx) {
 }
 
 void set_agc(RECEIVER *rx, int agc) {
-
     SetRXAAGCMode(rx->id, agc);
     // SetRXAAGCThresh(rx->id, agc_thresh_point, 4096.0, rx->sample_rate);
     SetRXAAGCSlope(rx->id, rx->agc_slope);
