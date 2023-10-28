@@ -1632,6 +1632,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         // update RX1 AGC
         receiver[0]->agc = agc;
         set_agc(receiver[0], agc);
+	vfo_update(); // to draw the AGC mode on the screen
       }
       break;
     case 'U': // ZZGU
@@ -1644,6 +1645,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         // update RX2 AGC
         receiver[1]->agc = agc;
 	set_agc(receiver[1], agc);
+	vfo_update(); // to draw the AGC mode on the screen
       }
       break;
     default:
