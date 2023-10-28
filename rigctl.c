@@ -1631,7 +1631,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         int agc = atoi(&command[4]);
         // update RX1 AGC
         receiver[0]->agc = agc;
-        vfo_update();
+        set_agc(receiver[0], agc);
       }
       break;
     case 'U': // ZZGU
@@ -1643,7 +1643,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
         int agc = atoi(&command[4]);
         // update RX2 AGC
         receiver[1]->agc = agc;
-        vfo_update();
+	set_agc(receiver[1], agc);
       }
       break;
     default:
