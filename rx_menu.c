@@ -178,17 +178,36 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
 }
 
 void toggle_audio_output_device(void) {
-    // n_output_devices holds the number of output devices (global -
-    // aargh!!)
-    int out_index = gtk_combo_box_get_active(GTK_COMBO_BOX(output));
+    // get the currently active name of the output_device.
+    // search in the output_devices list to find its index.
+    // increment the index MOD the number of output devices.
+    // get its output name
+    // close the previous device
+    // open the new device.
+    char *cur_output_device_name = active_receiver->audio_name;
+    int current_output_index = 0;
+    for (size_t i = 0; i < n_output_devices; i++) {
+	if (strcmp(cur_output_device_name, output_devices[i].name) == 0) {
+	    current_output_index = i;
+	    break;
+	}
+    }
 
     // toggle
-    out_index = (out_index + 1) % n_output_devices;
+    int out_index = (current_output_index + 1) % n_output_devices;
+
+    // close old output device
+    if (active_receiver->local_audio) {
+	audio_close_output(active_receiver);
+    }
+
+    char *new_output_device_name = output_devices[out_index].name;
+    strcpy(active_receiver->audio_name, new_output_device_name);
 
     // set the other device as active
-    gtk_combo_box_set_active(GTK_COMBO_BOX(output), out_index);
-
-    local_output_changed_cb(output, NULL);
+    if (audio_open_output(active_receiver) < 0) {
+	g_print("unable to open the audio output device: %s", active_receiver->audio_name);
+    }
 }
 
 static void audio_channel_cb(GtkWidget *widget, gpointer data) {
