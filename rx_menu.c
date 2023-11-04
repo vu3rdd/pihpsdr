@@ -188,7 +188,7 @@ void toggle_audio_output_device(void) {
     // set the other device as active
     gtk_combo_box_set_active(GTK_COMBO_BOX(output), out_index);
 
-    local_output_changed_cb(GTK_COMBO_BOX(output), NULL);
+    local_output_changed_cb(output, NULL);
 }
 
 static void audio_channel_cb(GtkWidget *widget, gpointer data) {
