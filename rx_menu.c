@@ -140,6 +140,18 @@ static void mute_radio_cb(GtkWidget *widget, gpointer data) {
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
+void toggle_audio_output_device(void) {
+    // n_output_devices holds the number of output devices (global -
+    // aargh!!)
+    int out_index = gtk_combo_box_get_active(GTK_COMBO_BOX(output));
+
+    // toggle
+    out_index = (out_index + 1) % n_output_devices;
+
+    // set the other device as active
+    gtk_combo_box_set_active(GTK_COMBO_BOX(output), out_index);
+}
+
 //
 // possible the device has been changed:
 // call audo_close_output with old device, audio_open_output with new one

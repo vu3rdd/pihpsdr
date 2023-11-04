@@ -44,6 +44,7 @@
 #include "receiver.h"
 #include "rigctl.h"
 #include "rigctl_menu.h"
+#include "rx_menu.h"
 #include "sliders.h"
 #include "store.h"
 #include "toolbar.h"
@@ -958,6 +959,11 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
     case 'I': // ZZAI
       implemented = FALSE;
       break;
+    case 'O': // ZZAO
+	if (command[4] == ';') {
+	    toggle_audio_output_device();
+	}
+	break;
     case 'P': // ZZAP
       implemented = FALSE;
       break;
