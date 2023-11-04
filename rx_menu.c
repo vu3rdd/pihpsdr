@@ -202,6 +202,7 @@ void toggle_audio_output_device(void) {
     }
 
     char *new_output_device_name = output_devices[out_index].name;
+    active_receiver->audio_name = g_new(gchar, strlen(new_output_device_name) + 1);
     strcpy(active_receiver->audio_name, new_output_device_name);
 
     // set the other device as active
