@@ -3529,8 +3529,10 @@ int parse_cmd(void *data) {
             if (command[2] == ';') {
                 double att = 0.0;
                 if (have_rx_gain) {
+		    fprintf(stderr, "1: rcvr gain: %f\n", adc[active_receiver->adc].gain);
                     att = adc[active_receiver->adc].gain + 12.0;
                 } else {
+		    fprintf(stderr, "2: rcvr attn: %f\n", adc[active_receiver->adc].attenuation);
                     att = adc[active_receiver->adc].attenuation;
                     att = round((att * 99.0) / 31.0);
                 }
