@@ -201,6 +201,12 @@ void toggle_audio_output_device(void) {
 	audio_close_output(active_receiver);
     }
 
+    // deallocate memory for the name of the previous device.
+    if (active_receiver->audio_name != NULL) {
+        g_free(active_receiver->audio_name);
+        active_receiver->audio_name = NULL;
+    }
+
     char *new_output_device_name = output_devices[out_index].name;
     active_receiver->audio_name = g_new(gchar, strlen(new_output_device_name) + 1);
     strcpy(active_receiver->audio_name, new_output_device_name);
