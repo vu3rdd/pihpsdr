@@ -994,6 +994,14 @@ int process_action(void *data) {
       if(a->mode==PRESSED) {
         if(can_transmit) {
           split=split==1?0:1;
+	  if (split == 1) {
+	      int m = vfo[active_receiver->id].mode;
+	      if ((m == modeLSB) || (m == modeUSB)) {
+		  local_set_frequency(VFO_B, vfo[VFO_A].frequency + 5000);
+	      } else if ((m == modeCWL) || (m == modeCWU)) {
+		  local_set_frequency(VFO_B, vfo[VFO_A].frequency + 1000);
+	      }
+	  }
           tx_set_mode(transmitter,get_tx_mode());
           g_idle_add(ext_vfo_update, NULL);
         }

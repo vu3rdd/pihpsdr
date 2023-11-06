@@ -2332,6 +2332,16 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
                 send_resp(client->fd, reply);
             } else if (command[5] == ';') {
                 split = atoi(&command[4]);
+		if (split == 1) {
+		    // if mode is LSB or USB, set VFO_B to VFO_A +
+		    // 5khz. If mode is CW, set VFO_B to VFO_A + 1khz.
+		    int m = vfo[active_receiver->id].mode;
+		    if ((m == modeLSB) || (m == modeUSB)) {
+			local_set_frequency(VFO_B, vfo[VFO_A].frequency + 5000);
+		    } else if ((m == modeCWL) || (m == modeCWU)) {
+			local_set_frequency(VFO_B, vfo[VFO_A].frequency + 1000);
+		    }
+		}
                 tx_set_mode(transmitter, get_tx_mode());
                 vfo_update();
             }
