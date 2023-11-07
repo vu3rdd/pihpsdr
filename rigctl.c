@@ -3032,28 +3032,47 @@ int parse_cmd(void *data) {
             implemented = FALSE;
             break;
         case 'R': // FR
-            // set/read transceiver receive VFO
+            // set/read transceiver receive VFO.
+	    //
+	    // If there is only one receiver and if it is in split
+	    // mode, it returns the active VFO id'. If there are two
+	    // receivers, then it switches between the receivers.
+	    // When queried, it returns the active receiver's active
+	    // vfo.
             if (command[2] == ';') {
-                sprintf(reply, "FR%d;", active_receiver->id);
+                sprintf(reply, "FR%d;", active_receiver->active_vfo);
                 send_resp(client->fd, reply);
             } else if (command[3] == ';') {
                 int id = atoi(&command[2]);
-                switch (id) {
-                case 0:
-                    active_receiver = receiver[id];
-                    break;
-                case 1:
-                    if (receivers == 2) {
-                        active_receiver = receiver[id];
-                    } else {
-                        implemented = FALSE;
-                    }
-                    break;
-                default:
-                    implemented = FALSE;
-                    break;
-                }
-            }
+		if (receivers == 1) {
+		    if (split == 1) {
+			// id is taken as the VFO id
+			switch (id) {
+			case 0:
+			case 1:
+			    active_receiver->active_vfo = id;
+			    break;
+			default:
+			    // illegal value
+			    break;
+			}
+		    } else {
+			// split is not active. Ignore the command.
+		    }
+		} else if (receivers == 2) {
+		    // id is taken as the receiver id
+		    switch (id) {
+		    case 0:
+		    case 1:
+			active_receiver = receiver[id];
+			break;
+		    default:
+			// ignore
+			break;
+		    }
+		}
+	    }
+	    vfo_update();
             break;
         case 'S': // FS
             // set/read the fine tune function status

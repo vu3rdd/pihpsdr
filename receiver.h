@@ -166,6 +166,9 @@ typedef struct _receiver {
 
   gint x;
   gint y;
+
+  // active_vfo: used by the UI to highlight the selected vfo for update etc.
+  gint active_vfo;
 } RECEIVER;
 
 extern RECEIVER *create_pure_signal_receiver(int id, int buffer_size,int sample_rate,int pixels);

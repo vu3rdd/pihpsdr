@@ -545,6 +545,7 @@ static void create_visual() {
 #endif
     receiver[i]->x = 0;
     receiver[i]->y = y;
+    receiver[i]->active_vfo = VFO_A;
     // Upon startup, if RIT or CTUN is active, tell WDSP.
 #ifdef CLIENT_SERVER
     if (!radio_is_remote) {

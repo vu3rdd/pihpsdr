@@ -1028,18 +1028,6 @@ void vfo_update() {
         cairo_move_to(cr, 70, 80);
         cairo_show_text(cr, temp_text);
 
-        /* // draw CW (wpm) */
-        /* switch(vfo[id].mode) { */
-        /* case modeCWU: */
-        /* case modeCWL: */
-        /*     cairo_set_font_size(cr, 16); */
-        /*     cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /*     cairo_show_text(cr, " wpm"); */
-        /*     break; */
-        /* default: */
-        /*     break; */
-        /* } */
-
 	// In what follows, we want to display the VFO frequency
 	// on which we currently transmit a signal with red colour.
 	// If it is out-of-band, we display "Out of band" in red.
@@ -1134,9 +1122,17 @@ void vfo_update() {
                 cairo_set_source_rgb(cr, 0.0, 1.0, 1.0);
             }
         }
+
         cairo_move_to(cr, 285, 20);
         cairo_set_font_size(cr, 18);
         cairo_show_text(cr, temp_text);
+
+	// show the currently active VFO.
+	cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+	sprintf(temp_text, "%c", active_receiver->active_vfo == 0 ? 'A' : 'B');
+	cairo_move_to(cr, 400, 20);
+	cairo_set_font_size(cr, 18);
+	cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
         if(can_transmit) {
@@ -1259,42 +1255,6 @@ void vfo_update() {
             break;
         }
 
-	//
-	// Since we can now change it by a MIDI controller,
-	// we should display the compressor (level)
-	//
-        /* if(can_transmit) { */
-        /*   cairo_move_to(cr, 395, 20); */
-  	/*   if (transmitter->compressor) { */
-  	/*     sprintf(temp_text,"CMPR %ddB",(int) transmitter->compressor_level); */
-        /*     cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /*     cairo_show_text(cr, temp_text); */
-	/*   } else { */
-        /*     cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /*     cairo_show_text(cr, "CMPR"); */
-	/*   } */
-        /* } */
-
-        /* cairo_move_to(cr, 505, 80);   */
-        /* if(diversity_enabled) { */
-        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /* } else { */
-        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /* } */
-        /* cairo_show_text(cr, "DIV"); */
-
-        /* sprintf(temp_text,"Step %s",step_labels[s]); */
-        /* cairo_move_to(cr, 400, 15); */
-        /* cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /* cairo_show_text(cr, temp_text); */
-
-        /* cairo_move_to(cr, 395, 40); */
-        /* if(vfo[id].ctun) { */
-        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /* } else { */
-        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /* } */
-        /* cairo_show_text(cr, "CTUN"); */
 
 #ifdef MIDI
         cairo_move_to(cr, 480, 20);
@@ -1305,14 +1265,6 @@ void vfo_update() {
         }
         cairo_show_text(cr, "MIDI");
 #endif
-
-        /* cairo_move_to(cr, 475, 90);   */
-        /* if(cat_control>0) { */
-        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /* } else { */
-        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /* } */
-        /* cairo_show_text(cr, "CAT"); */
 
         if(can_transmit) {
           cairo_move_to(cr, 160, 40);
