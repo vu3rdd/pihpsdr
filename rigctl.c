@@ -19,6 +19,9 @@
  * With a kindly assist from Jae, K5JAE who has helped
  * greatly with hamlib integration!
  */
+
+#include <stdbool.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <gdk/gdk.h>
@@ -163,6 +166,114 @@ int ctcss_tone; // Numbers 01-38 are legal values - set by CN command, read by
 int ctcss_mode; // Numbers 0/1 - on off.
 
 static gpointer rigctl_client(gpointer data);
+
+cat_command commands[NUM_CMDS] = {
+    [AC] = { "AC", cmd_type_none, false, 0, false, 0, 0 },
+    [AG] = { "AG", cmd_type_num, true, 3, false, 0, 255 },
+    [AI] = { "AI", cmd_type_bool, true, 1, false, 0, 1 },
+    [AL] = { "AL", cmd_type_none, false, 0, false, 0, 0 },
+    [AM] = { "AM", cmd_type_none, false, 0, false, 0, 0 },
+    [AN] = { "AN", cmd_type_none, false, 0, false, 0, 0 },
+    [AS] = { "AS", cmd_type_none, false, 0, false, 0, 0 },
+    [BC] = { "BC", cmd_type_none, false, 0, false, 0, 0 },
+    [BD] = { "BD", cmd_type_none, true, 0, false, 0, 0 },
+    [BP] = { "BP", cmd_type_none, false, 0, false, 0, 0 },
+    [BS] = { "BS", cmd_type_none, false, 0, false, 0, 0 },
+    [BU] = { "BU", cmd_type_none, true, 0, false, 0, 0 },
+    [BY] = { "BY", cmd_type_none, false, 0, false, 0, 0 },
+    [CA] = { "CA", cmd_type_none, false, 0, false, 0, 0 },
+    [CG] = { "CG", cmd_type_none, false, 0, false, 0, 0 },
+    [CI] = { "CI", cmd_type_none, false, 0, false, 0, 0 },
+    [CM] = { "CM", cmd_type_none, false, 0, false, 0, 0 },
+    [CN] = { "CN", cmd_type_num,  true, 2,  false, 1,  49 },
+    [CT] = { "CT", cmd_type_bool, true, 1,  false, 0,  1 },
+    [DC] = { "DC", cmd_type_none, false, 0, false, 0, 0 },
+    [DN] = { "DN", cmd_type_none, true, 0,  false, 0,  0 },
+    [DQ] = { "DQ", cmd_type_none, false, 0, false, 0, 0 },
+    [EX] = { "EX", cmd_type_none, false, 0, false, 0, 0 },
+    [FA] = { "FA", cmd_type_string, true, 11, false, 0,  0 },
+    [FB] = { "FB", cmd_type_string, true, 11, false, 0,  0 },
+    [FC] = { "FC", cmd_type_none, false, 0, false, 0, 0 },
+    [FD] = { "FD", cmd_type_none, false, 0, false, 0, 0 },
+    [FR] = { "FR", cmd_type_num, true, 1,  false, 0,  1 },
+    [FS] = { "FS", cmd_type_none, false, 0, false, 0, 0 },
+    [FT] = { "FT", cmd_type_num, true, 1,  false, 0,  1 },
+    [GT] = { "GT", cmd_type_num, true, 3,  false, 0,  5 },
+    [ID] = { "ID", cmd_type_none, true, 0,  false, 0,  0 },
+    [IF] = { "IF", cmd_type_string, true, 25, false, 0,  0 },
+    [IS] = { "IS", cmd_type_none, true, 0, false, 0, 0 },
+    [KS] = { "KS", cmd_type_num, true, 3,  false, 10, 60 },
+    [KY] = { "KY", cmd_type_string, true, 25, false, 0,  0 },
+    [LK] = { "LK", cmd_type_bool, true, 1, false, 0, 1 },
+    [LM] = { "LM", cmd_type_none, false, 0, false, 0, 0 },
+    [LT] = { "LT", cmd_type_none, false, 0, false, 0, 0 },
+    [MC] = { "MC", cmd_type_none, false, 0, false, 0, 0 },
+    [MD] = { "MD", cmd_type_num, true, 1,  false, 1,  9 },
+    [MF] = { "MF", cmd_type_none, false, 0, false, 0, 0 },
+    [MG] = { "MG", cmd_type_num, true, 3,  false, 1,  100 },
+    [ML] = { "ML", cmd_type_none, false, 0, false, 0, 0 },
+    [MO] = { "MO", cmd_type_bool, false, 0,  false, 0,  0 },
+    [MR] = { "MR", cmd_type_none, false, 0, false, 0, 0 },
+    [MU] = { "MU", cmd_type_none, false, 0, false, 0, 0 },
+    [MW] = { "MW", cmd_type_none, false, 0, false, 0, 0 },
+    [NB] = { "NB", cmd_type_bool, true, 1,  false, 0,  1 },
+    [NL] = { "NL", cmd_type_none, false, 0, false, 0, 0 },
+    [NR] = { "NR", cmd_type_none, true, 0, false, 0, 0 },
+    [NT] = { "NT", cmd_type_bool, true, 1,  false, 0, 1 },
+    [OF] = { "OF", cmd_type_none, false, 9,  false, 0, 0 }, // ignore
+    [OI] = { "OI", cmd_type_none, false, 0, false, 0, 0 },
+    [OS] = { "OS", cmd_type_num, false, 1,  false, 0, 2 },
+    [PA] = { "PA", cmd_type_num, true, 2, false, 0, 1 }, // preamp 
+    [PB] = { "PB", cmd_type_none, false, 0, false, 0, 0 },
+    [PC] = { "PC", cmd_type_num, true, 3,  false, 0, 100 },
+    [PI] = { "PI", cmd_type_none, false, 0, false, 0, 0 },
+    [PK] = { "PK", cmd_type_none, false, 0, false, 0, 0 },
+    [PL] = { "PL", cmd_type_none, false, 0, false, 0, 0 }, // speech proc - unimplemented
+    [PM] = { "PM", cmd_type_none, false, 0, false, 0, 0 },
+    [PR] = { "PR", cmd_type_num, false, 1,  false, 0, 0 },
+    [PS] = { "PS", cmd_type_num, true, 1,  false, 0, 1 },
+    [QC] = { "QC", cmd_type_none, false, 0, false, 0, 0 },
+    [QI] = { "QI", cmd_type_none, false, 0,  false, 0, 0 },
+    [QR] = { "QR", cmd_type_none, false, 0, false, 0, 0 },
+    [RA] = { "RA", cmd_type_none, false, 0, false, 0, 0},
+    [RC] = { "RC", cmd_type_none, true, 0,  false, 0, 0 },
+    [RD] = { "RD", cmd_type_none, false, 5,  false, 0, 0 }, // ignore
+    [RG] = { "RG", cmd_type_none, false, 0, false, 0, 0 },
+    [RL] = { "RL", cmd_type_none, false, 0, false, 0, 0 },
+    [RM] = { "RM", cmd_type_none, false, 0, false, 0, 0 },
+    [RT] = { "RT", cmd_type_bool, true, 1,  false, 0, 1 },
+    [RU] = { "RU", cmd_type_none, false, 5,  false, 0, 0 }, // ignore
+    [RX] = { "RX", cmd_type_none, true, 0,  false, 0, 0 },
+    [SA] = { "SA", cmd_type_none, false, 0, false, 0, 0 },
+    [SB] = { "SB", cmd_type_none, false, 0, false, 0, 0 },
+    [SC] = { "SC", cmd_type_none, false, 0, false, 0, 0 },
+    [SD] = { "SD", cmd_type_none, false, 0, false, 0, 0 },
+    [SH] = { "SH", cmd_type_num, true, 2,  false, 0, 11 },
+    [SI] = { "SI", cmd_type_none, false, 0, false, 0, 0 },
+    [SL] = { "SL", cmd_type_num, true, 2,  false, 0, 11 },
+    [SM] = { "SM", cmd_type_num, true, 4,  false, 0, 30 },
+    [SQ] = { "SQ", cmd_type_num, true, 3,  false, 0, 160 },
+    [SR] = { "SR", cmd_type_none, false, 0, false, 0, 0 },
+    [SS] = { "SS", cmd_type_none, false, 0, false, 0, 0 },
+    [ST] = { "ST", cmd_type_none, false, 0, false, 0, 0 },
+    [SU] = { "SU", cmd_type_none, false, 0, false, 0, 0 },
+    [SV] = { "SV", cmd_type_none, false, 0, false, 0, 0 },
+    [TC] = { "TC", cmd_type_none, false, 0, false, 0, 0 },
+    [TD] = { "TD", cmd_type_none, false, 0, false, 0, 0 },
+    [TI] = { "TI", cmd_type_none, false, 0, false, 0, 0 },
+    [TN] = { "TN", cmd_type_none, false, 0, false, 0, 0 },
+    [TO] = { "TO", cmd_type_none, false, 0, false, 0, 0 },
+    [TS] = { "TS", cmd_type_none, false, 0, false, 0, 0 },
+    [TX] = { "TX", cmd_type_none, true, 0, false, 0, 0 },
+    [TY] = { "TY", cmd_type_none, false, 0, false, 0, 0 },
+    [UL] = { "UL", cmd_type_none, false, 0, false, 0, 0 },
+    [UP] = { "UP", cmd_type_none, true, 0, false, 0, 0 },
+    [VD] = { "VD", cmd_type_none, false, 0, false, 0, 0 },
+    [VG] = { "VG", cmd_type_none, false, 0, false, 0, 0 },
+    [VR] = { "VR", cmd_type_none, false, 0, false, 0, 0 },
+    [VX] = { "VX", cmd_type_none, false, 0, false, 0, 0 },
+    [XT] = { "XT", cmd_type_bool, true, 1, false, 0, 1 },
+};
 
 void close_rigctl_ports() {
     int i;
@@ -2898,6 +3009,12 @@ int parse_cmd(void *data) {
             // set/read Manual Beat Canceller frequency
             implemented = FALSE;
             break;
+        case 'S': // BS
+            if (command[2] == ';') {
+                // start bandstack
+                start_bandstack();
+            }
+            break;
         case 'U': // BU
             // band up 1 band
             band_plus(receiver[0]->id);
@@ -2905,12 +3022,6 @@ int parse_cmd(void *data) {
         case 'Y': // BY
             // read busy signal
             implemented = FALSE;
-            break;
-        case 'S': // BS
-            if (command[2] == ';') {
-                // start bandstack
-                start_bandstack();
-            }
             break;
         default:
             implemented = FALSE;
@@ -4407,4 +4518,47 @@ int lookup_band(int val) {
         work_int = 0;
     }
     return work_int;
+}
+
+// notes on parsing a command (new method)
+//
+// We collect all characters including the ';' at the end of the
+// command + argument. Now, we need to validate it with our big array
+// of cat_command that we defined earlier. If there is no match we
+// will look at the extended commands table. But how do we look up
+// into the table? What we have is an array indexed by a number. What
+// is coming in is a bunch of characters. We could take the first two
+// characters, if they are "ZZ", it is an extended command. Else it is
+// a regular command. We can do a binary search into the table to zero
+// in on the right entry, since the table is sorted.
+//
+bool search(cat_command *commands, char cmd[2], int *index) {
+    int l = 0;
+    int r = NUM_CMDS - 1;
+
+    while (l <= r) {
+	// go to the middle of the array[r:l]
+	// and pick out the middle element.
+	int m = (l + r)/2;
+
+	// compare the command name in the middle element
+	// with the one we are looking for.
+	int cmp_result = strcmp(cmd, commands[m].cmd);
+
+	if (cmp_result > 0) {
+	    // cmd is in the right half
+	    // readjust the search indices. new left
+	    // index is m + 1
+	    l = m + 1;
+	} else if (cmp_result < 0) {
+	    // cmd is in the left half
+	    r = m - 1;
+	} else {
+	    // m is the answer
+	    *index = m;
+	    return true;
+	}
+    }
+
+    return false;
 }
