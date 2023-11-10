@@ -64,6 +64,8 @@
 #include "vox.h"
 #include "waterfall.h"
 #include "zoompan.h"
+#include "screen.h"
+
 #ifdef LOCALCW
 #include "iambic.h"
 #endif
@@ -96,19 +98,6 @@
 //   toolbar height (optional)   30
 //   zoom/pan height (optional)  50
 
-#define MENU_HEIGHT (50)
-#define MENU_WIDTH (50)
-// so menu height x 2 == meter height (but we still have 20 pixels
-// empty.
-#define VFO_HEIGHT (100) // edit default = 60
-#define VFO_WIDTH (display_width - METER_WIDTH - MENU_WIDTH)
-#define METER_HEIGHT (100) // edit default = 60
-#define METER_WIDTH (240)
-#define PANADAPTER_HEIGHT (105)
-#define ZOOMPAN_HEIGHT (50)
-#define SLIDERS_HEIGHT (100)
-#define TOOLBAR_HEIGHT (30)
-#define WATERFALL_HEIGHT (105)
 
 #ifdef MIDI
 gboolean midi_enabled;
