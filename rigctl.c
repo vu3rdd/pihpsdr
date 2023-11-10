@@ -4539,7 +4539,8 @@ bool search(cat_command *commands, char cmd[2], int *index) {
     while (l <= r) {
 	// go to the middle of the array[r:l]
 	// and pick out the middle element.
-	int m = (l + r)/2;
+	// int m = (l + r)/2;
+	int m = l + (r - l)/2;
 
 	// compare the command name in the middle element
 	// with the one we are looking for.
