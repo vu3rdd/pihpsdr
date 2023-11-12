@@ -17,9 +17,9 @@
 #define  VFO_HEIGHT (100)
 #define  VFO_WIDTH  (display_width - METER_WIDTH - MENU_WIDTH)
 
-#define  BLACK_R (0.0)
-#define  BLACK_G (0.0)
-#define  BLACK_B (0.0)
+#define  BLACK_R  (0.0)
+#define  BLACK_G  (0.0)
+#define  BLACK_B  (0.0)
 
 #define  RED_R (1.0)
 #define  RED_G (0.0)
