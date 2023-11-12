@@ -53,6 +53,7 @@
 #include "client_server.h"
 #endif
 #include "ext.h"
+#include "screen.h"
 
 static GtkWidget *parent_window;
 static int my_width;
