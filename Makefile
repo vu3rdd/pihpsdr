@@ -337,8 +337,8 @@ i2c.h \
 gpio.h \
 encoder_menu.h \
 switch_menu.h \
-toolbar_menu.h
-
+toolbar_menu.h \
+screen.h
 
 
 OBJS= \
