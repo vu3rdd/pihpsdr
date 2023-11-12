@@ -1013,7 +1013,7 @@ void vfo_update(void) {
 
         cairo_t *cr;
         cr = cairo_create(vfo_surface);
-        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+        cairo_set_source_rgb(cr, BLACK_R, BLACK_G, BLACK_B);
         cairo_paint(cr);
 
         cairo_select_font_face(cr, "Cantarell", CAIRO_FONT_SLANT_NORMAL,
