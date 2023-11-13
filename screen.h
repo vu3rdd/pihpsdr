@@ -48,8 +48,10 @@
 
 // font/typeface sizes
 
-#define  MODE_RENDER_FONT_SIZE   (30)
-#define  VFO_A_RENDER_FONT_SIZE  (70)
+#define  MODE_RENDER_FONT_SIZE      (30)
+#define  VFO_A_RENDER_FONT_SIZE     (70)
+#define  VFO_B_RENDER_FONT_SIZE     (18)
+#define  ACTIVE_VFO_INDICATION_SIZE (18)
 
 // coordinates
 
@@ -58,5 +60,11 @@
 
 #define  VFO_A_X    285
 #define  VFO_A_Y    95
+
+#define  VFO_B_X    285
+#define  VFO_B_Y    18
+
+#define  ACTIVE_VFO_INDICATION_X  400
+#define  ACTIVE_VFO_INDICATION_Y   20
 
 #endif // _SCREEN_H

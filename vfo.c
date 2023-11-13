@@ -1047,9 +1047,9 @@ void vfo_update(void) {
         }
 
         // draw mode
-        cairo_set_font_size(cr, 30);
-        cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
-        cairo_move_to(cr, 70, 80);
+        cairo_set_font_size(cr, MODE_RENDER_FONT_SIZE);
+        cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+        cairo_move_to(cr, MODE_X, MODE_Y);
         cairo_show_text(cr, temp_text);
 
         // In what follows, we want to display the VFO frequency
@@ -1093,33 +1093,33 @@ void vfo_update(void) {
         if (txvfo == 0 && (isTransmitting() || oob)) {
             if (oob)
                 sprintf(temp_text, "VFO A: Out of band");
-            cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         } else {
             if (vfo[0].entering_frequency) {
-                cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             } else if (id == 0) {
-                cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
             } else {
-                cairo_set_source_rgb(cr, 0.0, 0.65, 0.0);
+                cairo_set_source_rgb(cr, DARK_GREEN_R, DARK_GREEN_G, DARK_GREEN_B);
             }
         }
-        cairo_move_to(cr, 285, 95);
-        cairo_set_font_size(cr, 70);
+        cairo_move_to(cr, VFO_A_X, VFO_A_Y);
+        cairo_set_font_size(cr, VFO_A_RENDER_FONT_SIZE);
         // cairo_show_text(cr, temp_text);
 
         // try to show VFO text according to step value
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        cairo_set_source_rgb(cr, WHITE_R, WHITE_G, WHITE_B);
         cairo_show_text(cr, vfo_texts[0]);
         // show the step digit and the rest in grey
         // cairo_set_font_size(cr, 50);
         // cairo_show_text(cr, ".");
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // 0.75, 0.75);
+        cairo_set_source_rgb(cr, WHITE_R, WHITE_G, WHITE_B);
         cairo_show_text(cr, vfo_texts[1]);
         /* if (strlen(vfo_texts[2]) != 0) { */
         /*     cairo_set_source_rgb(cr, 0.0, 1.0, 1.0); // 0.75, 0.75, 0.75); */
         /*     cairo_show_text(cr, "."); */
         /* } */
-        cairo_set_source_rgb(cr, 0.0, 1.0, 0.0); // 0.75, 0.75);
+        cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
         cairo_show_text(cr, vfo_texts[2]);
 
         cairo_select_font_face(cr, "Cantarell", CAIRO_FONT_SLANT_NORMAL,
@@ -1137,28 +1137,33 @@ void vfo_update(void) {
         if (txvfo == 1 && (isTransmitting() || oob)) {
             if (oob)
                 sprintf(temp_text, "VFO B: Out of band");
-            cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         } else {
             if (vfo[1].entering_frequency) {
-                cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             } else if (id == 1) {
                 // vfo A
-                cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
             } else {
                 // vfo B
-                cairo_set_source_rgb(cr, 0.0, 1.0, 1.0);
+                cairo_set_source_rgb(cr, CYAN_R, CYAN_G, CYAN_B);
             }
         }
 
-        cairo_move_to(cr, 285, 20);
-        cairo_set_font_size(cr, 18);
+        cairo_move_to(cr, VFO_B_X, VFO_B_Y);
+        cairo_set_font_size(cr, VFO_B_RENDER_FONT_SIZE);
         cairo_show_text(cr, temp_text);
 
         // show the currently active VFO.
-        cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+        cairo_set_source_rgb(cr,
+			     YELLOW_R,
+			     YELLOW_G,
+			     YELLOW_B);
         sprintf(temp_text, "%c", active_receiver->active_vfo == 0 ? 'A' : 'B');
-        cairo_move_to(cr, 400, 20);
-        cairo_set_font_size(cr, 18);
+        cairo_move_to(cr,
+		      ACTIVE_VFO_INDICATION_X,
+		      ACTIVE_VFO_INDICATION_Y);
+        cairo_set_font_size(cr, ACTIVE_VFO_INDICATION_SIZE);
         cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
