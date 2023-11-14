@@ -1168,31 +1168,27 @@ void vfo_update(void) {
 
 #ifdef PURESIGNAL
         if (can_transmit) {
-            cairo_move_to(cr, 130, 50);
+            cairo_move_to(cr, PS_X, PS_Y);
             if (transmitter->puresignal) {
-                cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+                cairo_set_source_rgb(cr,
+				     YELLOW_R,
+				     YELLOW_G,
+				     YELLOW_B);
             } else {
-                cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+                cairo_set_source_rgb(cr,
+				     GREY_R,
+				     GREY_G,
+				     GREY_B);
             }
-            cairo_set_font_size(cr, 12);
+            cairo_set_font_size(cr, PS_RENDER_FONT_SIZE);
             cairo_show_text(cr, "PS");
         }
 #endif
 
-        /* cairo_move_to(cr, 580, 20); */
-        /* if(active_receiver->zoom>1) { */
-        /*   cairo_set_source_rgb(cr, 1.0, 1.0, 0.0); */
-        /* } else { */
-        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /* } */
-        /* cairo_set_font_size(cr, 18); */
-        /* sprintf(temp_text,"ZOOM x%d",active_receiver->zoom); */
-        /* cairo_show_text(cr, temp_text); */
-
         if (vfo[id].rit_enabled == 0) {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         } else {
-            cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
         }
         sprintf(temp_text, "RIT: %lld", vfo[id].rit);
         cairo_move_to(cr, 220, 40);

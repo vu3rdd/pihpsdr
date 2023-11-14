@@ -45,6 +45,9 @@
 #define  DARK_GREEN_G (0.65)
 #define  DARK_GREEN_B (0.0)
 
+#define  GREY_R (0.7)
+#define  GREY_G (0.7)
+#define  GREY_B (0.7)
 
 // font/typeface sizes
 
@@ -52,6 +55,7 @@
 #define  VFO_A_RENDER_FONT_SIZE     (70)
 #define  VFO_B_RENDER_FONT_SIZE     (18)
 #define  ACTIVE_VFO_INDICATION_SIZE (18)
+#define  PS_RENDER_FONT_SIZE        (12)
 
 // coordinates
 
@@ -67,4 +71,6 @@
 #define  ACTIVE_VFO_INDICATION_X  400
 #define  ACTIVE_VFO_INDICATION_Y   20
 
+#define  PS_X       130
+#define  PS_Y       50
 #endif // _SCREEN_H
