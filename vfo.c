@@ -1359,11 +1359,13 @@ static gboolean vfo_press_event_cb(GtkWidget *widget, GdkEventButton *event,
                                    gpointer data) {
     // vfo a and b are drawn at x = 280, so it is the y coordinate
     // that matters.
-    if (event->x >= 260 && event->y <= 40) {
+    if (event->x >= VFO_B_X && event->y <= VFO_B_Y) {
         // vfo B
         start_vfo(VFO_B);
         return TRUE;
-    } else if (event->x >= 260 && event->y > 40) {
+    } else if (event->x >= VFO_A_X &&
+	       event->y > VFO_B_Y &&
+	       event->y <= VFO_A_Y) {
         // vfo A
         start_vfo(VFO_A);
         return TRUE;
