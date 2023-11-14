@@ -1438,7 +1438,6 @@ void receiver_frequency_changed(RECEIVER *rx) {
     int id = rx->id;
 
     if (vfo[id].ctun) {
-
         long long frequency = vfo[id].frequency;
         long long half = (long long)rx->sample_rate / 2LL;
         long long rx_low = vfo[id].ctun_frequency + rx->filter_low;
