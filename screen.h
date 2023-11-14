@@ -90,4 +90,31 @@
 #define  NR_X       70
 #define  NR_Y       40
 
+#define  ANF_X      70
+#define  ANF_Y      20
+
+#define  SNB_X      115
+#define  SNB_Y      20
+
+#define  AGC_X      160
+#define  AGC_Y      20
+
+#define  MIDI_X     480
+#define  MIDI_Y     20
+
+#define  VOX_X      160
+#define  VOX_Y      40
+
+#define  LOCK_X      5
+#define  LOCK_Y      80
+
+#define  SPLIT_X     5
+#define  SPLIT_Y     20
+
+#define  CTUN_X      5
+#define  CTUN_Y      40
+
+#define  DUP_X       5
+#define  DUP_Y       60
+
 #endif // _SCREEN_H

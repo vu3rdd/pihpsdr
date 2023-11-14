@@ -1242,88 +1242,88 @@ void vfo_update(void) {
             cairo_show_text(cr, "NR");
         }
 
-        cairo_move_to(cr, 70, 20);
+        cairo_move_to(cr, ANF_X, ANF_Y);
         if (active_receiver->anf) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_show_text(cr, "ANF");
 
-        cairo_move_to(cr, 115, 20);
+        cairo_move_to(cr, SNB_X, SNB_Y);
         if (active_receiver->snb) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_show_text(cr, "SNB");
 
-        cairo_move_to(cr, 160, 20);
+        cairo_move_to(cr, AGC_X, AGC_Y);
         switch (active_receiver->agc) {
         case AGC_OFF:
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
             cairo_show_text(cr, "AGC");
             break;
         case AGC_LONG:
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "AGC L");
             break;
         case AGC_SLOW:
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "AGC S");
             break;
         case AGC_MEDIUM:
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "AGC M");
             break;
         case AGC_FAST:
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "AGC F");
             break;
         }
 
 #ifdef MIDI
-        cairo_move_to(cr, 480, 20);
+        cairo_move_to(cr, MIDI_X, MIDI_Y);
         if (midi_enabled) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_show_text(cr, "MIDI");
 #endif
 
         if (can_transmit) {
-            cairo_move_to(cr, 160, 40);
+            cairo_move_to(cr, VOX_X, VOX_Y);
             if (vox_enabled) {
-                cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+                cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
             } else {
-                cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+                cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
             }
             cairo_show_text(cr, "VOX");
         }
 
-        cairo_move_to(cr, 5, 80);
+        cairo_move_to(cr, LOCK_X, LOCK_Y);
         if (locked) {
-            cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_show_text(cr, "LOCK");
 
-        cairo_move_to(cr, 5, 20);
+        cairo_move_to(cr, SPLIT_X, SPLIT_Y);
         if (split) {
-            cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_set_font_size(cr, 16);
         cairo_show_text(cr, "SPLIT");
 
-        cairo_move_to(cr, 5, 40);
+        cairo_move_to(cr, CTUN_X, CTUN_Y);
         if (vfo[id].ctun) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         cairo_show_text(cr, "CTUN");
         /* if(sat_mode!=SAT_NONE) { */
@@ -1339,12 +1339,12 @@ void vfo_update(void) {
         /* } */
 
         if (duplex) {
-            cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
         sprintf(temp_text, "DUP");
-        cairo_move_to(cr, 5, 60);
+        cairo_move_to(cr, DUP_X, DUP_Y);
         cairo_set_font_size(cr, 16);
         cairo_show_text(cr, temp_text);
 
