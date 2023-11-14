@@ -1188,22 +1188,22 @@ void vfo_update(void) {
         if (vfo[id].rit_enabled == 0) {
             cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         } else {
-            cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
+            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
         }
         sprintf(temp_text, "RIT: %lld", vfo[id].rit);
-        cairo_move_to(cr, 220, 40);
-        cairo_set_font_size(cr, 16);
+        cairo_move_to(cr, RIT_X, RIT_Y);
+        cairo_set_font_size(cr, RIT_RENDER_FONT_SIZE);
         cairo_show_text(cr, temp_text);
 
         if (can_transmit) {
             if (transmitter->xit_enabled == 0) {
-                cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+                cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
             } else {
-                cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+                cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
             }
             sprintf(temp_text, "XIT: %lld", transmitter->xit);
-            cairo_move_to(cr, 220, 20);
-            cairo_set_font_size(cr, 16);
+            cairo_move_to(cr, XIT_X, XIT_Y);
+            cairo_set_font_size(cr, XIT_RENDER_FONT_SIZE);
             cairo_show_text(cr, temp_text);
         }
 

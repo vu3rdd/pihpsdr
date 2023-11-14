@@ -56,6 +56,8 @@
 #define  VFO_B_RENDER_FONT_SIZE     (18)
 #define  ACTIVE_VFO_INDICATION_SIZE (18)
 #define  PS_RENDER_FONT_SIZE        (12)
+#define  RIT_RENDER_FONT_SIZE       (16)
+#define  XIT_RENDER_FONT_SIZE       (16)
 
 // coordinates
 
@@ -73,4 +75,11 @@
 
 #define  PS_X       130
 #define  PS_Y       50
+
+#define  RIT_X      220
+#define  RIT_Y      40
+
+#define  XIT_X      220
+#define  XIT_Y      20
+
 #endif // _SCREEN_H
