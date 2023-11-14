@@ -1210,35 +1210,35 @@ void vfo_update(void) {
         // NB and NB2 are mutually exclusive, therefore
         // they are put to the same place in order to save
         // some space
-        cairo_move_to(cr, 115, 40);
-        cairo_set_font_size(cr, 16);
+        cairo_move_to(cr, NB_X, NB_Y);
+        cairo_set_font_size(cr, NB_RENDER_FONT_SIZE);
         if (active_receiver->nb) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NB");
         } else if (active_receiver->nb2) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NB2");
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
             cairo_show_text(cr, "NB");
         }
 
         // NR, NR2, NR3 and NR4 are mutually exclusive
-        cairo_move_to(cr, 70, 40);
+        cairo_move_to(cr, NR_X, NR_Y);
         if (active_receiver->nr) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NR");
         } else if (active_receiver->nr2) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NR2");
         } else if (active_receiver->nr3) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NR3");
         } else if (active_receiver->nr4) {
-            cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
+            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
             cairo_show_text(cr, "NR4");
         } else {
-            cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
+            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
             cairo_show_text(cr, "NR");
         }
 

@@ -58,6 +58,8 @@
 #define  PS_RENDER_FONT_SIZE        (12)
 #define  RIT_RENDER_FONT_SIZE       (16)
 #define  XIT_RENDER_FONT_SIZE       (16)
+#define  NB_RENDER_FONT_SIZE        (16)
+#define  NR_RENDER_FONT_SIZE        (16)
 
 // coordinates
 
@@ -81,5 +83,11 @@
 
 #define  XIT_X      220
 #define  XIT_Y      20
+
+#define  NB_X       115
+#define  NB_Y       40
+
+#define  NR_X       70
+#define  NR_Y       40
 
 #endif // _SCREEN_H
