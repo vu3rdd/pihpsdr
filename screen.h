@@ -60,7 +60,8 @@
 #define  XIT_RENDER_FONT_SIZE       (16)
 #define  NB_RENDER_FONT_SIZE        (16)
 #define  NR_RENDER_FONT_SIZE        (16)
-
+#define  DUP_RENDER_FONT_SIZE       (16)
+#define  SPLIT_RENDER_FONT_SIZE     (16)
 // coordinates
 
 #define  MODE_X     70

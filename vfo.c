@@ -1316,7 +1316,7 @@ void vfo_update(void) {
         } else {
             cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
         }
-        cairo_set_font_size(cr, 16);
+        cairo_set_font_size(cr, SPLIT_RENDER_FONT_SIZE);
         cairo_show_text(cr, "SPLIT");
 
         cairo_move_to(cr, CTUN_X, CTUN_Y);
@@ -1345,7 +1345,7 @@ void vfo_update(void) {
         }
         sprintf(temp_text, "DUP");
         cairo_move_to(cr, DUP_X, DUP_Y);
-        cairo_set_font_size(cr, 16);
+        cairo_set_font_size(cr, DUP_RENDER_FONT_SIZE);
         cairo_show_text(cr, temp_text);
 
         cairo_destroy(cr);
