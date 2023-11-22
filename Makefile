@@ -258,9 +258,8 @@ i2c.c \
 gpio.c \
 encoder_menu.c \
 switch_menu.c \
-toolbar_menu.c
-
-
+toolbar_menu.c \
+screen.c
 
 HEADERS= \
 agc.h \
@@ -340,7 +339,6 @@ switch_menu.h \
 toolbar_menu.h \
 screen.h
 
-
 OBJS= \
 band.o \
 discovered.o \
@@ -415,7 +413,8 @@ i2c.o \
 gpio.o \
 encoder_menu.o \
 switch_menu.o \
-toolbar_menu.o
+toolbar_menu.o \
+screen.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \

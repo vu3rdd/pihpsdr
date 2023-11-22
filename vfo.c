@@ -1046,10 +1046,12 @@ void vfo_update(void) {
             break;
         }
 
+	widget_props_t *entry;
         // draw mode
-        cairo_set_font_size(cr, MODE_RENDER_FONT_SIZE);
-        cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
-        cairo_move_to(cr, MODE_X, MODE_Y);
+	entry = &default_widget_prop_table[SCR_MODE];
+        cairo_set_font_size(cr, entry->font_size);
+        cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+        cairo_move_to(cr, entry->x, entry->y);
         cairo_show_text(cr, temp_text);
 
         // In what follows, we want to display the VFO frequency
@@ -1082,6 +1084,7 @@ void vfo_update(void) {
         if (s >= STEPS)
             s = 0;
 
+	entry = &default_widget_prop_table[SCR_VFO_A];
         // draw VFO A
         cairo_select_font_face(cr, "Cantarell", CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_NORMAL);
@@ -1103,8 +1106,8 @@ void vfo_update(void) {
                 cairo_set_source_rgb(cr, DARK_GREEN_R, DARK_GREEN_G, DARK_GREEN_B);
             }
         }
-        cairo_move_to(cr, VFO_A_X, VFO_A_Y);
-        cairo_set_font_size(cr, VFO_A_RENDER_FONT_SIZE);
+        cairo_move_to(cr, entry->x, entry->y);
+        cairo_set_font_size(cr, entry->font_size);
         // cairo_show_text(cr, temp_text);
 
         // try to show VFO text according to step value
@@ -1150,202 +1153,207 @@ void vfo_update(void) {
             }
         }
 
-        cairo_move_to(cr, VFO_B_X, VFO_B_Y);
-        cairo_set_font_size(cr, VFO_B_RENDER_FONT_SIZE);
+	// show vfo-b
+	entry = &default_widget_prop_table[SCR_VFO_B];
+        cairo_move_to(cr, entry->x, entry->y);
+        cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
         // show the currently active VFO.
-        cairo_set_source_rgb(cr,
-			     YELLOW_R,
-			     YELLOW_G,
-			     YELLOW_B);
         sprintf(temp_text, "%c", active_receiver->active_vfo == 0 ? 'A' : 'B');
-        cairo_move_to(cr,
-		      ACTIVE_VFO_INDICATION_X,
-		      ACTIVE_VFO_INDICATION_Y);
-        cairo_set_font_size(cr, ACTIVE_VFO_INDICATION_SIZE);
+	entry = &default_widget_prop_table[SCR_ACTIVE_VFO];
+	cairo_move_to(cr, entry->x, entry->y);
+	cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+        cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
         if (can_transmit) {
-            cairo_move_to(cr, PS_X, PS_Y);
+	    entry = &default_widget_prop_table[SCR_PS];
+	    cairo_move_to(cr, entry->x, entry->y);
             if (transmitter->puresignal) {
-                cairo_set_source_rgb(cr,
-				     YELLOW_R,
-				     YELLOW_G,
-				     YELLOW_B);
+		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             } else {
-                cairo_set_source_rgb(cr,
-				     GREY_R,
-				     GREY_G,
-				     GREY_B);
+		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             }
-            cairo_set_font_size(cr, PS_RENDER_FONT_SIZE);
-            cairo_show_text(cr, "PS");
+            cairo_set_font_size(cr, entry->font_size);
+            cairo_show_text(cr, entry->label);
         }
 #endif
 
+	// RIT
+	entry = &default_widget_prop_table[SCR_RIT];
+	cairo_move_to(cr, entry->x, entry->y);
         if (vfo[id].rit_enabled == 0) {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         } else {
-            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         }
         sprintf(temp_text, "RIT: %lld", vfo[id].rit);
-        cairo_move_to(cr, RIT_X, RIT_Y);
-        cairo_set_font_size(cr, RIT_RENDER_FONT_SIZE);
+        cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
         if (can_transmit) {
+	    entry = &default_widget_prop_table[SCR_XIT];
+	    cairo_move_to(cr, entry->x, entry->y);
             if (transmitter->xit_enabled == 0) {
-                cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             } else {
-                cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             }
             sprintf(temp_text, "XIT: %lld", transmitter->xit);
-            cairo_move_to(cr, XIT_X, XIT_Y);
-            cairo_set_font_size(cr, XIT_RENDER_FONT_SIZE);
+
+            cairo_set_font_size(cr, entry->font_size);
             cairo_show_text(cr, temp_text);
         }
 
         // NB and NB2 are mutually exclusive, therefore
         // they are put to the same place in order to save
         // some space
-        cairo_move_to(cr, NB_X, NB_Y);
-        cairo_set_font_size(cr, NB_RENDER_FONT_SIZE);
+	entry = &default_widget_prop_table[SCR_NB];
+        cairo_move_to(cr, entry->x, entry->y);
+        cairo_set_font_size(cr, entry->font_size);
         if (active_receiver->nb) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
-            cairo_show_text(cr, "NB");
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+	    cairo_show_text(cr, "NB");
         } else if (active_receiver->nb2) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
-            cairo_show_text(cr, "NB2");
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+	    cairo_show_text(cr, "NB2");
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             cairo_show_text(cr, "NB");
         }
 
+	// NR
         // NR, NR2, NR3 and NR4 are mutually exclusive
-        cairo_move_to(cr, NR_X, NR_Y);
+	entry = &default_widget_prop_table[SCR_NR];
+        cairo_move_to(cr, entry->x, entry->y);
         if (active_receiver->nr) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "NR");
         } else if (active_receiver->nr2) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "NR2");
         } else if (active_receiver->nr3) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "NR3");
         } else if (active_receiver->nr4) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
-            cairo_show_text(cr, "NR4");
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+	    cairo_show_text(cr, "NR4");
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             cairo_show_text(cr, "NR");
         }
 
-        cairo_move_to(cr, ANF_X, ANF_Y);
+	// anf
+	entry = &default_widget_prop_table[SCR_ANF];
+	cairo_move_to(cr, entry->x, entry->y);
         if (active_receiver->anf) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_show_text(cr, "ANF");
+        cairo_show_text(cr, entry->label);
 
-        cairo_move_to(cr, SNB_X, SNB_Y);
+	// snb
+	entry = &default_widget_prop_table[SCR_SNB];
+	cairo_move_to(cr, entry->x, entry->y);
         if (active_receiver->snb) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_show_text(cr, "SNB");
+        cairo_show_text(cr, entry->label);
 
-        cairo_move_to(cr, AGC_X, AGC_Y);
+	// agc
+	entry = &default_widget_prop_table[SCR_AGC];
+	cairo_move_to(cr, entry->x, entry->y);
         switch (active_receiver->agc) {
         case AGC_OFF:
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             cairo_show_text(cr, "AGC");
             break;
         case AGC_LONG:
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "AGC L");
             break;
         case AGC_SLOW:
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
-            cairo_show_text(cr, "AGC S");
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+	    cairo_show_text(cr, "AGC S");
             break;
         case AGC_MEDIUM:
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "AGC M");
             break;
         case AGC_FAST:
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             cairo_show_text(cr, "AGC F");
             break;
         }
 
 #ifdef MIDI
-        cairo_move_to(cr, MIDI_X, MIDI_Y);
+	entry = &default_widget_prop_table[SCR_MIDI];
+	cairo_move_to(cr, entry->x, entry->y);
         if (midi_enabled) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_show_text(cr, "MIDI");
+        cairo_show_text(cr, entry->label);
 #endif
 
         if (can_transmit) {
-            cairo_move_to(cr, VOX_X, VOX_Y);
+	    entry = &default_widget_prop_table[SCR_VOX];
+	    cairo_move_to(cr, entry->x, entry->y);
             if (vox_enabled) {
-                cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
             } else {
-                cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
             }
-            cairo_show_text(cr, "VOX");
+            cairo_show_text(cr, entry->label);
         }
 
-        cairo_move_to(cr, LOCK_X, LOCK_Y);
+	// lock
+	entry = &default_widget_prop_table[SCR_LOCK];
+	cairo_move_to(cr, entry->x, entry->y);
         if (locked) {
-            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_show_text(cr, "LOCK");
+        cairo_show_text(cr, entry->label);
 
-        cairo_move_to(cr, SPLIT_X, SPLIT_Y);
+	// split
+	entry = &default_widget_prop_table[SCR_SPLIT];
+        cairo_move_to(cr, entry->x, entry->y);
         if (split) {
-            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_set_font_size(cr, SPLIT_RENDER_FONT_SIZE);
-        cairo_show_text(cr, "SPLIT");
+        cairo_set_font_size(cr, entry->font_size);
+        cairo_show_text(cr, entry->label);
 
-        cairo_move_to(cr, CTUN_X, CTUN_Y);
+	// Ctun
+	entry = &default_widget_prop_table[SCR_CTUN];
+        cairo_move_to(cr, entry->x, entry->y);
         if (vfo[id].ctun) {
-            cairo_set_source_rgb(cr, YELLOW_R, YELLOW_G, YELLOW_B);
+            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        cairo_show_text(cr, "CTUN");
-        /* if(sat_mode!=SAT_NONE) { */
-        /*   cairo_set_source_rgb(cr, 1.0, 0.0, 0.0); */
-        /* } else { */
-        /*   cairo_set_source_rgb(cr, 0.7, 0.7, 0.7); */
-        /* } */
-        /* cairo_set_font_size(cr, 16); */
-        /* if(sat_mode==SAT_NONE || sat_mode==SAT_MODE) { */
-        /*   cairo_show_text(cr, "SAT"); */
-        /* } else { */
-        /*   cairo_show_text(cr, "RSAT"); */
-        /* } */
+        cairo_show_text(cr, entry->label);
 
+	// dup
+	entry = &default_widget_prop_table[SCR_DUP];
+        cairo_move_to(cr, entry->x, entry->y);
         if (duplex) {
-            cairo_set_source_rgb(cr, RED_R, RED_G, RED_B);
+            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
         } else {
-            cairo_set_source_rgb(cr, GREY_R, GREY_G, GREY_B);
+            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
         }
-        sprintf(temp_text, "DUP");
-        cairo_move_to(cr, DUP_X, DUP_Y);
-        cairo_set_font_size(cr, DUP_RENDER_FONT_SIZE);
+        sprintf(temp_text, entry->label);
+        cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
         cairo_destroy(cr);
@@ -1359,19 +1367,23 @@ static gboolean vfo_press_event_cb(GtkWidget *widget, GdkEventButton *event,
                                    gpointer data) {
     // vfo a and b are drawn at x = 280, so it is the y coordinate
     // that matters.
-    if (event->x >= VFO_B_X && event->y <= VFO_B_Y) {
+    if (event->x >= default_widget_prop_table[SCR_VFO_B].x &&
+	event->y <= default_widget_prop_table[SCR_VFO_B].y) {
         // vfo B
         start_vfo(VFO_B);
         return TRUE;
-    } else if (event->x >= VFO_A_X &&
-	       event->y > VFO_B_Y &&
-	       event->y <= VFO_A_Y) {
+    } else if (event->x >= default_widget_prop_table[SCR_VFO_A].x &&
+	       event->y > default_widget_prop_table[SCR_VFO_B].y &&
+	       event->y <= default_widget_prop_table[SCR_VFO_A].y) {
         // vfo A
         start_vfo(VFO_A);
         return TRUE;
     }
 
     return FALSE;
+}
+
+void draw_element(size_t index, char *buf) {
 }
 
 GtkWidget *vfo_init(int width, int height, GtkWidget *parent) {

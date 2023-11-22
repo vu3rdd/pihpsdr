@@ -1,9 +1,12 @@
 #ifndef _SCREEN_H
 #define _SCREEN_H
 
+#include <stddef.h>
+
 #define MENU_HEIGHT (50)
 #define MENU_WIDTH (50)
-// so menu height x 2 == meter height (but we still have 20 pixels
+
+// menu height x 2 == meter height (but we still have 20 pixels
 // empty.
 #define METER_HEIGHT (100) // edit default = 60
 #define METER_WIDTH (240)
@@ -12,6 +15,43 @@
 #define SLIDERS_HEIGHT (100)
 #define TOOLBAR_HEIGHT (30)
 #define WATERFALL_HEIGHT (105)
+
+typedef struct colour {
+    float r;
+    float g;
+    float b;
+} colour_t;
+
+typedef struct widget_props {
+    char *label;
+    size_t x;
+    size_t y;
+    size_t font_size;
+    colour_t on;
+    colour_t off;
+} widget_props_t;
+
+enum on_screen_buttons {
+    SCR_VFO_A = 0,
+    SCR_VFO_B,
+    SCR_ACTIVE_VFO,
+    SCR_MODE,
+    SCR_PS,
+    SCR_RIT,
+    SCR_XIT,
+    SCR_NB,
+    SCR_NR,
+    SCR_ANF,
+    SCR_SNB,
+    SCR_MIDI,
+    SCR_AGC,
+    SCR_VOX,
+    SCR_LOCK,
+    SCR_CTUN,
+    SCR_SPLIT,
+    SCR_DUP,
+    NUM_ACTIVE_BUTTONS,
+};
 
 // define a type and coordinates for various widgets on the screen.
 #define  VFO_HEIGHT (100)
@@ -49,73 +89,6 @@
 #define  GREY_G (0.7)
 #define  GREY_B (0.7)
 
-// font/typeface sizes
-
-#define  MODE_RENDER_FONT_SIZE      (30)
-#define  VFO_A_RENDER_FONT_SIZE     (70)
-#define  VFO_B_RENDER_FONT_SIZE     (18)
-#define  ACTIVE_VFO_INDICATION_SIZE (18)
-#define  PS_RENDER_FONT_SIZE        (12)
-#define  RIT_RENDER_FONT_SIZE       (16)
-#define  XIT_RENDER_FONT_SIZE       (16)
-#define  NB_RENDER_FONT_SIZE        (16)
-#define  NR_RENDER_FONT_SIZE        (16)
-#define  DUP_RENDER_FONT_SIZE       (16)
-#define  SPLIT_RENDER_FONT_SIZE     (16)
-// coordinates
-
-#define  MODE_X     70
-#define  MODE_Y     80
-
-#define  VFO_A_X    285
-#define  VFO_A_Y    95
-
-#define  VFO_B_X    285
-#define  VFO_B_Y    18
-
-#define  ACTIVE_VFO_INDICATION_X  400
-#define  ACTIVE_VFO_INDICATION_Y   20
-
-#define  PS_X       130
-#define  PS_Y       50
-
-#define  RIT_X      220
-#define  RIT_Y      40
-
-#define  XIT_X      220
-#define  XIT_Y      20
-
-#define  NB_X       115
-#define  NB_Y       40
-
-#define  NR_X       70
-#define  NR_Y       40
-
-#define  ANF_X      70
-#define  ANF_Y      20
-
-#define  SNB_X      115
-#define  SNB_Y      20
-
-#define  AGC_X      160
-#define  AGC_Y      20
-
-#define  MIDI_X     480
-#define  MIDI_Y     20
-
-#define  VOX_X      160
-#define  VOX_Y      40
-
-#define  LOCK_X      5
-#define  LOCK_Y      80
-
-#define  SPLIT_X     5
-#define  SPLIT_Y     20
-
-#define  CTUN_X      5
-#define  CTUN_Y      40
-
-#define  DUP_X       5
-#define  DUP_Y       60
+extern widget_props_t default_widget_prop_table[];
 
 #endif // _SCREEN_H
