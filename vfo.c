@@ -1003,6 +1003,25 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
     return s;
 }
 
+// depending on the status, draw an item on the screen.
+// The font size, coordinates, colours etc are picked up
+// from a table and drawn
+void draw_item(cairo_t *cr, size_t item, bool status) {
+    char temp_text[32];
+
+    widget_props_t *entry = &default_widget_prop_table[item];
+    cairo_move_to(cr, entry->x, entry->y);
+    if (status) {
+	cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+    } else {
+	cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
+    }
+
+    sprintf(temp_text, entry->label);
+    cairo_set_font_size(cr, entry->font_size);
+    cairo_show_text(cr, temp_text);
+}
+
 void vfo_update(void) {
     int id = active_receiver->id;
     int txvfo = get_tx_vfo();
@@ -1169,15 +1188,7 @@ void vfo_update(void) {
 
 #ifdef PURESIGNAL
         if (can_transmit) {
-	    entry = &default_widget_prop_table[SCR_PS];
-	    cairo_move_to(cr, entry->x, entry->y);
-            if (transmitter->puresignal) {
-		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            } else {
-		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            }
-            cairo_set_font_size(cr, entry->font_size);
-            cairo_show_text(cr, entry->label);
+	    draw_item(cr, SCR_PS, transmitter->puresignal);
         }
 #endif
 
@@ -1246,24 +1257,10 @@ void vfo_update(void) {
         }
 
 	// anf
-	entry = &default_widget_prop_table[SCR_ANF];
-	cairo_move_to(cr, entry->x, entry->y);
-        if (active_receiver->anf) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_ANF, active_receiver->anf);
 
 	// snb
-	entry = &default_widget_prop_table[SCR_SNB];
-	cairo_move_to(cr, entry->x, entry->y);
-        if (active_receiver->snb) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_SNB, active_receiver->snb);
 
 	// agc
 	entry = &default_widget_prop_table[SCR_AGC];
@@ -1292,69 +1289,24 @@ void vfo_update(void) {
         }
 
 #ifdef MIDI
-	entry = &default_widget_prop_table[SCR_MIDI];
-	cairo_move_to(cr, entry->x, entry->y);
-        if (midi_enabled) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_MIDI, midi_enabled);
 #endif
 
         if (can_transmit) {
-	    entry = &default_widget_prop_table[SCR_VOX];
-	    cairo_move_to(cr, entry->x, entry->y);
-            if (vox_enabled) {
-		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            } else {
-		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            }
-            cairo_show_text(cr, entry->label);
+	    draw_item(cr, SCR_VOX, vox_enabled);
         }
 
 	// lock
-	entry = &default_widget_prop_table[SCR_LOCK];
-	cairo_move_to(cr, entry->x, entry->y);
-        if (locked) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_LOCK, locked);
 
 	// split
-	entry = &default_widget_prop_table[SCR_SPLIT];
-        cairo_move_to(cr, entry->x, entry->y);
-        if (split) {
-            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_set_font_size(cr, entry->font_size);
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_SPLIT, split);
 
 	// Ctun
-	entry = &default_widget_prop_table[SCR_CTUN];
-        cairo_move_to(cr, entry->x, entry->y);
-        if (vfo[id].ctun) {
-            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        cairo_show_text(cr, entry->label);
+	draw_item(cr, SCR_CTUN, vfo[id].ctun);
 
 	// dup
-	entry = &default_widget_prop_table[SCR_DUP];
-        cairo_move_to(cr, entry->x, entry->y);
-        if (duplex) {
-            cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        } else {
-            cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        }
-        sprintf(temp_text, entry->label);
-        cairo_set_font_size(cr, entry->font_size);
-        cairo_show_text(cr, temp_text);
+	draw_item(cr, SCR_DUP, duplex);
 
         cairo_destroy(cr);
         gtk_widget_queue_draw(vfo_panel);
@@ -1381,9 +1333,6 @@ static gboolean vfo_press_event_cb(GtkWidget *widget, GdkEventButton *event,
     }
 
     return FALSE;
-}
-
-void draw_element(size_t index, char *buf) {
 }
 
 GtkWidget *vfo_init(int width, int height, GtkWidget *parent) {
