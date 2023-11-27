@@ -1015,6 +1015,32 @@ void draw_item(cairo_t *cr, size_t item, uint status) {
     cairo_show_text(cr, entry->label[status]);
 }
 
+// I am not proud of this code
+int get_nr(RECEIVER *rx)
+{
+    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
+	return 0;
+    }
+
+    if (rx->nr == 1 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
+	return 1;
+    }
+
+    if (rx->nr == 0 && rx->nr2 == 1 && rx->nr3 == 0 && rx->nr4 == 0) {
+	return 2;
+    }
+
+    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 1 && rx->nr4 == 0) {
+	return 3;
+    }
+
+    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 1) {
+	return 4;
+    }
+
+    return -1;
+}
+
 void vfo_update(void) {
     int id = active_receiver->id;
     int txvfo = get_tx_vfo();
@@ -1214,7 +1240,12 @@ void vfo_update(void) {
 
 	// NR
         // NR, NR2, NR3 and NR4 are mutually exclusive
-	draw_item(cr, SCR_NR, active_receiver->nr);
+	int which_nr = get_nr(active_receiver);
+	if (which_nr < 0) {
+	    g_print("RIGCTL: ERROR in NR determination used for display\n");
+	    which_nr = 0;
+	}
+	draw_item(cr, SCR_NR, which_nr);
 
 	// anf
 	draw_item(cr, SCR_ANF, active_receiver->anf);
