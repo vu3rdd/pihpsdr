@@ -889,31 +889,37 @@ static gpointer rigctl_client(gpointer data) {
     g_idle_add(ext_vfo_update, NULL);
 
     int i;
-    int numbytes;
+    int numbytes = 0;
     char cmd_input[MAXDATASIZE];
 
     char *command = g_new(char, MAXDATASIZE);
     int command_index = 0;
 
-    while (server_running &&
-           (numbytes = recv(client->fd, cmd_input, MAXDATASIZE - 2, 0)) > 0) {
-        for (i = 0; i < numbytes; i++) {
-            command[command_index] = cmd_input[i];
-            command_index++;
-            if (cmd_input[i] == ';') {
-                command[command_index] = '\0';
-                if (rigctl_debug)
-                    g_print("RIGCTL: command=%s\n", command);
-                COMMAND *info = g_new(COMMAND, 1);
-                info->client = client;
-                info->command = command;
-                g_idle_add(parse_cmd, info);
-                command = g_new(char, MAXDATASIZE);
-                command_index = 0;
-            }
-        }
+    while (server_running) {
+	numbytes = recv(client->fd, cmd_input, MAXDATASIZE - 2, 0);
+	if (numbytes > 0) {
+	    for (i = 0; i < numbytes; i++) {
+		command[command_index] = cmd_input[i];
+		command_index++;
+		if (cmd_input[i] == ';') {
+		    command[command_index] = '\0';
+		    if (rigctl_debug)
+			g_print("RIGCTL: command=%s\n", command);
+		    COMMAND *info = g_new(COMMAND, 1);
+		    info->client = client;
+		    info->command = command;
+		    g_idle_add(parse_cmd, info);
+		    command = g_new(char, MAXDATASIZE);
+		    command_index = 0;
+		}
+	    }
+	} else if (numbytes <= 0) {
+	    // print the errno string
+	    perror("RIGCTL server: got zero bytes from the client");
+	}
     }
-    g_print("RIGCTL: Leaving rigctl_client thread");
+
+    g_print("RIGCTL: Leaving rigctl_client thread: numbytes = %d", numbytes);
     if (client->fd != -1) {
         g_print("setting SO_LINGER to 0 for client_socket: %d\n", client->fd);
         struct linger linger = {0};
