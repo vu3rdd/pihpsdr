@@ -913,9 +913,13 @@ static gpointer rigctl_client(gpointer data) {
 		    command_index = 0;
 		}
 	    }
-	} else if (numbytes <= 0) {
+	} else if (numbytes == 0) {
 	    // print the errno string
-	    perror("RIGCTL server: got zero bytes from the client");
+	    perror("RIGCTL server: connection closed by the client");
+	    break;
+	} else if (numbytes == -1) {
+	    perror("RIGCTL server: error reading from the client");
+	    break;
 	}
     }
 
