@@ -4138,7 +4138,8 @@ int parse_cmd(void *data) {
             break;
         case 'Y': // TY
             // set/read microprocessor firmware type
-            implemented = FALSE;
+	    sprintf(reply, "TY000;");
+	    send_resp(client->fd, reply);
             break;
         default:
             implemented = FALSE;
