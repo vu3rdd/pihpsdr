@@ -4295,18 +4295,30 @@ int set_interface_attribs(int fd, int speed, int parity) {
     return 0;
 }
 
-void set_blocking(int fd, int should_block) {
-    struct termios tty;
-    memset(&tty, 0, sizeof tty);
-    if (tcgetattr(fd, &tty) != 0) {
-        g_print("RIGCTL: Error %d from tggetattr\n", errno);
-        return;
-    }
-    tty.c_cc[VMIN] = should_block ? 1 : 0;
-    tty.c_cc[VTIME] = 5; // 0.5 seconds read timeout
+void set_blocking (int fd, int should_block) {
+  struct termios tty;
+  memset (&tty, 0, sizeof tty);
+  int flags = fcntl(fd, F_GETFL, 0);
 
-    if (tcsetattr(fd, TCSANOW, &tty) != 0)
-        g_print("RIGCTL: error %d setting term attributes\n", errno);
+  if (should_block) {
+    flags &= ~O_NONBLOCK;
+  } else {
+    flags |= O_NONBLOCK;
+  }
+
+  fcntl(fd, F_SETFL, flags);
+
+  if (tcgetattr (fd, &tty) != 0) {
+    g_print ("RIGCTL (tggetattr):");
+    return;
+  }
+
+  tty.c_cc[VMIN]  = should_block > 0? 1: 0;
+  tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+  if (tcsetattr (fd, TCSANOW, &tty) != 0) {
+    g_print("RIGCTL (tcsetattr):");
+  }
 }
 
 static gpointer serial_server(gpointer data) {
@@ -4365,7 +4377,7 @@ int launch_serial() {
         g_mutex_init(&mutex_busy->m);
     }
 
-    fd = open(ser_port, O_RDWR | O_NOCTTY | O_SYNC);
+    fd = open(ser_port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
     if (fd < 0) {
         g_print("RIGCTL: Error %d opening %s: %s\n", errno, ser_port,
                 strerror(errno));
@@ -4373,7 +4385,6 @@ int launch_serial() {
     }
 
     g_print("serial port fd=%d\n", fd);
-
     set_interface_attribs(fd, serial_baud_rate, serial_parity);
     set_blocking(fd, 1); // set no blocking
 
