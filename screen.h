@@ -23,12 +23,11 @@ typedef struct colour {
 } colour_t;
 
 typedef struct widget_props {
-    char *label;
     size_t x;
     size_t y;
     size_t font_size;
-    colour_t on;
-    colour_t off;
+    colour_t colours[5];
+    char *label[5];
 } widget_props_t;
 
 enum on_screen_buttons {

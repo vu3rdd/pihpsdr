@@ -1006,20 +1006,13 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
 // depending on the status, draw an item on the screen.
 // The font size, coordinates, colours etc are picked up
 // from a table and drawn
-void draw_item(cairo_t *cr, size_t item, bool status) {
-    char temp_text[32];
-
+void draw_item(cairo_t *cr, size_t item, uint status) {
     widget_props_t *entry = &default_widget_prop_table[item];
     cairo_move_to(cr, entry->x, entry->y);
-    if (status) {
-	cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-    } else {
-	cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-    }
+    cairo_set_source_rgb(cr, entry->colours[status].r, entry->colours[status].g, entry->colours[status].b);
 
-    sprintf(temp_text, entry->label);
     cairo_set_font_size(cr, entry->font_size);
-    cairo_show_text(cr, temp_text);
+    cairo_show_text(cr, entry->label[status]);
 }
 
 void vfo_update(void) {
@@ -1066,10 +1059,11 @@ void vfo_update(void) {
         }
 
 	widget_props_t *entry;
+
         // draw mode
 	entry = &default_widget_prop_table[SCR_MODE];
         cairo_set_font_size(cr, entry->font_size);
-        cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+        cairo_set_source_rgb(cr, entry->colours[0].r, entry->colours[0].g, entry->colours[0].b);
         cairo_move_to(cr, entry->x, entry->y);
         cairo_show_text(cr, temp_text);
 
@@ -1182,7 +1176,7 @@ void vfo_update(void) {
         sprintf(temp_text, "%c", active_receiver->active_vfo == 0 ? 'A' : 'B');
 	entry = &default_widget_prop_table[SCR_ACTIVE_VFO];
 	cairo_move_to(cr, entry->x, entry->y);
-	cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
+	cairo_set_source_rgb(cr, entry->colours[1].r, entry->colours[1].g, entry->colours[1].b);
         cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
@@ -1195,11 +1189,7 @@ void vfo_update(void) {
 	// RIT
 	entry = &default_widget_prop_table[SCR_RIT];
 	cairo_move_to(cr, entry->x, entry->y);
-        if (vfo[id].rit_enabled == 0) {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-        } else {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-        }
+	cairo_set_source_rgb(cr, entry->colours[vfo[id].rit_enabled].r, entry->colours[vfo[id].rit_enabled].g, entry->colours[vfo[id].rit_enabled].b);
         sprintf(temp_text, "RIT: %lld", vfo[id].rit);
         cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
@@ -1207,11 +1197,10 @@ void vfo_update(void) {
         if (can_transmit) {
 	    entry = &default_widget_prop_table[SCR_XIT];
 	    cairo_move_to(cr, entry->x, entry->y);
-            if (transmitter->xit_enabled == 0) {
-		cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            } else {
-		cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            }
+	    cairo_set_source_rgb(cr,
+				 entry->colours[transmitter->xit_enabled].r,
+				 entry->colours[transmitter->xit_enabled].g,
+				 entry->colours[transmitter->xit_enabled].b);
             sprintf(temp_text, "XIT: %lld", transmitter->xit);
 
             cairo_set_font_size(cr, entry->font_size);
@@ -1221,40 +1210,11 @@ void vfo_update(void) {
         // NB and NB2 are mutually exclusive, therefore
         // they are put to the same place in order to save
         // some space
-	entry = &default_widget_prop_table[SCR_NB];
-        cairo_move_to(cr, entry->x, entry->y);
-        cairo_set_font_size(cr, entry->font_size);
-        if (active_receiver->nb) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-	    cairo_show_text(cr, "NB");
-        } else if (active_receiver->nb2) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-	    cairo_show_text(cr, "NB2");
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            cairo_show_text(cr, "NB");
-        }
+	draw_item(cr, SCR_NB, active_receiver->nb);
 
 	// NR
         // NR, NR2, NR3 and NR4 are mutually exclusive
-	entry = &default_widget_prop_table[SCR_NR];
-        cairo_move_to(cr, entry->x, entry->y);
-        if (active_receiver->nr) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "NR");
-        } else if (active_receiver->nr2) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "NR2");
-        } else if (active_receiver->nr3) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "NR3");
-        } else if (active_receiver->nr4) {
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-	    cairo_show_text(cr, "NR4");
-        } else {
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            cairo_show_text(cr, "NR");
-        }
+	draw_item(cr, SCR_NR, active_receiver->nr);
 
 	// anf
 	draw_item(cr, SCR_ANF, active_receiver->anf);
@@ -1263,30 +1223,7 @@ void vfo_update(void) {
 	draw_item(cr, SCR_SNB, active_receiver->snb);
 
 	// agc
-	entry = &default_widget_prop_table[SCR_AGC];
-	cairo_move_to(cr, entry->x, entry->y);
-        switch (active_receiver->agc) {
-        case AGC_OFF:
-	    cairo_set_source_rgb(cr, entry->off.r, entry->off.g, entry->off.b);
-            cairo_show_text(cr, "AGC");
-            break;
-        case AGC_LONG:
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "AGC L");
-            break;
-        case AGC_SLOW:
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-	    cairo_show_text(cr, "AGC S");
-            break;
-        case AGC_MEDIUM:
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "AGC M");
-            break;
-        case AGC_FAST:
-	    cairo_set_source_rgb(cr, entry->on.r, entry->on.g, entry->on.b);
-            cairo_show_text(cr, "AGC F");
-            break;
-        }
+	draw_item(cr, SCR_AGC, active_receiver->agc);
 
 #ifdef MIDI
 	draw_item(cr, SCR_MIDI, midi_enabled);
