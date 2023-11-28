@@ -1018,24 +1018,22 @@ void draw_item(cairo_t *cr, size_t item, uint status) {
 // I am not proud of this code
 int get_nr(RECEIVER *rx)
 {
-    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
+    int nr_bitmap = rx->nr | (rx->nr2 << 1) | (rx->nr3 << 2) | (rx->nr4 << 3);
+
+    switch (nr_bitmap) {
+    case 0:
 	return 0;
-    }
-
-    if (rx->nr == 1 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
+    case 1:
 	return 1;
-    }
-
-    if (rx->nr == 0 && rx->nr2 == 1 && rx->nr3 == 0 && rx->nr4 == 0) {
+    case 2:
 	return 2;
-    }
-
-    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 1 && rx->nr4 == 0) {
+    case 4:
 	return 3;
-    }
-
-    if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 1) {
+    case 8:
 	return 4;
+    default:
+	g_print("NR: unknown NR value");
+	return -1;
     }
 
     return -1;
