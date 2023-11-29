@@ -777,14 +777,27 @@ long long rigctl_getFrequency() {
 // returns the command string
 //
 void send_resp(int fd, char *msg) {
+    if (fd == -1) {
+	g_print("RIGCTL: invalid file descriptor\n");
+	perror("send_resp");
+	return;
+    }
     if (rigctl_debug)
         g_print("RIGCTL: RESP=%s\n", msg);
+
     int length = strlen(msg);
     int written = 0;
 
     while (written < length) {
-        written += write(fd, &msg[written], length - written);
+	ssize_t n = write(fd, &msg[written], length - written);
+	if (n < 0) {
+	    perror("send_resp");
+	    break;
+	}
+        written += n;
     }
+
+    return;
 }
 
 //
@@ -833,13 +846,16 @@ static gpointer rigctl_server(gpointer data) {
         if (listen(server_socket, 3) < 0) {
             perror("rigctl_server: listen failed");
             close(server_socket);
+	    for (i = 0; i < MAX_CLIENTS; i++) {
+		client[i].fd = -1;
+	    }
             return NULL;
         }
+	g_print("rigctl server: listen succeeded\n");
 
         // find a spare thread
         for (i = 0; i < MAX_CLIENTS; i++) {
             if (client[i].fd == -1) {
-
                 g_print("Using client: %d\n", i);
 
                 client[i].fd =
@@ -866,6 +882,7 @@ static gpointer rigctl_server(gpointer data) {
                             "setsockopt(...,SO_LINGER,...) failed for client");
                     }
                     close(client[i].fd);
+		    client[i].fd = -1;
                 }
             }
         }
@@ -884,7 +901,7 @@ static gpointer rigctl_client(gpointer data) {
     g_mutex_lock(&mutex_a->m);
     cat_control++;
     if (rigctl_debug)
-        g_print("RIGCTL: CTLA INC cat_contro=%d\n", cat_control);
+        g_print("RIGCTL: CTLA INC cat_control=%d\n", cat_control);
     g_mutex_unlock(&mutex_a->m);
     g_idle_add(ext_vfo_update, NULL);
 
@@ -908,7 +925,9 @@ static gpointer rigctl_client(gpointer data) {
 		    COMMAND *info = g_new(COMMAND, 1);
 		    info->client = client;
 		    info->command = command;
-		    g_idle_add(parse_cmd, info);
+		    if (client->fd != -1) {
+			g_idle_add(parse_cmd, info);
+		    }
 		    command = g_new(char, MAXDATASIZE);
 		    command_index = 0;
 		}
@@ -923,7 +942,7 @@ static gpointer rigctl_client(gpointer data) {
 	}
     }
 
-    g_print("RIGCTL: Leaving rigctl_client thread: numbytes = %d", numbytes);
+    g_print("RIGCTL: Leaving rigctl_client thread: numbytes = %d\n", numbytes);
     if (client->fd != -1) {
         g_print("setting SO_LINGER to 0 for client_socket: %d\n", client->fd);
         struct linger linger = {0};
@@ -4357,7 +4376,9 @@ static gpointer serial_server(gpointer data) {
                     info->client = client;
                     info->command = command;
                     g_mutex_lock(&mutex_busy->m);
-                    g_idle_add(parse_cmd, info);
+		    if (client->fd != -1) {
+			g_idle_add(parse_cmd, info);
+		    }
                     g_mutex_unlock(&mutex_busy->m);
 
                     command = g_new(char, MAXDATASIZE);
