@@ -1041,6 +1041,21 @@ int get_nr(RECEIVER *rx)
     return -1;
 }
 
+int get_nb(RECEIVER *rx)
+{
+    if (rx->nb == 0 && rx->nb2 == 0) {
+	return 0;
+    }
+    if (rx->nb == 1 && rx->nb2 == 0) {
+	return 1;
+    }
+    if (rx->nb == 0 && rx->nb2 == 1) {
+	return 2;
+    }
+
+    return -1;
+}
+
 void vfo_update(void) {
     int id = active_receiver->id;
     int txvfo = get_tx_vfo();
@@ -1236,7 +1251,12 @@ void vfo_update(void) {
         // NB and NB2 are mutually exclusive, therefore
         // they are put to the same place in order to save
         // some space
-	draw_item(cr, SCR_NB, active_receiver->nb);
+	int which_nb = get_nb(active_receiver);
+	if (which_nb < 0) {
+	    g_print("RIGCTL: ERROR in NR determination used for display\n");
+	    which_nb = 0;
+	}
+	draw_item(cr, SCR_NB, which_nb);
 
 	// NR
         // NR, NR2, NR3 and NR4 are mutually exclusive
