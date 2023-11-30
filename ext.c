@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <gtk/gtk.h>
+#include <stdbool.h>
+
 #include "main.h"
 #include "discovery.h"
 #include "receiver.h"

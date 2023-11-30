@@ -57,7 +57,7 @@ extern int txFilterHighCut;
 
 extern FILTER *filters[MODES];
 
-extern gint filter_step;
+extern int filter_step;
 
 extern void filterSaveState();
 extern void filterRestoreState();

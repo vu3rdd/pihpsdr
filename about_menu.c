@@ -25,13 +25,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 #include <wdsp.h>
 
 #include "new_menu.h"
 #include "about_menu.h"
 #include "discovered.h"
 #include "radio.h"
-#include "version.h"
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;
@@ -83,9 +83,7 @@ void about_menu(GtkWidget *parent) {
   GtkWidget *grid=gtk_grid_new();
 
   gtk_grid_set_column_homogeneous(GTK_GRID(grid),TRUE);
-  //gtk_grid_set_row_homogeneous(GTK_GRID(grid),TRUE);
   gtk_grid_set_column_spacing (GTK_GRID(grid),4);
-  //gtk_grid_set_row_spacing (GTK_GRID(grid),4);
 
   int row=0;
 
@@ -102,12 +100,6 @@ void about_menu(GtkWidget *parent) {
   strcat(text,"\n    Johan Maas, PA3GSB: RadioBerry support");
   strcat(text,"\n    Ken Hopper, N9VV: Testing and Documentation");
   strcat(text,"\n    Christoph van Wüllen, DL1YCF: CW, Pure Signal, Diversity, MIDI ");
-
-  sprintf(line,"\n\nBuild date: %s", build_date);
-  strcat(text,line);
-
-  sprintf(line,"\nBuild version: %s", build_version);
-  strcat(text,line);
 
   sprintf(line,"\nWDSP version: %d.%02d", GetWDSPVersion()/100, GetWDSPVersion()%100);
   strcat(text,line);

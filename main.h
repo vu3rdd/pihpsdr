@@ -30,14 +30,13 @@ enum {
   CONTROLLER2_V2
 };
 
-extern gint controller;
-
-extern gint display_width;
-extern gint display_height;
-extern gint full_screen;
+extern int controller;
+extern int display_width;
+extern int display_height;
+extern int full_screen;
 extern GtkWidget *top_window;
 extern GtkWidget *grid;
 extern void status_text(char *text);
 
-extern gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
+extern bool keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 #endif

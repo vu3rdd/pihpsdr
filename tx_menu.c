@@ -18,6 +18,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "audio.h"
 #include "new_menu.h"

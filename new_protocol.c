@@ -40,6 +40,7 @@
 #include <semaphore.h>
 #include <math.h>
 #include <sys/select.h>
+#include <stdbool.h>
 
 #include <wdsp.h>
 

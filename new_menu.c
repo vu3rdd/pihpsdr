@@ -21,6 +21,7 @@
 #include <semaphore.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "audio.h"
 #include "new_menu.h"
@@ -377,11 +378,6 @@ static gboolean ps_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) 
 }
 #endif
 
-void start_test() {
-  cleanup();
-  test_menu(top_window);
-}
-
 #ifdef CLIENT_SERVER
 void start_server() {
   cleanup();
@@ -454,7 +450,7 @@ void new_menu()
 
     GtkWidget *exit_b=gtk_button_new_with_label("Exit piHPSDR");
     g_signal_connect (exit_b, "button-press-event", G_CALLBACK(exit_cb), NULL);
-    gtk_grid_attach(GTK_GRID(grid),exit_b,4,0,2,1);
+    gtk_grid_attach(GTK_GRID(grid),exit_b,3,0,2,1);
 
     i=5;
 

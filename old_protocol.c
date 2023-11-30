@@ -34,6 +34,8 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
+
 #include <wdsp.h>
 
 #include "audio.h"

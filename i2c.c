@@ -8,8 +8,9 @@
 #include <i2c/smbus.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-
+#include <stdbool.h>
 #include <gtk/gtk.h>
+
 #include "i2c.h"
 #include "actions.h"
 #include "gpio.h"

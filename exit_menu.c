@@ -21,6 +21,7 @@
 #include <semaphore.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "new_menu.h"

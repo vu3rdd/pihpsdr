@@ -18,6 +18,7 @@
 */
 
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
 #include "radio.h"
 #include "transmitter.h"

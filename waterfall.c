@@ -23,6 +23,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "radio.h"
 #include "vfo.h"

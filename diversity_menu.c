@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #include "new_menu.h"
 #include "diversity_menu.h"

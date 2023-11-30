@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include "actions.h"
 #include "gpio.h"
 #include "toolbar.h"

@@ -167,7 +167,7 @@ OPTIONS=$(SMALL_SCREEN_OPTIONS) $(MIDI_OPTIONS) $(LEVEL_OPTIONS) $(PURESIGNAL_OP
         $(PTT_OPTIONS) \
 	$(SERVER_OPTIONS) \
 	$(AUDIO_OPTIONS) \
-	-D GIT_DATE='"$(GIT_DATE)"' -D GIT_VERSION='"$(GIT_VERSION)"' $(DEBUG_OPTION)
+	$(DEBUG_OPTION)
 
 
 ifeq ($(UNAME_S), Linux)
@@ -217,7 +217,6 @@ fft_menu.c \
 diversity_menu.c \
 tx_menu.c \
 vfo_menu.c \
-test_menu.c \
 meter.c \
 mode.c \
 old_discovery.c \
@@ -236,12 +235,10 @@ toolbar.c \
 transmitter.c \
 zoompan.c \
 sliders.c \
-version.c \
 vfo.c \
 waterfall.c \
 button_text.c \
 vox.c \
-update.c \
 store.c \
 store_menu.c \
 memory.c \
@@ -297,7 +294,6 @@ fft_menu.h \
 diversity_menu.h \
 tx_menu.h \
 vfo_menu.h \
-test_menu.h \
 meter.h \
 mode.h \
 old_discovery.h \
@@ -315,12 +311,10 @@ toolbar.h \
 transmitter.h \
 zoompan.h \
 sliders.h \
-version.h \
 vfo.h \
 waterfall.h \
 button_text.h \
 vox.h \
-update.h \
 store.h \
 store_menu.h \
 memory.h \
@@ -344,7 +338,6 @@ band.o \
 discovered.o \
 discovery.o \
 filter.o \
-version.o \
 main.o \
 new_menu.o \
 about_menu.o \
@@ -373,7 +366,6 @@ fft_menu.o \
 diversity_menu.o \
 tx_menu.o \
 vfo_menu.o \
-test_menu.o \
 meter.o \
 mode.o \
 old_discovery.o \
@@ -396,7 +388,6 @@ vfo.o \
 waterfall.o \
 button_text.o \
 vox.o \
-update.o \
 store.o \
 store_menu.o \
 memory.o \
@@ -424,18 +415,14 @@ $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(MIDI_OBJS) $(SERVER_OBJS) $(LIBS)
 
 .PHONY:	all
-all:	prebuild  $(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) \
+all:	$(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) \
 	$(LOCALCW_HEADERS) \
 	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(SERVER_HEADERS) \
 	$(AUDIO_SOURCES) $(SOURCES) \
 	$(USBOZY_SOURCES) $(LOCALCW_SOURCE) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(SERVER_SOURCES)
 
-.PHONY:	prebuild
-prebuild:
-	rm -f version.o
 
-#
 # On some platforms, INCLUDES contains "-pthread"  (from a pkg-config output)
 # which is not a valid cppcheck option
 # Therefore, correct this here. Furthermore, we can add additional options to CPP

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 #include <wdsp.h>
 

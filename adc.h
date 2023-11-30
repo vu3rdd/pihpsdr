@@ -20,8 +20,6 @@
 #ifndef ADC_H
 #define ADC_H
 
-#include <gtk/gtk.h>
-
 enum {
   AUTOMATIC=0,
   MANUAL
@@ -56,18 +54,18 @@ enum {
 };
 
 typedef struct _adc {
-  gint filters;
-  gint hpf;
-  gint lpf;
-  gint antenna;
-  gboolean dither;
-  gboolean random;
-  gboolean preamp;
-  gint attenuation;
-  gboolean enable_step_attenuation;
-  gdouble gain;
-  gdouble min_gain;
-  gdouble max_gain;
+  int filters;
+  int hpf;
+  int lpf;
+  int antenna;
+  bool dither;
+  bool random;
+  bool preamp;
+  int attenuation;
+  bool enable_step_attenuation;
+  double gain;
+  double min_gain;
+  double max_gain;
 } ADC;
 
 #endif

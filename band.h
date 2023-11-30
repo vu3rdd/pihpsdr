@@ -20,7 +20,6 @@
 #ifndef _BAND_H
 #define _BAND_H
 
-#include <gtk/gtk.h>
 #include "bandstack.h"
 
 enum {
@@ -77,7 +76,7 @@ typedef struct _CHANNEL CHANNEL;
 
 
 extern int band;
-extern gboolean displayHF;
+extern bool displayHF;
 
 #define UK_CHANNEL_ENTRIES 11
 #define OTHER_CHANNEL_ENTRIES 5

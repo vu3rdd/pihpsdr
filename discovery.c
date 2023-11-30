@@ -27,6 +27,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
+
 #ifdef MIDI
 #include <sys/types.h>
 #include <sys/stat.h>

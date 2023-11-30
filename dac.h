@@ -21,8 +21,8 @@
 #define DAC_H
 
 typedef struct _dac {
-  gint antenna;
-  gdouble gain;
+  int antenna;
+  double gain;
 } DAC;
 
 #endif

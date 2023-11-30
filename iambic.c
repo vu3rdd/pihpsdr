@@ -191,6 +191,7 @@
 #include <semaphore.h>
 #include <time.h>
 #include <sys/mman.h>
+#include <stdbool.h>
 
 #ifdef LOCALCW
 #include "gpio.h"

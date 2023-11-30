@@ -18,8 +18,6 @@
  */
 
 #include <arpa/inet.h>
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
 #include <ifaddrs.h>
 #include <math.h>
 #include <net/if.h>
@@ -30,6 +28,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <gtk/gtk.h>
 
 #include "agc.h"
 #include "band.h"

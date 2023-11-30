@@ -24,7 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
+#include <stdbool.h>
 #include <wdsp.h>
+
 #include "agc.h"
 #include "band.h"
 #include "channel.h"

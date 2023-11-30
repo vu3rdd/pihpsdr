@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
 #include "error_handler.h"
 #include "main.h"

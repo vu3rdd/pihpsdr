@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include <wdsp.h>
 

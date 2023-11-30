@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <wdsp.h>
+#include <stdbool.h>
 
 #include "new_menu.h"
 #include "band.h"

@@ -34,6 +34,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "actions.h"
 #include "audio.h"
@@ -67,17 +68,11 @@ gint display_width;
 gint display_height;
 gint full_screen = 1;
 
-static GtkWidget *discovery_dialog;
-
 static GdkCursor *cursor_arrow;
 static GdkCursor *cursor_watch;
 
-static GtkWidget *splash;
-
 GtkWidget *top_window;
 GtkWidget *grid;
-
-static DISCOVERED *d;
 
 static GtkWidget *status;
 
@@ -87,11 +82,6 @@ void status_text(char *text) {
   usleep(100000);
   while (gtk_events_pending())
     gtk_main_iteration();
-}
-
-static gint save_cb(gpointer data) {
-  radioSaveState();
-  return TRUE;
 }
 
 static pthread_t wisdom_thread_id;
@@ -109,7 +99,7 @@ static void *wisdom_thread(void *arg) {
 // code to switch mox copied from mox_cb() in toolbar.c,
 // but added the correct return values.
 //
-gboolean keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+bool keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
   if (radio != NULL) {
     if (event->keyval == GDK_KEY_space) {
@@ -189,6 +179,9 @@ static int init(void *data) {
   // sem_trywait() is not elegant, replaced this with wisdom_running variable.
   //
   char *c = getcwd(wisdom_directory, sizeof(wisdom_directory));
+  if (c == NULL) {
+      perror("getcwd");
+  }
   strcpy(&wisdom_directory[strlen(wisdom_directory)], "/");
   fprintf(stderr, "Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");
@@ -211,8 +204,6 @@ static int init(void *data) {
 static void activate_pihpsdr(GtkApplication *app, gpointer data) {
 
   // gtk_init (&argc, &argv);
-
-  fprintf(stderr, "Build: %s %s\n", build_date, version);
 
   fprintf(stderr, "GTK+ version %ud.%ud.%ud\n", gtk_major_version,
           gtk_minor_version, gtk_micro_version);
@@ -304,22 +295,6 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   GtkWidget *image = gtk_image_new_from_file("hpsdr.png");
   fprintf(stderr, "add image to grid\n");
   gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 4);
-
-  fprintf(stderr, "create pi label\n");
-  char build[128];
-  sprintf(build, "build: %s %s", build_date, version);
-  GtkWidget *pi_label = gtk_label_new("Verdure RF Technologies");
-  gtk_label_set_justify(GTK_LABEL(pi_label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(pi_label);
-  fprintf(stderr, "add pi label to grid\n");
-  gtk_grid_attach(GTK_GRID(grid), pi_label, 1, 0, 1, 1);
-
-  fprintf(stderr, "create build label\n");
-  GtkWidget *build_date_label = gtk_label_new(build);
-  gtk_label_set_justify(GTK_LABEL(build_date_label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(build_date_label);
-  fprintf(stderr, "add build label to grid\n");
-  gtk_grid_attach(GTK_GRID(grid), build_date_label, 1, 1, 1, 1);
 
   fprintf(stderr, "create status\n");
   status = gtk_label_new("");

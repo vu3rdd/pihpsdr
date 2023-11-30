@@ -2,6 +2,7 @@
 #include <pulse/glib-mainloop.h>
 #include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
+#include <stdbool.h>
 
 #include "audio.h"
 #include "mode.h"
