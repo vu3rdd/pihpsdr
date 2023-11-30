@@ -50,7 +50,6 @@
 #include "button_text.h"
 #include "new_menu.h"
 #include "radio.h"
-#include "version.h"
 #include "wdsp.h"
 #ifdef I2C
 #include "i2c.h"

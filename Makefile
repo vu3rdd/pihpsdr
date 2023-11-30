@@ -2,7 +2,6 @@
 UNAME_S := $(shell uname -s)
 
 # Get git commit version and date
-GIT_DATE := $(firstword $(shell git --no-pager show --date=short --format="%ai" --name-only))
 GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 
 # uncomment the following line to force 480x320 screen

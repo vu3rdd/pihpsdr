@@ -30,7 +30,6 @@
 #include "radio.h"
 #include "wdsp.h"
 #include "radio.h"
-#include "version.h"
 #include "mode.h"
 #include "vox.h"
 #include "new_menu.h"
