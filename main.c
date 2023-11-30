@@ -24,6 +24,7 @@
 #define MAX_DISPLAY_HEIGHT 600 // edit
 
 #include <arpa/inet.h>
+#include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <math.h>
@@ -76,7 +77,6 @@ GtkWidget *grid;
 static GtkWidget *status;
 
 void status_text(char *text) {
-  // fprintf(stderr,"splash_status: %s\n",text);
   gtk_label_set_text(GTK_LABEL(status), text);
   usleep(100000);
   while (gtk_events_pending())
@@ -102,8 +102,6 @@ bool keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data) {
 
   if (radio != NULL) {
     if (event->keyval == GDK_KEY_space) {
-
-      fprintf(stderr, "space");
 
       if (getTune() == 1) {
         setTune(0);
@@ -158,8 +156,6 @@ gboolean main_delete(GtkWidget *widget) {
 static int init(void *data) {
   char wisdom_directory[1024];
 
-  g_print("%s\n", __FUNCTION__);
-
   audio_get_cards();
 
   // wait for get_cards to complete
@@ -182,7 +178,7 @@ static int init(void *data) {
       perror("getcwd");
   }
   strcpy(&wisdom_directory[strlen(wisdom_directory)], "/");
-  fprintf(stderr, "Securing wisdom file in directory: %s\n", wisdom_directory);
+  g_info("Securing wisdom file in directory: %s\n", wisdom_directory);
   status_text("Checking FFTW Wisdom file ...");
   wisdom_running = 1;
   pthread_create(&wisdom_thread_id, NULL, wisdom_thread, wisdom_directory);
@@ -201,30 +197,18 @@ static int init(void *data) {
 }
 
 static void activate_pihpsdr(GtkApplication *app, gpointer data) {
-
-  // gtk_init (&argc, &argv);
-
-  fprintf(stderr, "GTK+ version %ud.%ud.%ud\n", gtk_major_version,
-          gtk_minor_version, gtk_micro_version);
-  uname(&unameData);
-  fprintf(stderr, "sysname: %s\n", unameData.sysname);
-  fprintf(stderr, "nodename: %s\n", unameData.nodename);
-  fprintf(stderr, "release: %s\n", unameData.release);
-  fprintf(stderr, "version: %s\n", unameData.version);
-  fprintf(stderr, "machine: %s\n", unameData.machine);
-
   load_css();
 
   GdkScreen *screen = gdk_screen_get_default();
   if (screen == NULL) {
-    fprintf(stderr, "no default screen!\n");
-    _exit(0);
+      g_info("no default screen!\n");
+      _exit(0);
   }
 
   display_width = gdk_screen_get_width(screen);
   display_height = gdk_screen_get_height(screen);
 
-  fprintf(stderr, "width=%d height=%d\n", display_width, display_height);
+  g_debug("width=%d height=%d\n", display_width, display_height);
 
   // Go to "window" mode if there is enough space on the screen.
   // Do not forget extra space needed for window top bars, screen bars etc.
@@ -249,31 +233,26 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
     full_screen = 1;
   }
 
-  fprintf(stderr, "display_width=%d display_height=%d\n", display_width,
+  g_debug("display_width=%d display_height=%d\n", display_width,
           display_height);
 
-  fprintf(stderr, "create top level window\n");
   top_window = gtk_application_window_new(app);
   if (full_screen) {
-    fprintf(stderr, "full screen\n");
     gtk_window_fullscreen(GTK_WINDOW(top_window));
   }
   gtk_widget_set_size_request(top_window, display_width, display_height);
   gtk_window_set_title(GTK_WINDOW(top_window), "Verdure SDR V1.2");
   gtk_window_set_position(GTK_WINDOW(top_window), GTK_WIN_POS_CENTER_ALWAYS);
-  // gtk_window_set_resizable(GTK_WINDOW(top_window), FALSE);
   gtk_window_set_resizable(GTK_WINDOW(top_window), TRUE); // edit
-  fprintf(stderr, "setting top window icon\n");
   GError *error;
   if (!gtk_window_set_icon_from_file(GTK_WINDOW(top_window), "hpsdr.png",
                                      &error)) {
-    fprintf(stderr, "Warning: failed to set icon for top_window\n");
+    g_warning("Warning: failed to set icon for top_window\n");
     if (error != NULL) {
-      fprintf(stderr, "%s\n", error->message);
+      g_warning("%s\n", error->message);
     }
   }
   g_signal_connect(top_window, "delete-event", G_CALLBACK(main_delete), NULL);
-  // g_signal_connect (top_window,"draw", G_CALLBACK (main_draw_cb), NULL);
 
   //
   // We want to use the space-bar as an alternative to go to TX
@@ -282,32 +261,21 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   g_signal_connect(top_window, "key_press_event", G_CALLBACK(keypress_cb),
                    NULL);
 
-  fprintf(stderr, "create grid\n");
   grid = gtk_grid_new();
   gtk_widget_set_size_request(grid, display_width, display_height);
   gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), FALSE);
-  fprintf(stderr, "add grid\n");
   gtk_container_add(GTK_CONTAINER(top_window), grid);
 
-  fprintf(stderr, "create image\n");
   GtkWidget *image = gtk_image_new_from_file("hpsdr.png");
-  fprintf(stderr, "add image to grid\n");
   gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 4);
 
-  fprintf(stderr, "create status\n");
   status = gtk_label_new("");
   gtk_label_set_justify(GTK_LABEL(status), GTK_JUSTIFY_LEFT);
-  // gtk_widget_override_font(status,
-  // pango_font_description_from_string("FreeMono 18"));
   gtk_widget_show(status);
-  fprintf(stderr, "add status to grid\n");
   gtk_grid_attach(GTK_GRID(grid), status, 1, 3, 1, 1);
-
-  // gtk_widget_show_all(top_window);
   gtk_widget_hide(top_window);
 
-  fprintf(stderr, "g_idle_add: init\n");
   g_idle_add(init, NULL);
 }
 
@@ -315,16 +283,9 @@ int main(int argc, char **argv) {
   GtkApplication *pihpsdr;
   int status;
 
-  char name[1024];
-
-  sprintf(name, "com.verdure.sdr.pid%d", getpid());
-
-  // fprintf(stderr,"gtk_application_new: %s\n",name);
-
-  pihpsdr = gtk_application_new(name, G_APPLICATION_FLAGS_NONE);
+  pihpsdr = gtk_application_new("org.rkrishnan.pihpsdr", G_APPLICATION_FLAGS_NONE);
   g_signal_connect(pihpsdr, "activate", G_CALLBACK(activate_pihpsdr), NULL);
   status = g_application_run(G_APPLICATION(pihpsdr), argc, argv);
-  fprintf(stderr, "exiting ...\n");
   g_object_unref(pihpsdr);
   return status;
 }
