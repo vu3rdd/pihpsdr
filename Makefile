@@ -255,7 +255,8 @@ gpio.c \
 encoder_menu.c \
 switch_menu.c \
 toolbar_menu.c \
-screen.c
+screen.c \
+log.c
 
 HEADERS= \
 agc.h \
@@ -330,7 +331,8 @@ gpio.h \
 encoder_menu.h \
 switch_menu.h \
 toolbar_menu.h \
-screen.h
+screen.h \
+log.h
 
 OBJS= \
 band.o \
@@ -404,7 +406,8 @@ gpio.o \
 encoder_menu.o \
 switch_menu.o \
 toolbar_menu.o \
-screen.o
+screen.o \
+log.o
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
