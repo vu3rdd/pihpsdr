@@ -20,6 +20,8 @@
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
+#define G_LOG_USE_STRUCTURED 1
+
 #define MAX_DISPLAY_WIDTH 1024 // edit
 #define MAX_DISPLAY_HEIGHT 600 // edit
 
@@ -247,10 +249,12 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   GError *error;
   if (!gtk_window_set_icon_from_file(GTK_WINDOW(top_window), "hpsdr.png",
                                      &error)) {
-    g_warning("Warning: failed to set icon for top_window\n");
-    if (error != NULL) {
-      g_warning("%s\n", error->message);
-    }
+      g_log_structured(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
+		       "MESSAGE", "failed to set icon for top_window\n");
+      if (error != NULL) {
+	  g_log_structured(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
+			   "MESSAGE", "%s\n", error->message);
+      }
   }
   g_signal_connect(top_window, "delete-event", G_CALLBACK(main_delete), NULL);
 
