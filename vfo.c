@@ -129,8 +129,10 @@ void modesettings_restore_state() {
         mode_settings[i].nr2 = 0;
         mode_settings[i].nr3 = 0;
         mode_settings[i].nr4 = 0;
+
         mode_settings[i].nb = 0;
         mode_settings[i].nb2 = 0;
+
         mode_settings[i].anf = 0;
         mode_settings[i].snb = 0;
 
@@ -138,15 +140,16 @@ void modesettings_restore_state() {
         value = getProperty(name);
         if (value)
             mode_settings[i].filter = atoi(value);
+
         sprintf(name, "modeset.%d.nr", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nr = atoi(value);
-        sprintf(name, "modeset.%d.nr2", i);
+
+	sprintf(name, "modeset.%d.nr2", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nr2 = atoi(value);
-        sprintf(name, "modeset.%d.nb", i);
 
         sprintf(name, "modeset.%d.nr3", i);
         value = getProperty(name);
@@ -158,18 +161,22 @@ void modesettings_restore_state() {
         if (value)
             mode_settings[i].nr4 = atoi(value);
 
+	sprintf(name, "modeset.%d.nb", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nb = atoi(value);
+
         sprintf(name, "modeset.%d.nb2", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nb2 = atoi(value);
-        sprintf(name, "modeset.%d.anf", i);
+
+	sprintf(name, "modeset.%d.anf", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].anf = atoi(value);
-        sprintf(name, "modeset.%d.snb", i);
+
+	sprintf(name, "modeset.%d.snb", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].snb = atoi(value);
@@ -435,10 +442,12 @@ void vfo_mode_changed(int m) {
     // Change to the filter/NR combination stored for this mode
     //
     vfo[id].filter = mode_settings[m].filter;
+
     active_receiver->nr = mode_settings[m].nr;
     active_receiver->nr2 = mode_settings[m].nr2;
     active_receiver->nr3 = mode_settings[m].nr3;
     active_receiver->nr4 = mode_settings[m].nr4;
+
     active_receiver->nb = mode_settings[m].nb;
     active_receiver->nb2 = mode_settings[m].nb2;
     active_receiver->anf = mode_settings[m].anf;
