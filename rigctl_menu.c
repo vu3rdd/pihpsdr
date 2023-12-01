@@ -36,7 +36,7 @@ gboolean  serial_enable = TRUE; // edit (enable serial at startup)
 char ser_port[64]="/dev/ttyACM0";
 int serial_baud_rate = B9600;
 int serial_parity = 0; // 0=none, 1=even, 2=odd
-gboolean rigctl_debug=FALSE;
+gboolean rigctl_debug = TRUE;
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

@@ -4370,15 +4370,14 @@ static gpointer serial_server(gpointer data) {
                 command_index++;
                 if (cmd_input[i] == ';') {
                     command[command_index] = '\0';
-                    if (rigctl_debug)
+                    if (rigctl_debug) {
                         g_print("RIGCTL: command=%s\n", command);
+		    }
                     COMMAND *info = g_new(COMMAND, 1);
                     info->client = client;
                     info->command = command;
                     g_mutex_lock(&mutex_busy->m);
-		    if (client->fd != -1) {
-			g_idle_add(parse_cmd, info);
-		    }
+		    g_idle_add(parse_cmd, info);
                     g_mutex_unlock(&mutex_busy->m);
 
                     command = g_new(char, MAXDATASIZE);
@@ -4386,9 +4385,14 @@ static gpointer serial_server(gpointer data) {
                 }
             }
         } else if (numbytes < 0) {
+	    perror("serial_server");
             break;
-        }
-        // usleep(100L);
+        } else if (numbytes == 0) {
+	    // don't continue in the loop, the other side has closed
+	    // the connection, so no point trying to read from it.
+	    perror("serial_server: connection closed by the client");
+	    break;
+	}
     }
     close(client->fd);
     cat_control--;
