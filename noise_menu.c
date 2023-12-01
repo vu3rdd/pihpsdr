@@ -80,14 +80,30 @@ void set_noise() {
   update_nb();
   update_nb2();
 
+  g_print("set_noise: NB = %d, NB2 = %d -- NR = %d, NR2 = %d, NR3 = %d, NR4 = %d -- ANF = %d, SNB = %d\n",
+	  active_receiver->nb,
+	  active_receiver->nb2,
+	  active_receiver->nr,
+	  active_receiver->nr2,
+	  active_receiver->nr3,
+	  active_receiver->nr4,
+	  active_receiver->anf,
+	  active_receiver->snb);
+
+  // noise blanker
   SetEXTANBRun(active_receiver->id, active_receiver->nb);
   SetEXTNOBRun(active_receiver->id, active_receiver->nb2);
+
+  // noise reduction
   SetRXAANRRun(active_receiver->id, active_receiver->nr);
   SetRXAEMNRRun(active_receiver->id, active_receiver->nr2);
   SetRXARNNRRun(active_receiver->id, active_receiver->nr3);
   SetRXASBNRRun(active_receiver->id, active_receiver->nr4);
+
+  // notch filter/spectral noise blanker
   SetRXAANFRun(active_receiver->id, active_receiver->anf);
   SetRXASNBARun(active_receiver->id, active_receiver->snb);
+
   g_idle_add(ext_vfo_update,NULL);
 }
 

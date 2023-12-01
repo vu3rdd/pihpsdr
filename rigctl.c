@@ -2171,6 +2171,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
                     // NR4 is set
                     sprintf(reply, "ZZNR%d;", 4);
                     break;
+		default:
+		    g_print("ZZNR: invalid NR state %d\n", nr_bitmap);
                 }
                 send_resp(client->fd, reply);
             } else if (command[5] == ';') {
