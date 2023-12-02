@@ -38,6 +38,7 @@
 #include "button_text.h"
 #include "store.h"
 #include "ext.h"
+#include "log.h"
 
 static GtkWidget *parent_window=NULL;
 
@@ -65,7 +66,7 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 
 static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
    int index = GPOINTER_TO_INT(data);
-   fprintf(stderr,"STORE BUTTON PUSHED=%d\n",index);
+   log_trace("STORE BUTTON PUSHED=%d",index);
    char workstr[40];
      
    /* Update mem[data] with current info  */
@@ -74,10 +75,10 @@ static gboolean store_select_cb (GtkWidget *widget, gpointer data) {
    mem[index].mode = vfo[active_receiver->id].mode;
    mem[index].filter=vfo[active_receiver->id].filter;
 
-    fprintf(stderr,"store_select_cb: Index=%d\n",index);
-    fprintf(stderr,"store_select_cb: freqA=%11lld\n",mem[index].frequency);
-    fprintf(stderr,"store_select_cb: mode=%d\n",mem[index].mode);
-    fprintf(stderr,"store_select_cb: filter=%d\n",mem[index].filter);
+    log_debug("store_select_cb: Index=%d",index);
+    log_debug("store_select_cb: freqA=%11lld",mem[index].frequency);
+    log_debug("store_select_cb: mode=%d",mem[index].mode);
+    log_debug("store_select_cb: filter=%d",mem[index].filter);
 
     sprintf(workstr,"M%d=%8.6f MHz", index,((double) mem[index].frequency)/1000000.0);
     gtk_button_set_label(GTK_BUTTON(store_button[index]),workstr);
@@ -94,10 +95,10 @@ static gboolean recall_select_cb (GtkWidget *widget, gpointer data) {
     //new_freq = mem[index].frequency;
     strcpy(mem[index].title,"Active");
     new_freq = mem[index].frequency;
-    fprintf(stderr,"recall_select_cb: Index=%d\n",index);
-    fprintf(stderr,"recall_select_cb: freqA=%11lld\n",new_freq);
-    fprintf(stderr,"recall_select_cb: mode=%d\n",mem[index].mode);
-    fprintf(stderr,"recall_select_cb: filter=%d\n",mem[index].filter);
+    log_debug("recall_select_cb: Index=%d",index);
+    log_debug("recall_select_cb: freqA=%11lld",new_freq);
+    log_debug("recall_select_cb: mode=%d",mem[index].mode);
+    log_debug("recall_select_cb: filter=%d",mem[index].filter);
     
     vfo[active_receiver->id].frequency = new_freq;
     vfo[active_receiver->id].band = get_band_from_frequency(new_freq);

@@ -34,6 +34,7 @@
 #include "client_server.h"
 #endif
 #include "actions.h"
+#include "log.h"
 
 static int width;
 static int height;
@@ -231,7 +232,7 @@ GtkWidget *zoompan_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-fprintf(stderr,"zoompan_init: width=%d height=%d\n", width,height);
+  log_trace("zoompan_init: width=%d height=%d", width,height);
 
   zoompan=gtk_grid_new();
   gtk_widget_set_size_request (zoompan, width, height);

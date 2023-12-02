@@ -31,7 +31,7 @@
 #include "property.h"
 #include "store.h"
 #include "store_menu.h"
-
+#include "log.h"
 
 /*
 struct MEM {
@@ -104,35 +104,35 @@ void memRestoreState() {
        mem[b].filter = filterF0;
     }
 
-    fprintf(stderr,"memRestoreState: restore memory\n");
+    log_trace("memRestoreState: restore memory");
 
     for(b=0;b<NUM_OF_MEMORYS;b++) {
         sprintf(name,"mem.%d.title",b);
         value=getProperty(name);
         if(value) {
           strcpy(mem[b].title,value);
-          fprintf(stderr,"RESTORE: index=%d title=%s\n",b,value);
+          log_trace("RESTORE: index=%d title=%s",b,value);
 	}
 
         sprintf(name,"mem.%d.freqA",b);
         value=getProperty(name);
         if(value) {
 	  mem[b].frequency=atoll(value);
-          fprintf(stderr,"RESTORE MEM:Mem %d=FreqA %11lld\n",b,mem[b].frequency);
+          log_trace("RESTORE MEM:Mem %d=FreqA %11lld",b,mem[b].frequency);
 	}
 
         sprintf(name,"mem.%d.mode",b);
         value=getProperty(name);
         if(value) {
 	  mem[b].mode=atoi(value);
-          fprintf(stderr,"RESTORE: index=%d mode=%d\n",b,mem[b].mode);
+          log_trace("RESTORE: index=%d mode=%d",b,mem[b].mode);
 	}
 
         sprintf(name,"mem.%d.filter",b);
         value=getProperty(name);
         if(value) {
 	  mem[b].filter=atoi(value);
-          fprintf(stderr,"RESTORE: index=%d filter=%d\n",b,mem[b].filter);
+          log_trace("RESTORE: index=%d filter=%d",b,mem[b].filter);
 	}
     }
 

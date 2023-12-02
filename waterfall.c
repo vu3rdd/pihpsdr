@@ -138,17 +138,12 @@ void waterfall_update(RECEIVER *rx) {
                 if (rx->waterfall_frequency < (vfo_freq - half) ||
                     rx->waterfall_frequency > (vfo_freq + half)) {
                     // outside of the range - blank waterfall
-                    // fprintf(stderr,"waterfall_update: clear waterfall from
-                    // %lld to
-                    // %lld\n",rx->waterfall_frequency,vfo[rx->id].frequency);
                     memset(pixels, 0, display_width * display_height * 3);
                 } else {
                     // rotate waterfall
                     int rotate_pixels = (int)((double)(rx->waterfall_frequency -
                                                        vfo_freq) /
                                               hz_per_pixel);
-                    // fprintf(stderr,"waterfall_update: rotate waterfall from
-                    // %lld to %lld
                     // pixels=%d\n",rx->waterfall_frequency,vfo[rx->id].frequency,rotate_pixels);
                     if (rotate_pixels < 0) {
                         for (size_t h = 0; h < display_height; h++) {

@@ -19,9 +19,10 @@
 
 #include <sys/resource.h>
 #include <stdio.h>
+#include "log.h"
 
 void show_memory(char *title) {
   struct rusage r_usage;
   getrusage(RUSAGE_SELF,&r_usage);
-  fprintf(stderr, "%s: Memory usage: %ld bytes\n",title,r_usage.ru_maxrss);
+  log_trace("%s: Memory usage: %ld bytes",title,r_usage.ru_maxrss);
 }

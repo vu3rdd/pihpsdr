@@ -58,6 +58,7 @@
 #include "client_server.h"
 #endif
 #include "actions.h"
+#include "log.h"
 
 static int width;
 static int height;
@@ -783,7 +784,7 @@ GtkWidget *sliders_init(int my_width, int my_height) {
   width=my_width;
   height=my_height;
 
-fprintf(stderr,"sliders_init: width=%d height=%d\n", width,height);
+  log_trace("sliders_init: width=%d height=%d", width,height);
 
   sliders=gtk_grid_new();
   gtk_widget_set_size_request (sliders, width, height);

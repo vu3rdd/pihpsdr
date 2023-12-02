@@ -32,6 +32,7 @@
 #include "vox_menu.h"
 #include "vox.h"
 #include "ext.h"
+#include "log.h"
 
 static GtkWidget *parent_window=NULL;
 
@@ -124,9 +125,9 @@ static void start_level_thread() {
   run_level=1;
   level_thread_id = g_thread_new( "VOX level", level_thread, NULL);
   if(!level_thread_id ) {
-    fprintf(stderr,"g_thread_new failed on level_thread\n");
+    log_debug("g_thread_new failed on level_thread");
   }
-  fprintf(stderr, "level_thread: id=%p\n",level_thread_id);
+  log_debug("level_thread: id=%p",level_thread_id);
 }
 
 static void destroy_cb(GtkWidget *widget, gpointer data) {

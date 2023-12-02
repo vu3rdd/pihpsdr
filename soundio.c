@@ -36,6 +36,7 @@
 #include "radio.h"
 #include "receiver.h"
 #include "audio.h"
+#include "log.h"
 
 int audio = 0;
 int audio_buffer_size = 256; // samples (both left and right)
@@ -88,7 +89,6 @@ static int remove_index=0;
 static int frames=0;
 
 static void write_callback(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max) {
-//fprintf(stderr,"write_callback: min=%d max=%d frames=%d insert_index=%d remove_index=%d\n",frame_count_min, frame_count_max, frames, insert_index, remove_index);
   double float_sample_rate = outstream->sample_rate;
   double seconds_per_frame = 1.0 / float_sample_rate;
   struct SoundIoChannelArea *areas;
@@ -102,7 +102,7 @@ static void write_callback(struct SoundIoOutStream *outstream, int frame_count_m
       frames_left=frame_count_max;
     }
     if ((err = soundio_outstream_begin_write(outstream, &areas, &frames_left))) {
-      fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
+      log_error("unrecoverable stream error: %s", soundio_strerror(err));
       exit(1);
     }
 
@@ -129,7 +129,7 @@ static void write_callback(struct SoundIoOutStream *outstream, int frame_count_m
     if ((err = soundio_outstream_end_write(outstream))) {
       if (err == SoundIoErrorUnderflow)
          return;
-      fprintf(stderr, "unrecoverable stream error: %s\n", soundio_strerror(err));
+      log_error("unrecoverable stream error: %s", soundio_strerror(err));
       exit(1);
     }
   } else {
@@ -143,14 +143,13 @@ static void underflow_callback(struct SoundIoOutStream *outstream) {
 }
 
 int audio_open_output(RECEIVER *rx) {
-
   int err;
 
-fprintf(stderr,"audio_open_output: id=%d device=%d\n", rx->id,rx->audio_device);
+  log_trace("audio_open_output: id=%d device=%d", rx->id,rx->audio_device);
   soundio = soundio_create();
   if (!soundio) {
-    fprintf(stderr, "audio_open_output: soundio_create failed\n");
-    return -1;
+      log_error("audio_open_output: soundio_create failed");
+      return -1;
   }
 
   soundio_connect(soundio);
@@ -159,13 +158,13 @@ fprintf(stderr,"audio_open_output: id=%d device=%d\n", rx->id,rx->audio_device);
 
   audio_device = soundio_get_output_device(soundio, rx->audio_device);
   if(!audio_device) {
-    fprintf(stderr, "audio_open_output: soundio_get_output_device failed\n");
+    log_error("audio_open_output: soundio_get_output_device failed");
     return -1;
   }
 
   if (audio_device->probe_error) {
-    fprintf(stderr, "audio_open_output: Cannot probe audio_device: %s\n", soundio_strerror(audio_device->probe_error));
-    return -1;
+      log_error("audio_open_output: Cannot probe audio_device: %s", soundio_strerror(audio_device->probe_error));
+      return -1;
   }
 
   outstream = soundio_outstream_create(audio_device);
@@ -178,22 +177,22 @@ fprintf(stderr,"audio_open_output: id=%d device=%d\n", rx->id,rx->audio_device);
   if (soundio_device_supports_format(audio_device, SoundIoFormatS16LE)) {
     outstream->format = SoundIoFormatS16LE;
   } else {
-    fprintf(stderr,"audio_open_output: audio_device does not support S16LE\n");
+    log_error("audio_open_output: audio_device does not support S16LE");
     return -1;
   }
 
   if ((err = soundio_outstream_open(outstream))) {
-    fprintf(stderr, "audio_open_output: unable to open audio_device: %s", soundio_strerror(err));
+    log_error("audio_open_output: unable to open audio_device: %s", soundio_strerror(err));
     return -1;
   }
-  fprintf(stderr, "audio_open_output: Software latency: %f\n", outstream->software_latency);
+  log_trace("audio_open_output: Software latency: %f", outstream->software_latency);
 
   if (outstream->layout_error) {
-    fprintf(stderr, "audio_open_output: unable to set channel layout: %s\n", soundio_strerror(outstream->layout_error));
+    log_error("audio_open_output: unable to set channel layout: %s", soundio_strerror(outstream->layout_error));
   }
 
   if ((err = soundio_outstream_start(outstream))) {
-    fprintf(stderr, "audio_open_output: unable to start audio_device: %s\n", soundio_strerror(err));
+    log_error("audio_open_output: unable to start audio_device: %s", soundio_strerror(err));
     return -1;
   }
 
@@ -207,7 +206,7 @@ int audio_open_input() {
   int rate=48000;
   int dir=0;
 
-fprintf(stderr,"audio_open_input: %d\n",n_selected_input_device);
+  fprintf(stderr,"audio_open_input: %d\n",n_selected_input_device);
   if(n_selected_input_device<0 || n_selected_input_device>=n_input_devices) {
     n_selected_input_device=-1;
     return -1;
@@ -334,7 +333,6 @@ void audio_close_input() {
 }
 
 int audio_write(RECEIVER *rx,short left_sample,short right_sample) {
-//fprintf(stderr,"audio_write: id=%d frames=%d insert_index=%d remove_index=%d\n",rx->id, frames, insert_index,remove_index);
   if(frames<(BUFFER_SIZE-2)) {
     output_left_buffer[insert_index]=left_sample;
     output_right_buffer[insert_index]=right_sample;
@@ -344,7 +342,7 @@ int audio_write(RECEIVER *rx,short left_sample,short right_sample) {
     }
     frames++;
   } else {
-    fprintf(stderr,"audio_write: buffer_full: frames=%d insert_index-%d remove_index=%d\n",frames,insert_index,remove_index);
+    log_debug("audio_write: buffer_full: frames=%d insert_index-%d remove_index=%d",frames,insert_index,remove_index);
   }
 
 /*
@@ -440,7 +438,7 @@ void audio_get_cards() {
 
   struct SoundIo *soundio = soundio_create();
   if (!soundio) {
-    fprintf(stderr, "audio_get_cards: soundio_create failed\n");
+    log_error("audio_get_cards: soundio_create failed");
     return;
   }
 
@@ -456,7 +454,7 @@ void audio_get_cards() {
 
   for(i=0;i<n_output_devices;i++) {
     struct SoundIoDevice *device = soundio_get_output_device(soundio, i);
-fprintf(stderr,"output: %d: id=%s name=%s\n",i,device->id,device->name);
+    log_trace("output: %d: id=%s name=%s",i,device->id,device->name);
     char *device_id=malloc(64);
     strncpy(device_id,device->id,64);
     output_devices[i]=device_id;
@@ -465,7 +463,7 @@ fprintf(stderr,"output: %d: id=%s name=%s\n",i,device->id,device->name);
 
   for(i=0;i<n_input_devices;i++) {
     struct SoundIoDevice *device = soundio_get_input_device(soundio, i);
-fprintf(stderr,"input: %d: id=%s name=%s\n",i,device->id,device->name);
+    log_trace("input: %d: id=%s name=%s",i,device->id,device->name);
     char *device_id=malloc(64);
     strncpy(device_id,device->id,64);
     input_devices[i]=device_id;

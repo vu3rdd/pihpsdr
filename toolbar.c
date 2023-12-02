@@ -50,6 +50,7 @@
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
+#include "log.h"
 
 int function=0;
 
@@ -158,7 +159,6 @@ void mox_cb(GtkWidget *widget, gpointer data) {
 }
 
 void mox_update(int state) {
-//fprintf(stderr,"mox_update: state=%d\n",state);
   if(getTune()==1) {
     setTune(0);
   }
@@ -228,7 +228,7 @@ GtkWidget *toolbar_init(int my_width, int my_height, GtkWidget* parent) {
 
     int button_width=width/8;
 
-    fprintf(stderr,"toolbar_init: width=%d height=%d button_width=%d\n", width,height,button_width);
+    log_trace("toolbar_init: width=%d height=%d button_width=%d", width,height,button_width);
 
     white.red=1.0;
     white.green=1.0;

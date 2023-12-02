@@ -51,6 +51,7 @@
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
+#include "log.h"
 
 #define min(x, y) (x < y ? x : y)
 #define max(x, y) (x < y ? y : x)
@@ -62,7 +63,7 @@ static gboolean making_active = FALSE;
 
 void receiver_weak_notify(gpointer data, GObject *obj) {
     RECEIVER *rx = (RECEIVER *)data;
-    g_print("%s: id=%d obj=%p\n", __FUNCTION__, rx->id, obj);
+    log_trace("%s: id=%d obj=%p", __FUNCTION__, rx->id, obj);
 }
 
 gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event,
@@ -171,7 +172,7 @@ void receiver_save_state(RECEIVER *rx) {
     char name[128];
     char value[128];
 
-    g_print("%s: %d\n", __FUNCTION__, rx->id);
+    log_trace("%s: %d", __FUNCTION__, rx->id);
     sprintf(name, "receiver.%d.audio_channel", rx->id);
     sprintf(value, "%d", rx->audio_channel);
     setProperty(name, value);
@@ -391,7 +392,7 @@ void receiver_restore_state(RECEIVER *rx) {
     char name[128];
     char *value;
 
-    g_print("%s: id=%d\n", __FUNCTION__, rx->id);
+    log_trace("%s: id=%d", __FUNCTION__, rx->id);
 
     sprintf(name, "receiver.%d.audio_channel", rx->id);
     value = getProperty(name);
@@ -706,7 +707,7 @@ void reconfigure_receiver(RECEIVER *rx, int height) {
 
     if (rx->display_panadapter) {
         if (rx->panadapter == NULL) {
-            g_print("%s: panadapter_init: width:%d height:%d\n", __FUNCTION__,
+            log_trace("%s: panadapter_init: width:%d height:%d", __FUNCTION__,
                     rx->width, myheight);
             rx_panadapter_init(rx, rx->width, myheight);
             gtk_fixed_put(GTK_FIXED(rx->panel), rx->panadapter, 0,
@@ -728,14 +729,14 @@ void reconfigure_receiver(RECEIVER *rx, int height) {
 
     if (rx->display_waterfall) {
         if (rx->waterfall == NULL) {
-            g_print("%s: waterfall_init: width:%d height:%d\n", __FUNCTION__,
+            log_trace("%s: waterfall_init: width:%d height:%d", __FUNCTION__,
                     rx->width, myheight);
             waterfall_init(rx, rx->width, myheight);
             gtk_fixed_put(GTK_FIXED(rx->panel), rx->waterfall, 0,
                           y); // y=0 if ONLY waterfall is present
         } else {
             // set the size
-            g_print("%s: waterfall set_size_request: width:%d height:%d\n",
+            log_trace("%s: waterfall set_size_request: width:%d height:%d",
                     __FUNCTION__, rx->width, myheight);
             gtk_widget_set_size_request(rx->waterfall, rx->width, myheight);
             // move the current one
@@ -913,9 +914,6 @@ static void init_analyzer(RECEIVER *rx) {
     overlap = (int)fmax(
         0.0, ceil(fft_size - (double)rx->sample_rate / (double)rx->fps));
 
-    // g_print("%s: id=%d buffer_size=%d
-    // overlap=%d\n",_FUNCTION__,rx->id,rx->buffer_size,overlap);
-
     SetAnalyzer(
         rx->id, n_pixout,
         spur_elimination_ffts, // number of LO frequencies = number of ffts used
@@ -950,7 +948,7 @@ static void create_visual(RECEIVER *rx) {
     int y = 0;
 
     rx->panel = gtk_fixed_new();
-    g_print("%s: id=%d width=%d height=%d %p\n", __FUNCTION__, rx->id,
+    log_debug("%s: id=%d width=%d height=%d %p", __FUNCTION__, rx->id,
             rx->width, rx->height, rx->panel);
     g_object_weak_ref(G_OBJECT(rx->panel), receiver_weak_notify, (gpointer)rx);
     gtk_widget_set_size_request(rx->panel, rx->width, rx->height);
@@ -964,7 +962,7 @@ static void create_visual(RECEIVER *rx) {
     }
 
     rx_panadapter_init(rx, rx->width, height);
-    g_print("%s: panadapter height=%d y=%d %p\n", __FUNCTION__, height, y,
+    log_debug("%s: panadapter height=%d y=%d %p", __FUNCTION__, height, y,
             rx->panadapter);
     g_object_weak_ref(G_OBJECT(rx->panadapter), receiver_weak_notify,
                       (gpointer)rx);
@@ -973,8 +971,8 @@ static void create_visual(RECEIVER *rx) {
 
     if (rx->display_waterfall) {
         waterfall_init(rx, rx->width, height);
-        g_print("%ss: waterfall height=%d y=%d %p\n", __FUNCTION__, height, y,
-                rx->waterfall);
+        log_debug("%ss: waterfall height=%d y=%d %p", __FUNCTION__, height, y,
+		  rx->waterfall);
         g_object_weak_ref(G_OBJECT(rx->waterfall), receiver_weak_notify,
                           (gpointer)rx);
         gtk_fixed_put(GTK_FIXED(rx->panel), rx->waterfall, 0, y);
@@ -986,7 +984,7 @@ static void create_visual(RECEIVER *rx) {
 #ifdef PURESIGNAL
 RECEIVER *create_pure_signal_receiver(int id, int buffer_size, int sample_rate,
                                       int width) {
-    g_print("%s: id=%d buffer_size=%d\n", __FUNCTION__, id, buffer_size);
+    log_trace("%s: id=%d buffer_size=%d", __FUNCTION__, id, buffer_size);
     RECEIVER *rx = malloc(sizeof(RECEIVER));
     rx->id = id;
 
@@ -1104,8 +1102,8 @@ RECEIVER *create_pure_signal_receiver(int id, int buffer_size, int sample_rate,
     int result;
     XCreateAnalyzer(rx->id, &result, 262144, 1, 1, "");
     if (result != 0) {
-        g_print("%s: XCreateAnalyzer id=%d failed: %d\n", __FUNCTION__, rx->id,
-                result);
+        log_error("%s: XCreateAnalyzer id=%d failed: %d", __FUNCTION__, rx->id,
+		  result);
     } else {
         init_analyzer(rx);
     }
@@ -1123,8 +1121,8 @@ RECEIVER *create_pure_signal_receiver(int id, int buffer_size, int sample_rate,
 
 RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels,
                           int fps, int width, int height) {
-    g_print("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d\n",
-            __FUNCTION__, id, buffer_size, fft_size, pixels, fps);
+    log_trace("%s: id=%d buffer_size=%d fft_size=%d pixels=%d fps=%d",
+	      __FUNCTION__, id, buffer_size, fft_size, pixels, fps);
     RECEIVER *rx = malloc(sizeof(RECEIVER));
     rx->id = id;
     g_mutex_init(&rx->mutex);
@@ -1161,7 +1159,7 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels,
             break;
         }
     }
-    g_print("%s: id=%d default adc=%d\n", __FUNCTION__, rx->id, rx->adc);
+    log_trace("%s: id=%d default adc=%d", __FUNCTION__, rx->id, rx->adc);
     rx->sample_rate = 48000;
     rx->buffer_size = buffer_size;
     rx->fft_size = fft_size;
@@ -1262,23 +1260,23 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels,
     rx->pixels = pixels * rx->zoom;
     rx->pixel_samples = g_new(float, rx->pixels);
 
-    g_print(
-        "%s (after restore): rx=%p id=%d audio_buffer_size=%d local_audio=%d\n",
+    log_trace(
+        "%s (after restore): rx=%p id=%d audio_buffer_size=%d local_audio=%d",
         __FUNCTION__, rx, rx->id, rx->audio_buffer_size, rx->local_audio);
     int scale = rx->sample_rate / 48000;
     rx->output_samples = rx->buffer_size / scale;
     rx->audio_output_buffer = g_new(gdouble, 2 * rx->output_samples);
 
-    g_print("%s: id=%d output_samples=%d audio_output_buffer=%p\n",
+    log_trace("%s: id=%d output_samples=%d audio_output_buffer=%p",
             __FUNCTION__, rx->id, rx->output_samples, rx->audio_output_buffer);
 
     rx->hz_per_pixel = (double)rx->sample_rate / (double)rx->pixels;
 
     // setup wdsp for this receiver
 
-    g_print("%s: id=%d after restore adc=%d\n", __FUNCTION__, rx->id, rx->adc);
+    log_trace("%s: id=%d after restore adc=%d", __FUNCTION__, rx->id, rx->adc);
 
-    g_print("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d\n",
+    log_trace("%s: OpenChannel id=%d buffer_size=%d fft_size=%d sample_rate=%d",
             __FUNCTION__, rx->id, rx->buffer_size, rx->fft_size,
             rx->sample_rate);
     OpenChannel(rx->id, rx->buffer_size, rx->fft_size, rx->sample_rate,
@@ -1348,8 +1346,8 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels,
     int result;
     XCreateAnalyzer(rx->id, &result, 262144, 1, 1, "");
     if (result != 0) {
-        g_print("%s: XCreateAnalyzer id=%d failed: %d\n", __FUNCTION__, rx->id,
-                result);
+        log_error("%s: XCreateAnalyzer id=%d failed: %d", __FUNCTION__, rx->id,
+		  result);
     } else {
         init_analyzer(rx);
     }
@@ -1361,7 +1359,7 @@ RECEIVER *create_receiver(int id, int buffer_size, int fft_size, int pixels,
 
     create_visual(rx);
 
-    g_print("%s: rx=%p id=%d local_audio=%d\n", __FUNCTION__, rx, rx->id,
+    log_trace("%s: rx=%p id=%d local_audio=%d", __FUNCTION__, rx, rx->id,
             rx->local_audio);
     if (rx->local_audio) {
         if (audio_open_output(rx) < 0) {
@@ -1390,7 +1388,7 @@ void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
     rx->output_samples = rx->buffer_size / scale;
     rx->hz_per_pixel = (double)rx->sample_rate / (double)rx->width;
 
-    g_print("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d\n",
+    log_trace("%s: id=%d rate=%d scale=%d buffer_size=%d output_samples=%d",
             __FUNCTION__, rx->id, sample_rate, scale, rx->buffer_size,
             rx->output_samples);
 #ifdef PURESIGNAL
@@ -1406,8 +1404,8 @@ void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
             g_free(rx->pixel_samples);
             rx->pixel_samples = g_new(float, rx->pixels);
             init_analyzer(rx);
-            g_print("%s: PS FEEDBACK: id=%d rate=%d buffer_size=%d "
-                    "output_samples=%d\n",
+            log_trace("%s: PS FEEDBACK: id=%d rate=%d buffer_size=%d "
+                    "output_samples=%d",
                     __FUNCTION__, rx->id, rx->sample_rate, rx->buffer_size,
                     rx->output_samples);
             g_mutex_unlock(&rx->mutex);
@@ -1430,9 +1428,9 @@ void receiver_change_sample_rate(RECEIVER *rx, int sample_rate) {
 
     g_mutex_unlock(&rx->mutex);
 
-    g_print("%s: id=%d rate=%d buffer_size=%d output_samples=%d\n",
-            __FUNCTION__, rx->id, rx->sample_rate, rx->buffer_size,
-            rx->output_samples);
+    log_trace("%s: id=%d rate=%d buffer_size=%d output_samples=%d",
+	      __FUNCTION__, rx->id, rx->sample_rate, rx->buffer_size,
+	      rx->output_samples);
 }
 
 void receiver_frequency_changed(RECEIVER *rx) {
@@ -1523,9 +1521,6 @@ static void process_rx_buffer(RECEIVER *rx) {
     short left_audio_sample, right_audio_sample;
     int i;
 
-    // g_print("%s: rx=%p id=%d output_samples=%d
-    // audio_output_buffer=%p\n",__FUNCTION__,rx,rx->id,rx->output_samples,rx->audio_output_buffer);
-
     for (i = 0; i < rx->output_samples; i++) {
         if (isTransmitting() && (!duplex || mute_rx_while_transmitting)) {
             left_sample = 0.0;
@@ -1611,7 +1606,6 @@ static void process_rx_buffer(RECEIVER *rx) {
 void full_rx_buffer(RECEIVER *rx) {
     int error;
 
-    // g_print("%s: rx=%p\n",__FUNCTION__,rx);
     g_mutex_lock(&rx->mutex);
 
     // noise blanker works on original IQ samples
