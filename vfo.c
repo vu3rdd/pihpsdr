@@ -1262,7 +1262,7 @@ void vfo_update(void) {
         // some space
 	int which_nb = get_nb(active_receiver);
 	if (which_nb < 0) {
-	    g_print("RIGCTL: ERROR in NR determination used for display\n");
+	    g_print("RIGCTL: ERROR in NB determination used for display\n");
 	    which_nb = 0;
 	}
 	draw_item(cr, SCR_NB, which_nb);
@@ -1274,6 +1274,7 @@ void vfo_update(void) {
 	    g_print("RIGCTL: ERROR in NR determination used for display\n");
 	    which_nr = 0;
 	}
+	update_noise();
 	draw_item(cr, SCR_NR, which_nr);
 
 	// anf
