@@ -31,6 +31,7 @@
 #include "band.h"
 #include "radio.h"
 #include "vfo.h"
+#include "log.h"
 
 gboolean  serial_enable = TRUE; // edit (enable serial at startup)
 char ser_port[64]="/dev/ttyACM0";
@@ -93,7 +94,7 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
 // Set Baud Rate
 static void baud_rate_cb(GtkWidget *widget, gpointer data) {
    serial_baud_rate = GPOINTER_TO_INT(data);
-   fprintf(stderr,"RIGCTL_MENU: Baud rate changed: %d\n",serial_baud_rate);
+   log_trace("RIGCTL_MENU: Baud rate changed: %d",serial_baud_rate);
 }
 
 void rigctl_menu(GtkWidget *parent) {

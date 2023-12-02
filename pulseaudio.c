@@ -11,6 +11,7 @@
 #include "radio.h"
 #include "receiver.h"
 #include "transmitter.h"
+#include "log.h"
 
 int n_input_devices;
 AUDIO_DEVICE input_devices[MAX_AUDIO_DEVICES];
@@ -364,7 +365,7 @@ int cw_audio_write(RECEIVER *rx, float sample) {
                              rx->local_audio_buffer_size * sizeof(float) * 2,
                              &err);
         if (rc != 0) {
-            fprintf(stderr, "audio_write failed err=%d\n", err);
+            log_error("audio_write failed err=%d", err);
         }
         rx->local_audio_buffer_offset = 0;
     }
@@ -393,7 +394,7 @@ int audio_write(RECEIVER *rx, float left_sample, float right_sample) {
                              rx->local_audio_buffer_size * sizeof(float) * 2,
                              &err);
         if (rc != 0) {
-            fprintf(stderr, "audio_write failed err=%d\n", err);
+            log_error("audio_write failed err=%d", err);
         }
         rx->local_audio_buffer_offset = 0;
     }

@@ -43,6 +43,7 @@
 #endif
 #include "ext.h"
 #include "new_menu.h"
+#include "log.h"
 
 static gint last_x;
 static gboolean has_moved=FALSE;
@@ -317,7 +318,6 @@ void tx_panadapter_update(TRANSMITTER *tx) {
   // cursor
   cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
   cairo_set_line_width(cr, 1.0);
-//fprintf(stderr,"cursor: x=%f\n",(double)(display_width/2.0)+(vfo[tx->id].offset/hz_per_pixel));
   //cairo_move_to(cr,vfofreq+(vfo[id].offset/hz_per_pixel),0.0);
   //cairo_line_to(cr,vfofreq+(vfo[id].offset/hz_per_pixel),(double)display_height);
   cairo_move_to(cr,vfofreq,0.0);
@@ -455,7 +455,7 @@ void tx_panadapter_update(TRANSMITTER *tx) {
 
 void tx_panadapter_init(TRANSMITTER *tx, int width,int height) {
 
-fprintf(stderr,"tx_panadapter_init: %d x %d\n",width,height);
+  log_trace("tx_panadapter_init: %d x %d",width,height);
 
   tx->panadapter_surface=NULL;
   tx->panadapter=gtk_drawing_area_new ();

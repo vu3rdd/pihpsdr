@@ -20,13 +20,10 @@
 // Define maximum window size.
 // Standard values 800 and 480: suitable for RaspberryBi 7-inch screen
 
-#define G_LOG_USE_STRUCTURED 1
-
 #define MAX_DISPLAY_WIDTH 1024 // edit
 #define MAX_DISPLAY_HEIGHT 600 // edit
 
 #include <arpa/inet.h>
-#include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <math.h>
@@ -63,6 +60,8 @@
 #include "css.h"
 #include "ext.h"
 #include "vfo.h"
+
+#include "log.h"
 
 struct utsname unameData;
 
@@ -210,7 +209,7 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   display_width = gdk_screen_get_width(screen);
   display_height = gdk_screen_get_height(screen);
 
-  g_debug("width=%d height=%d\n", display_width, display_height);
+  log_debug("width=%d height=%d", display_width, display_height);
 
   // Go to "window" mode if there is enough space on the screen.
   // Do not forget extra space needed for window top bars, screen bars etc.
@@ -235,8 +234,8 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
     full_screen = 1;
   }
 
-  g_debug("display_width=%d display_height=%d\n", display_width,
-          display_height);
+  log_debug("display_width=%d display_height=%d", display_width,
+	    display_height);
 
   top_window = gtk_application_window_new(app);
   if (full_screen) {
@@ -249,11 +248,9 @@ static void activate_pihpsdr(GtkApplication *app, gpointer data) {
   GError *error;
   if (!gtk_window_set_icon_from_file(GTK_WINDOW(top_window), "hpsdr.png",
                                      &error)) {
-      g_log_structured(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
-		       "MESSAGE", "failed to set icon for top_window\n");
+      log_warn("failed to set icon for top_window");
       if (error != NULL) {
-	  g_log_structured(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
-			   "MESSAGE", "%s\n", error->message);
+	  log_warn("%s", error->message);
       }
   }
   g_signal_connect(top_window, "delete-event", G_CALLBACK(main_delete), NULL);

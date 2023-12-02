@@ -55,6 +55,7 @@
 #include "client_server.h"
 #endif
 #include "property.h"
+#include "log.h"
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;
@@ -236,7 +237,7 @@ static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
   // connect to remote host running piHPSDR
   strncpy(host_addr, gtk_entry_get_text(GTK_ENTRY(host_addr_entry)), 30);
   host_port=gtk_spin_button_get_value(GTK_SPIN_BUTTON(host_port_spinner));
-g_print("connect_cb: %s:%d\n",host_addr,host_port);
+  log_trace("connect_cb: %s:%d",host_addr,host_port);
   setProperty("host",host_addr);
   char temp[16];
   sprintf(temp,"%d",host_port);
@@ -495,7 +496,7 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 fprintf(stderr,"showing device dialog\n");
 
     // autostart if one device and autostart enabled
-    g_print("%s: devices=%d autostart=%d\n",__FUNCTION__,devices,autostart);
+    log_trace("%s: devices=%d autostart=%d",__FUNCTION__,devices,autostart);
 
     // if(devices==1 && autostart) {
     if(autostart) {

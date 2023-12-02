@@ -54,6 +54,7 @@
 #endif
 #include "ext.h"
 #include "screen.h"
+#include "log.h"
 
 static GtkWidget *parent_window;
 static int my_width;
@@ -223,7 +224,7 @@ void vfo_restore_state() {
     char *value;
 
     for (i = 0; i < MAX_VFOS; i++) {
-        g_print("vfo_restore_state: %d\n", i);
+        log_trace("vfo_restore_state: %d", i);
 
         vfo[i].band = band20;
         vfo[i].bandstack = 0;
@@ -236,7 +237,7 @@ void vfo_restore_state() {
         vfo[i].rit = 0;
         vfo[i].ctun = 0;
 
-        g_print("vfo_restore_state: band=%d frequency=%lld\n", vfo[i].band,
+        log_trace("vfo_restore_state: band=%d frequency=%lld", vfo[i].band,
                 vfo[i].frequency);
 
         sprintf(name, "vfo.%d.band", i);
@@ -1253,7 +1254,7 @@ void vfo_update(void) {
         // some space
 	int which_nb = get_nb(active_receiver);
 	if (which_nb < 0) {
-	    g_print("RIGCTL: ERROR in NR determination used for display\n");
+	    log_trace("RIGCTL: ERROR in NR determination used for display");
 	    which_nb = 0;
 	}
 	draw_item(cr, SCR_NB, which_nb);
@@ -1262,7 +1263,7 @@ void vfo_update(void) {
         // NR, NR2, NR3 and NR4 are mutually exclusive
 	int which_nr = get_nr(active_receiver);
 	if (which_nr < 0) {
-	    g_print("RIGCTL: ERROR in NR determination used for display\n");
+	    log_trace("RIGCTL: ERROR in NR determination used for display");
 	    which_nr = 0;
 	}
 	draw_item(cr, SCR_NR, which_nr);
@@ -1299,7 +1300,7 @@ void vfo_update(void) {
         cairo_destroy(cr);
         gtk_widget_queue_draw(vfo_panel);
     } else {
-        fprintf(stderr, "vfo_update: no surface!\n");
+        log_debug("vfo_update: no surface!");
     }
 }
 
@@ -1325,7 +1326,7 @@ static gboolean vfo_press_event_cb(GtkWidget *widget, GdkEventButton *event,
 
 GtkWidget *vfo_init(int width, int height, GtkWidget *parent) {
 
-    fprintf(stderr, "vfo_init: width=%d height=%d\n", width, height);
+    log_trace("vfo_init: width=%d height=%d", width, height);
 
     parent_window = parent;
     my_width = width;

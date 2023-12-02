@@ -34,6 +34,7 @@
 #include "receiver.h"
 #include "rx_menu.h"
 #include "sliders.h"
+#include "log.h"
 
 static GtkWidget *parent_window = NULL;
 static GtkWidget *dialog = NULL;
@@ -101,7 +102,7 @@ static void adc_cb(GtkToggleButton *widget, gpointer data) {
 }
 
 static void local_audio_cb(GtkWidget *widget, gpointer data) {
-    fprintf(stderr, "local_audio_cb: rx=%d\n", active_receiver->id);
+    log_trace("local_audio_cb: rx=%d", active_receiver->id);
 
     if (active_receiver->audio_name != NULL) {
         g_free(active_receiver->audio_name);
@@ -117,7 +118,7 @@ static void local_audio_cb(GtkWidget *widget, gpointer data) {
         if (audio_open_output(active_receiver) == 0) {
             active_receiver->local_audio = 1;
         } else {
-            fprintf(stderr, "local_audio_cb: audio_open_output failed\n");
+            log_error("local_audio_cb: audio_open_output failed");
             active_receiver->local_audio = 0;
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
         }
@@ -127,7 +128,7 @@ static void local_audio_cb(GtkWidget *widget, gpointer data) {
             audio_close_output(active_receiver);
         }
     }
-    fprintf(stderr, "local_audio_cb: local_audio=%d\n",
+    log_trace("local_audio_cb: local_audio=%d",
             active_receiver->local_audio);
 }
 
@@ -147,7 +148,7 @@ static void mute_radio_cb(GtkWidget *widget, gpointer data) {
 //
 static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
     int i = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
-    fprintf(stderr, "local_output_changed rx=%d %s\n", active_receiver->id,
+    log_trace("local_output_changed rx=%d %s", active_receiver->id,
             output_devices[i].name);
     if (active_receiver->local_audio) {
         audio_close_output(active_receiver); // audio_close with OLD device
@@ -174,7 +175,7 @@ static void local_output_changed_cb(GtkWidget *widget, gpointer data) {
                                          FALSE);
         }
     }
-    fprintf(stderr, "local_output_changed rx=%d local_audio=%d\n",
+    log_trace("local_output_changed rx=%d local_audio=%d",
             active_receiver->id, active_receiver->local_audio);
 }
 
@@ -214,7 +215,7 @@ void toggle_audio_output_device(void) {
 
     // set the other device as active
     if (audio_open_output(active_receiver) < 0) {
-	g_print("unable to open the audio output device: %s", active_receiver->audio_name);
+	log_error("unable to open the audio output device: %s", active_receiver->audio_name);
     }
 }
 

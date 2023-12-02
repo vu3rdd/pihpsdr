@@ -37,6 +37,7 @@
 #include "discovered.h"
 #include "discovery.h"
 #include "old_discovery.h"
+#include "log.h"
 
 static char interface_name[64];
 static struct sockaddr_in interface_addr={0};
@@ -69,11 +70,11 @@ static void discover(struct ifaddrs* iface) {
 	// Therefore we try to send a METIS detection packet via TCP 
 	// to a "fixed" ip address.
 	//
-        fprintf(stderr,"Trying to detect at TCP addr %s\n", ipaddr_tcp);
+        log_trace("Trying to detect at TCP addr %s", ipaddr_tcp);
 	memset(&to_addr, 0, sizeof(to_addr));
 	to_addr.sin_family = AF_INET;
 	if (inet_aton(ipaddr_tcp, &to_addr.sin_addr) == 0) {
-	    fprintf(stderr,"discover: TCP addr %s is invalid!\n",ipaddr_tcp);
+	    log_error("discover: TCP addr %s is invalid!",ipaddr_tcp);
 	    return;
 	}
 	to_addr.sin_port=htons(DISCOVERY_PORT);
@@ -116,7 +117,7 @@ static void discover(struct ifaddrs* iface) {
 	// If no connection occured, return
 	if (rc == 0) {
 	    // select timed out
-	    fprintf(stderr,"discover: select() timed out on TCP discovery socket\n");
+	    log_error("discover: select() timed out on TCP discovery socket");
 	    close(discovery_socket);
 	    return;
 	}
@@ -131,7 +132,7 @@ static void discover(struct ifaddrs* iface) {
 	}
 	if (optval != 0) {
 	    // connect did not succeed
-	    fprintf(stderr,"discover: connect() on TCP socket did not succeed\n");
+	    log_error("discover: connect() on TCP socket did not succeed");
 	    close(discovery_socket);
 	    return;
 	}
@@ -140,7 +141,7 @@ static void discover(struct ifaddrs* iface) {
     } else {
 
         strcpy(interface_name,iface->ifa_name);
-        fprintf(stderr,"discover: looking for HPSDR devices on %s\n", interface_name);
+        log_trace("discover: looking for HPSDR devices on %s", interface_name);
 
         // send a broadcast to locate hpsdr boards on the network
         discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
@@ -163,13 +164,13 @@ static void discover(struct ifaddrs* iface) {
             return;
         }
 
-        fprintf(stderr,"discover: bound to %s\n",interface_name);
+        log_trace("discover: bound to %s",interface_name);
 
         // allow broadcast on the socket
         int on=1;
         rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
         if(rc != 0) {
-            fprintf(stderr,"discover: cannot set SO_BROADCAST: rc=%d\n", rc);
+            log_error("discover: cannot set SO_BROADCAST: rc=%d", rc);
             exit(-1);
         }
 
@@ -187,8 +188,8 @@ static void discover(struct ifaddrs* iface) {
     discover_thread_id = g_thread_new( "old discover receive", discover_receive_thread, NULL);
     if( ! discover_thread_id )
     {
-        fprintf(stderr,"g_thread_new failed on discover_receive_thread\n");
-        exit( -1 );
+        log_error("g_thread_new failed on discover_receive_thread");
+        exit(-1);
     }
 
 
@@ -215,23 +216,23 @@ static void discover(struct ifaddrs* iface) {
     close(discovery_socket);
 
     if (iface == NULL) {
-      fprintf(stderr,"discover: exiting TCP discover for %s\n",ipaddr_tcp);
-      if (devices == rc+1) {
-	//
-	// We have exactly found one TCP device
-	// and have to patch the TCP addr into the device field
-	// and set the "use TCP" flag.
-	//
-        memcpy((void*)&discovered[rc].info.network.address,(void*)&to_addr,sizeof(to_addr));
-        discovered[rc].info.network.address_length=sizeof(to_addr);
-        memcpy((void*)&discovered[rc].info.network.interface_address,(void*)&to_addr,sizeof(to_addr));
-        memcpy((void*)&discovered[rc].info.network.interface_netmask,(void*)&to_addr,sizeof(to_addr));
-        discovered[rc].info.network.interface_length=sizeof(to_addr);
-        strcpy(discovered[rc].info.network.interface_name,"TCP");
-	discovered[rc].use_tcp=1;
-      }
+	log_trace("discover: exiting TCP discover for %s",ipaddr_tcp);
+	if (devices == rc+1) {
+	    //
+	    // We have exactly found one TCP device
+	    // and have to patch the TCP addr into the device field
+	    // and set the "use TCP" flag.
+	    //
+	    memcpy((void*)&discovered[rc].info.network.address,(void*)&to_addr,sizeof(to_addr));
+	    discovered[rc].info.network.address_length=sizeof(to_addr);
+	    memcpy((void*)&discovered[rc].info.network.interface_address,(void*)&to_addr,sizeof(to_addr));
+	    memcpy((void*)&discovered[rc].info.network.interface_netmask,(void*)&to_addr,sizeof(to_addr));
+	    discovered[rc].info.network.interface_length=sizeof(to_addr);
+	    strcpy(discovered[rc].info.network.interface_name,"TCP");
+	    discovered[rc].use_tcp=1;
+	}
     } else {
-      fprintf(stderr,"discover: exiting discover for %s\n",iface->ifa_name);
+	log_trace("discover: exiting discover for %s",iface->ifa_name);
     }
 
 }
@@ -246,8 +247,6 @@ static gpointer discover_receive_thread(gpointer data) {
     struct timeval tv;
     int i;
 
-    fprintf(stderr,"discover_receive_thread\n");
-
     tv.tv_sec = 2;
     tv.tv_usec = 0;
     setsockopt(discovery_socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,sizeof(struct timeval));
@@ -256,12 +255,12 @@ static gpointer discover_receive_thread(gpointer data) {
     while(1) {
         bytes_read=recvfrom(discovery_socket,buffer,sizeof(buffer),1032,(struct sockaddr*)&addr,&len);
         if(bytes_read<0) {
-            fprintf(stderr,"discovery: bytes read %d\n", bytes_read);
-            perror("old_discovery: recvfrom socket failed for discover_receive_thread");
+            log_debug("discovery: bytes read %d", bytes_read);
+            log_error("old_discovery: recvfrom socket failed for discover_receive_thread: %s", strerror(errno));
             break;
         }
         if (bytes_read == 0) break;
-        fprintf(stderr,"old_discovery: received %d bytes\n",bytes_read);
+        log_trace("old_discovery: received %d bytes",bytes_read);
         if ((buffer[0] & 0xFF) == 0xEF && (buffer[1] & 0xFF) == 0xFE) {
             int status = buffer[2] & 0xFF;
             if (status == 2 || status == 3) {
@@ -341,7 +340,7 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
                     strcpy(discovered[devices].info.network.interface_name,interface_name);
 		    discovered[devices].use_tcp=0;
                     discovered[devices].supported_receivers=2;
-		    fprintf(stderr,"old_discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s min=%f max=%f\n",
+		    log_trace("old_discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s min=%f max=%f",
                             discovered[devices].device,
                             discovered[devices].software_version,
                             discovered[devices].status,
@@ -361,7 +360,7 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
         }
 
     }
-    fprintf(stderr,"discovery: exiting discover_receive_thread\n");
+    log_trace("discovery: exiting discover_receive_thread");
     g_thread_exit(NULL);
     return NULL;
 }
@@ -369,7 +368,6 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
 void old_discovery() {
     struct ifaddrs *addrs,*ifa;
 
-fprintf(stderr,"old_discovery\n");
     getifaddrs(&addrs);
     ifa = addrs;
     while (ifa) {
@@ -388,21 +386,21 @@ fprintf(stderr,"old_discovery\n");
     // Do one additional "discover" for a fixed TCP address
     discover(NULL);
 
-    fprintf(stderr, "discovery found %d devices\n",devices);
+    log_trace("discovery found %d devices",devices);
 
     for(size_t i = 0; i < devices; i++) {
-	fprintf(stderr,"discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n",
-		discovered[i].device,
-		discovered[i].software_version,
-		discovered[i].status,
-		inet_ntoa(discovered[i].info.network.address.sin_addr),
-		discovered[i].info.network.mac_address[0],
-		discovered[i].info.network.mac_address[1],
-		discovered[i].info.network.mac_address[2],
-		discovered[i].info.network.mac_address[3],
-		discovered[i].info.network.mac_address[4],
-		discovered[i].info.network.mac_address[5],
-		discovered[i].info.network.interface_name);
+	log_trace("discovery: found device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s",
+		  discovered[i].device,
+		  discovered[i].software_version,
+		  discovered[i].status,
+		  inet_ntoa(discovered[i].info.network.address.sin_addr),
+		  discovered[i].info.network.mac_address[0],
+		  discovered[i].info.network.mac_address[1],
+		  discovered[i].info.network.mac_address[2],
+		  discovered[i].info.network.mac_address[3],
+		  discovered[i].info.network.mac_address[4],
+		  discovered[i].info.network.mac_address[5],
+		  discovered[i].info.network.interface_name);
     }
 }
 

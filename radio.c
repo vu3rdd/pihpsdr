@@ -66,6 +66,7 @@
 #include "vox.h"
 #include "waterfall.h"
 #include "zoompan.h"
+#include "log.h"
 
 #ifdef LOCALCW
 #include "iambic.h"
@@ -355,21 +356,21 @@ gint rx_height;
 
 void radio_stop() {
     if (can_transmit) {
-        g_print("radio_stop: TX: CloseChannel: %d\n", transmitter->id);
+        log_trace("radio_stop: TX: CloseChannel: %d", transmitter->id);
         CloseChannel(transmitter->id);
     }
     set_displaying(receiver[0], 0);
-    g_print("radio_stop: RX0: CloseChannel: %d\n", receiver[0]->id);
+    log_trace("radio_stop: RX0: CloseChannel: %d", receiver[0]->id);
     CloseChannel(receiver[0]->id);
     set_displaying(receiver[1], 0);
-    g_print("radio_stop: RX1: CloseChannel: %d\n", receiver[1]->id);
+    log_trace("radio_stop: RX1: CloseChannel: %d", receiver[1]->id);
     CloseChannel(receiver[1]->id);
 }
 
 void reconfigure_radio() {
     int i;
     int y;
-    g_print("reconfigure_radio: receivers=%d\n", receivers);
+    log_trace("reconfigure_radio: receivers=%d", receivers);
     rx_height = display_height - VFO_HEIGHT;
     if (display_zoompan) {
         rx_height -= ZOOMPAN_HEIGHT;
@@ -471,11 +472,9 @@ static void create_visual() {
     gtk_container_remove(GTK_CONTAINER(top_window), grid);
     gtk_container_add(GTK_CONTAINER(top_window), fixed);
 
-    // g_print("radio: vfo_init\n");
     vfo_panel = vfo_init(VFO_WIDTH, VFO_HEIGHT, top_window);
     gtk_fixed_put(GTK_FIXED(fixed), vfo_panel, 0, y);
 
-    // g_print("radio: meter_init\n");
     meter = meter_init(METER_WIDTH, METER_HEIGHT, top_window);
     gtk_fixed_put(GTK_FIXED(fixed), meter, VFO_WIDTH, y);
 
@@ -564,7 +563,6 @@ static void create_visual() {
 #ifdef CLIENT_SERVER
     if (!radio_is_remote) {
 #endif
-        // g_print("Create transmitter\n");
         if (can_transmit) {
             if (duplex) {
                 transmitter = create_transmitter(
@@ -644,7 +642,7 @@ static void create_visual() {
     if (init_gpio) {
 #ifdef GPIO
         if (gpio_init() < 0) {
-            g_print("GPIO failed to initialize\n");
+            log_error("GPIO failed to initialize");
         }
 #endif
     }
@@ -652,7 +650,7 @@ static void create_visual() {
 #ifdef LOCALCW
     // init local keyer if enabled
     if (cw_keyer_internal == 0) {
-        g_print("Initialize keyer.....\n");
+        log_trace("Initialize keyer.....");
         keyer_update();
     }
 
@@ -685,7 +683,6 @@ static void create_visual() {
     }
 
     if (display_sliders) {
-        // g_print("create sliders\n");
         sliders = sliders_init(display_width, SLIDERS_HEIGHT);
         gtk_fixed_put(GTK_FIXED(fixed), sliders, 0, y);
         y += SLIDERS_HEIGHT;
@@ -697,12 +694,12 @@ static void create_visual() {
         y += TOOLBAR_HEIGHT;
     }
 
-    g_print("create_visual: receivers=%d RECEIVERS=%d\n", receivers, RECEIVERS);
+    log_trace("create_visual: receivers=%d RECEIVERS=%d", receivers, RECEIVERS);
     if (receivers != RECEIVERS) {
         int r = receivers;
         receivers = RECEIVERS;
-        g_print("create_visual: calling radio_change_receivers: receivers=%d "
-                "r=%d\n",
+        log_trace("create_visual: calling radio_change_receivers: receivers=%d "
+		  "r=%d",
                 receivers, r);
         radio_change_receivers(r);
     }
@@ -713,8 +710,6 @@ static void create_visual() {
 
 void start_radio() {
     int i;
-    // g_print("start_radio: selected radio=%p
-    // device=%d\n",radio,radio->device);
     gdk_window_set_cursor(gtk_widget_get_window(top_window),
                           gdk_cursor_new(GDK_WATCH));
 
@@ -1091,8 +1086,6 @@ void start_radio() {
         adc[1].attenuation = 0;
     }
 
-    // g_print("meter_calibration=%f display_calibration=%f\n",
-    // meter_calibration, display_calibration);
 
 #ifdef GPIO
     switch (controller) {
@@ -1123,10 +1116,10 @@ void start_radio() {
 
     display_sequence_errors = TRUE;
 
-    g_print("%s: setup RECEIVERS protocol=%d\n", __FUNCTION__, protocol);
+    log_trace("%s: setup RECEIVERS protocol=%d", __FUNCTION__, protocol);
     switch (protocol) {
     default:
-        g_print("%s: setup RECEIVERS default\n", __FUNCTION__);
+        log_trace("%s: setup RECEIVERS default", __FUNCTION__);
         RECEIVERS = 2;
 #ifdef PURESIGNAL
         MAX_RECEIVERS = (RECEIVERS + 2);
@@ -1203,7 +1196,7 @@ void start_radio() {
     // radio.
     //
 #ifdef MIDI
-    g_print("%s: midi_enabled=%d midi_device_name=%s\n", __FUNCTION__,
+    log_trace("%s: midi_enabled=%d midi_device_name=%s", __FUNCTION__,
             midi_enabled, midi_device_name);
     if (midi_enabled && (midi_device_name != NULL)) {
         if (register_midi_device(midi_device_name) < 0) {
@@ -1225,12 +1218,12 @@ void start_radio() {
 }
 
 void disable_rigctl() {
-    g_print("RIGCTL: disable_rigctl()\n");
+    log_trace("RIGCTL: disable_rigctl()");
     close_rigctl_ports();
 }
 
 void radio_change_receivers(int r) {
-    g_print("radio_change_receivers: from %d to %d\n", receivers, r);
+    log_trace("radio_change_receivers: from %d to %d", receivers, r);
     // The button in the radio menu will call this function even if the
     // number of receivers has not changed.
     if (receivers == r)
@@ -1412,9 +1405,6 @@ void vox_changed(int state) {
 }
 
 void frequency_changed(RECEIVER *rx) {
-    // g_print("frequency_changed: channel=%d frequency=%ld lo=%ld error=%ld
-    // ctun=%d
-    // offset=%ld\n",rx->channel,rx->frequency_a,rx->lo_a,rx->error_a,rx->ctun,rx->offset);
     if (vfo[0].ctun) {
         SetRXAShiftFreq(rx->id, (double)vfo[0].offset);
         RXANBPSetShiftFrequency(rx->id, (double)vfo[0].offset);
@@ -1640,8 +1630,6 @@ void calcDriveLevel() {
     if (isTransmitting() && protocol == NEW_PROTOCOL) {
         schedule_high_priority();
     }
-    // g_print("calcDriveLevel: drive=%d
-    // drive_level=%d\n",transmitter->drive,transmitter->drive_level);
 }
 
 void setDrive(double value) {
@@ -1715,7 +1703,7 @@ void radioRestoreState() {
     char *value;
     int i;
 
-    g_print("radioRestoreState: %s\n", property_path);
+    log_trace("radioRestoreState: %s", property_path);
     g_mutex_lock(&property_mutex);
     loadProperties(property_path);
 
@@ -2173,7 +2161,7 @@ void radioSaveState() {
     char value[80];
     char name[32];
 
-    g_print("radioSaveState: %s\n", property_path);
+    log_trace("radioSaveState: %s", property_path);
 
     g_mutex_lock(&property_mutex);
     clearProperties();
@@ -2514,7 +2502,6 @@ void calculate_display_average(RECEIVER *rx) {
 void set_filter_type(int filter_type) {
     int i;
 
-    // g_print("set_filter_type: %d\n",filter_type);
     for (i = 0; i < RECEIVERS; i++) {
         receiver[i]->low_latency = filter_type;
         RXASetMP(receiver[i]->id, filter_type);
@@ -2526,7 +2513,6 @@ void set_filter_type(int filter_type) {
 void set_filter_size(int filter_size) {
     int i;
 
-    // g_print("set_filter_size: %d\n",filter_size);
     for (i = 0; i < RECEIVERS; i++) {
         receiver[i]->fft_size = filter_size;
         RXASetNC(receiver[i]->id, filter_size);

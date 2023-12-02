@@ -54,6 +54,7 @@
 #include "ext.h"
 #include "iambic.h"
 #include "error_handler.h"
+#include "log.h"
 
 #define min(x,y) (x<y?x:y)
 
@@ -225,34 +226,10 @@ static unsigned char usb_buffer_block = 0;
 #define USB_TIMEOUT -7
 #endif
 
-static GMutex dump_mutex;
-
-void dump_buffer(unsigned char *buffer,int length,const char *who) {
-  g_mutex_lock(&dump_mutex);
-  g_print("%s: %s: %d\n",__FUNCTION__,who,length);
-  int i=0;
-  int line=0;
-  while(i<length) {
-    g_print("%02X",buffer[i]);
-    i++;
-    line++;
-    if(line==16) {
-      g_print("\n");
-      line=0;
-    }
-  }
-  if(line!=0) {
-    g_print("\n");
-  }
-  g_print("\n");
-  g_mutex_unlock(&dump_mutex);
-}
-
 void old_protocol_stop() {
 #ifdef USBOZY
   if(device!=DEVICE_OZY) {
 #endif
-    g_print("%s\n",__FUNCTION__);
     metis_start_stop(0);
 #ifdef USBOZY
   }
@@ -263,7 +240,6 @@ void old_protocol_run() {
 #ifdef USBOZY
   if(device!=DEVICE_OZY) {
 #endif
-    g_print("%s\n",__FUNCTION__);
     metis_restart();
 #ifdef USBOZY
   }
@@ -276,13 +252,13 @@ void old_protocol_set_mic_sample_rate(int rate) {
 
 void old_protocol_init(int rx,int pixels,int rate) {
   int i;
-  g_print("old_protocol_init: num_hpsdr_receivers=%d\n",how_many_receivers());
+  log_trace("old_protocol_init: num_hpsdr_receivers=%d",how_many_receivers());
 
   old_protocol_set_mic_sample_rate(rate);
 
   if(transmitter->local_microphone) {
     if(audio_open_input()!=0) {
-      g_print("audio_open_input failed\n");
+      log_error("audio_open_input failed");
       transmitter->local_microphone=0;
     }
   }
@@ -294,28 +270,25 @@ void old_protocol_init(int rx,int pixels,int rate) {
 // if we have a USB interfaced Ozy device:
 //
   if (device == DEVICE_OZY) {
-    g_print("old_protocol_init: initialise ozy on USB\n");
-    ozy_initialise();
-    start_usb_receive_threads();
+      log_trace("old_protocol_init: initialise ozy on USB");
+      ozy_initialise();
+      start_usb_receive_threads();
   }
   else
 #endif
   {
-    g_print("old_protocol starting receive thread: buffer_size=%d output_buffer_size=%d\n",buffer_size,output_buffer_size);
-    if (radio->use_tcp) {
-      open_tcp_socket();
-    } else  {
-      open_udp_socket();
-    }
+      log_trace("old_protocol starting receive thread: buffer_size=%d output_buffer_size=%d",buffer_size,output_buffer_size);
+      if (radio->use_tcp) {
+	  open_tcp_socket();
+      } else  {
+	  open_udp_socket();
+      }
     receive_thread_id = g_thread_new( "old protocol", receive_thread, NULL);
     if( ! receive_thread_id )
     {
-      g_print("g_thread_new failed on receive_thread\n");
-      exit( -1 );
+	log_error("g_thread_new failed on receive_thread");
+	exit(-1);
     }
-    g_print( "receive_thread: id=%p\n",receive_thread_id);
-
-    g_print("old_protocol_init: prime radio\n");
     for(i=8;i<OZY_BUFFER_SIZE;i++) {
       output_buffer[i]=0;
     }
@@ -333,12 +306,10 @@ void old_protocol_init(int rx,int pixels,int rate) {
 //
 static void start_usb_receive_threads()
 {
-  g_print("old_protocol starting USB receive thread: buffer_size=%d\n",buffer_size);
-
   ozy_EP6_rx_thread_id = g_thread_new( "OZY EP6 RX", ozy_ep6_rx_thread, NULL);
-  if( ! ozy_EP6_rx_thread_id )
+  if(!ozy_EP6_rx_thread_id )
   {
-    g_print("g_thread_new failed for ozy_ep6_rx_thread\n");
+    log_error("g_thread_new failed for ozy_ep6_rx_thread");
     exit( -1 );
   }
 }
@@ -359,29 +330,24 @@ static gpointer ozy_ep4_rx_thread(gpointer arg)
 static gpointer ozy_ep6_rx_thread(gpointer arg) {
   int bytes;
 
-  g_print( "old_protocol: USB EP6 receive_thread\n");
+  log_trace("old_protocol: USB EP6 receive_thread");
   running=1;
  
   while (running)
   {
     bytes = ozy_read(EP6_IN_ID,ep6_inbuffer,EP6_BUFFER_SIZE); // read a 2K buffer at a time
 
-    //g_print("%s: read %d bytes\n",__FUNCTION__,bytes);
-    //dump_buffer(ep6_inbuffer,bytes,__FUNCTION__);
-
     if (bytes == 0)
     {
-      g_print("old_protocol_ep6_read: ozy_read returned 0 bytes... retrying\n");
+      log_trace("old_protocol_ep6_read: ozy_read returned 0 bytes... retrying");
       continue;
     }
     else if (bytes != EP6_BUFFER_SIZE)
     {
-      g_print("old_protocol_ep6_read: OzyBulkRead failed %d bytes\n",bytes);
-      perror("ozy_read(EP6 read failed");
-      //exit(1);
+      log_trace("old_protocol_ep6_read: OzyBulkRead failed %d bytes",bytes);
+      log_error("ozy_read(EP6 read failed: %s", strerror(errno));
     }
     else
-// process the received data normally
     {
       process_ozy_input_buffer(&ep6_inbuffer[0]);
       process_ozy_input_buffer(&ep6_inbuffer[512]);
@@ -438,16 +404,16 @@ static void open_udp_socket() {
     }
 
     // bind to the interface
-g_print("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
+    log_trace("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
     if(bind(tmp,(struct sockaddr*)&radio->info.network.interface_address,radio->info.network.interface_length)<0) {
-      perror("old_protocol: bind socket failed for data_socket\n");
-      exit(-1);
+	log_error("old_protocol: bind socket failed for data_socket: %s", strerror(errno));
+	exit(-1);
     }
 
     memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
     data_socket=tmp;
-    g_print("%s: UDP socket established: %d for %s:%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
+    log_trace("%s: UDP socket established: %d for %s:%d",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
 }
 
 static void open_tcp_socket() {
@@ -462,7 +428,7 @@ static void open_tcp_socket() {
     memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
     data_addr.sin_family = AF_INET;
-    g_print("Trying to open TCP connection to %s\n", inet_ntoa(radio->info.network.address.sin_addr));
+    log_trace("Trying to open TCP connection to %s", inet_ntoa(radio->info.network.address.sin_addr));
 
     tmp=socket(AF_INET, SOCK_STREAM, 0);
     if (tmp < 0) {
@@ -487,7 +453,7 @@ static void open_tcp_socket() {
       perror("tcp_socket: SO_RCVBUF");
     }
     tcp_socket=tmp;
-    g_print("TCP socket established: %d\n", tcp_socket);
+    log_trace("TCP socket established: %d", tcp_socket);
 }
 
 static gpointer receive_thread(gpointer arg) {
