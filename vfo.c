@@ -1027,6 +1027,8 @@ void draw_item(cairo_t *cr, size_t item, uint status) {
 // I am not proud of this code
 int get_nr(RECEIVER *rx)
 {
+    g_print("get_nr: NR: %d, NR2: %d, NR3: %d, NR4: %d\n",
+	    rx->nr, rx->nr2, rx->nr3, rx->nr4);
     if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
 	return 0;
     }
