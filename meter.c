@@ -104,14 +104,12 @@ meter_press_event_cb (GtkWidget *widget,
 
 
 GtkWidget* meter_init(int width,int height,GtkWidget *parent) {
+    meter_width=width;
+    meter_height=height;
+    parent_window=parent;
 
-fprintf(stderr,"meter_init: width=%d height=%d\n",width,height);
-  meter_width=width;
-  meter_height=height;
-  parent_window=parent;
-
-  meter = gtk_drawing_area_new ();
-  gtk_widget_set_size_request (meter, width, height);
+    meter = gtk_drawing_area_new ();
+    gtk_widget_set_size_request (meter, width, height);
  
   /* Signals used to handle the backing surface */
   g_signal_connect (meter, "draw",

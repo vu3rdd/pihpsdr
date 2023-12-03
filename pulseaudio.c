@@ -46,8 +46,8 @@ static void source_list_cb(pa_context *context, const pa_source_info *s,
     int i;
     if (eol > 0) {
         for (i = 0; i < n_input_devices; i++) {
-            g_print("Input: %d: %s (%s)\n", input_devices[i].index,
-                    input_devices[i].name, input_devices[i].description);
+            log_trace("Input: %d: %s (%s)", input_devices[i].index,
+		      input_devices[i].name, input_devices[i].description);
         }
         g_mutex_unlock(&audio_mutex);
     } else if (n_input_devices < MAX_AUDIO_DEVICES) {
@@ -67,8 +67,8 @@ static void sink_list_cb(pa_context *context, const pa_sink_info *s, int eol,
     int i;
     if (eol > 0) {
         for (i = 0; i < n_output_devices; i++) {
-            g_print("Output: %d: %s (%s)\n", output_devices[i].index,
-                    output_devices[i].name, output_devices[i].description);
+            log_trace("Output: %d: %s (%s)", output_devices[i].index,
+		      output_devices[i].name, output_devices[i].description);
         }
         op = pa_context_get_source_info_list(pa_ctx, source_list_cb, NULL);
     } else if (n_output_devices < MAX_AUDIO_DEVICES) {
@@ -90,38 +90,37 @@ static void state_cb(pa_context *c, void *userdata) {
 
     state = pa_context_get_state(c);
 
-    g_print("%s: %d\n", __FUNCTION__, state);
     switch (state) {
     // There are just here for reference
     case PA_CONTEXT_UNCONNECTED:
-        g_print("audio: state_cb: PA_CONTEXT_UNCONNECTED\n");
+        log_debug("audio: state_cb: PA_CONTEXT_UNCONNECTED");
         break;
     case PA_CONTEXT_CONNECTING:
-        g_print("audio: state_cb: PA_CONTEXT_CONNECTING\n");
+        log_debug("audio: state_cb: PA_CONTEXT_CONNECTING");
         break;
     case PA_CONTEXT_AUTHORIZING:
-        g_print("audio: state_cb: PA_CONTEXT_AUTHORIZING\n");
+        log_debug("audio: state_cb: PA_CONTEXT_AUTHORIZING");
         break;
     case PA_CONTEXT_SETTING_NAME:
-        g_print("audio: state_cb: PA_CONTEXT_SETTING_NAME\n");
+        log_debug("audio: state_cb: PA_CONTEXT_SETTING_NAME");
         break;
     case PA_CONTEXT_FAILED:
-        g_print("audio: state_cb: PA_CONTEXT_FAILED\n");
+        log_debug("audio: state_cb: PA_CONTEXT_FAILED");
         g_mutex_unlock(&audio_mutex);
         break;
     case PA_CONTEXT_TERMINATED:
-        g_print("audio: state_cb: PA_CONTEXT_TERMINATED\n");
+        log_debug("audio: state_cb: PA_CONTEXT_TERMINATED");
         g_mutex_unlock(&audio_mutex);
         break;
     case PA_CONTEXT_READY:
-        g_print("audio: state_cb: PA_CONTEXT_READY\n");
+        log_debug("audio: state_cb: PA_CONTEXT_READY");
         // get a list of the output devices
         n_input_devices = 0;
         n_output_devices = 0;
         op = pa_context_get_sink_info_list(pa_ctx, sink_list_cb, NULL);
         break;
     default:
-        g_print("audio: state_cb: unknown state %d\n", state);
+        log_debug("audio: state_cb: unknown state %d", state);
         break;
     }
 }
@@ -167,12 +166,12 @@ int audio_open_output(RECEIVER *rx) {
             rx->local_audio_buffer_offset = 0;
             rx->local_audio_buffer =
                 g_new0(float, 2 * rx->local_audio_buffer_size);
-            g_print("%s: allocated local_audio_buffer %p size %ld bytes\n",
-                    __FUNCTION__, rx->local_audio_buffer,
-                    2 * rx->local_audio_buffer_size * sizeof(float));
+            log_trace("allocated local_audio_buffer %p size %ld bytes",
+		      rx->local_audio_buffer,
+		      2 * rx->local_audio_buffer_size * sizeof(float));
         } else {
             result = -1;
-            g_print("%s: pa-simple_new failed: err=%d\n", __FUNCTION__, err);
+            log_trace("pa-simple_new failed: err=%d", err);
         }
         g_mutex_unlock(&rx->local_audio_mutex);
     }
@@ -184,7 +183,6 @@ static void *mic_read_thread(gpointer arg) {
     int rc;
     int err;
 
-    g_print("%s: running=%d\n", __FUNCTION__, running);
     while (running) {
         g_mutex_lock(&audio_mutex);
         if (local_microphone_buffer == NULL) {
@@ -195,8 +193,8 @@ static void *mic_read_thread(gpointer arg) {
                                 &err);
             if (rc < 0) {
                 running = 0;
-                g_print("%s: returned %d error=%d (%s)\n", __FUNCTION__, rc,
-                        err, pa_strerror(err));
+                log_error("%s: returned %d error=%d (%s)", __FUNCTION__, rc,
+			  err, pa_strerror(err));
             } else {
                 gint newpt;
                 for (gint i = 0; i < local_microphone_buffer_size; i++) {
@@ -229,7 +227,6 @@ static void *mic_read_thread(gpointer arg) {
         }
         g_mutex_unlock(&audio_mutex);
     }
-    g_print("%s: exit\n", __FUNCTION__);
     return NULL;
 }
 
@@ -270,7 +267,7 @@ int audio_open_input() {
         local_microphone_buffer_offset = 0;
         local_microphone_buffer = g_new0(float, local_microphone_buffer_size);
 
-        g_print("%s: allocating ring buffer\n", __FUNCTION__);
+        log_trace("%s: allocating ring buffer", __FUNCTION__);
         mic_ring_buffer = (float *)g_new(float, MICRINGLEN);
         mic_ring_read_pt = mic_ring_write_pt = 0;
         if (mic_ring_buffer == NULL) {
@@ -279,11 +276,11 @@ int audio_open_input() {
         }
 
         running = TRUE;
-        g_print("%s: PULSEAUDIO mic_read_thread\n", __FUNCTION__);
+        log_trace("%s: PULSEAUDIO mic_read_thread", __FUNCTION__);
         mic_read_thread_id = g_thread_new("mic_thread", mic_read_thread, NULL);
         if (!mic_read_thread_id) {
-            g_print("%s: g_thread_new failed on mic_read_thread\n",
-                    __FUNCTION__);
+            log_error("%s: g_thread_new failed on mic_read_thread",
+		      __FUNCTION__);
             g_free(local_microphone_buffer);
             local_microphone_buffer = NULL;
             running = FALSE;
@@ -331,7 +328,6 @@ float audio_get_next_mic_sample() {
 
     if ((mic_ring_buffer == NULL) || (mic_ring_read_pt == mic_ring_write_pt)) {
         // no buffer, or nothing in buffer: insert silence
-        // g_print("%s: no samples\n",__FUNCTION__);
         sample = 0.0;
     } else {
         // the "existence" of the ring buffer is now guaranteed for 1 msec,

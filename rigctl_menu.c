@@ -67,7 +67,7 @@ static void rigctl_value_changed_cb(GtkWidget *widget, gpointer data) {
 
 static void rigctl_debug_cb(GtkWidget *widget, gpointer data) {
   rigctl_debug=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  g_print("---------- RIGCTL DEBUG %s ----------\n",rigctl_debug?"ON":"OFF");
+  log_trace("---------- RIGCTL DEBUG %s ----------",rigctl_debug?"ON":"OFF");
 }
 
 static void rigctl_enable_cb(GtkWidget *widget, gpointer data) {
@@ -83,11 +83,12 @@ static void serial_enable_cb(GtkWidget *widget, gpointer data) {
   strcpy(ser_port,gtk_entry_get_text(GTK_ENTRY(serial_port_entry)));
   serial_enable=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   if(serial_enable) {
-     if(launch_serial() == 0) {
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(widget),FALSE)	     ;
-     }	      
+     if(launch_serial() == -1) {
+	 log_debug("unable to enable serial port\n");
+	 gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(widget),FALSE);
+     }
   } else {
-     disable_serial();
+      disable_serial();
   }
 }
 
