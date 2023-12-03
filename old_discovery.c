@@ -306,7 +306,7 @@ static gpointer discover_receive_thread(gpointer data) {
 			    } else {
                               strcpy(discovered[devices].name,"HermesLite V2");		
 			      discovered[devices].device = DEVICE_HERMES_LITE2;
-g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9],buffer[15]);
+			      log_trace("discovered HL2: Gateware Major Version=%d Minor Version=%d",buffer[9],buffer[15]);
 			    }
                             discovered[devices].frequency_min=0.0;
                             discovered[devices].frequency_max=30720000.0;
@@ -327,7 +327,7 @@ g_print("discovered HL2: Gateware Major Version=%d Minor Version=%d\n",buffer[9]
                             discovered[devices].frequency_max=61440000.0;
                             break;
                     }
-		    g_print("old_discovery: name=%s min=%f max=%f\n",discovered[devices].name, discovered[devices].frequency_min, discovered[devices].frequency_max);
+		    log_trace("old_discovery: name=%s min=%f max=%f",discovered[devices].name, discovered[devices].frequency_min, discovered[devices].frequency_max);
                     for(i=0;i<6;i++) {
                         discovered[devices].info.network.mac_address[i]=buffer[i+3];
                     }

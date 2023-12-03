@@ -58,7 +58,6 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 static gboolean exit_cb (GtkWidget *widget, GdkEventButton *event, gpointer data) {
-g_print("exit_cb\n");
 #ifdef GPIO
   gpio_close();
 #endif

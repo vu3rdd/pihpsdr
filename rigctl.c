@@ -62,6 +62,7 @@
 #include "iambic.h" // declare keyer_update()
 #endif
 #include <math.h>
+#include "log.h"
 
 #define NEW_PARSER
 
@@ -281,30 +282,24 @@ void close_rigctl_ports() {
     linger.l_onoff = 1;
     linger.l_linger = 0;
 
-    g_print("close_rigctl_ports: server_socket=%d\n", server_socket);
+    log_trace("close_rigctl_ports: server_socket=%d", server_socket);
     server_running = 0;
     for (i = 0; i < MAX_CLIENTS; i++) {
         if (client[i].fd != -1) {
-            g_print("setting SO_LINGER to 0 for client_socket: %d\n",
-                    client[i].fd);
             if (setsockopt(client[i].fd, SOL_SOCKET, SO_LINGER,
                            (const char *)&linger, sizeof(linger)) == -1) {
-                perror("setsockopt(...,SO_LINGER,...) failed for client");
+                log_debug("setsockopt(...,SO_LINGER,...) failed for client: %s", strerror(errno));
             }
-            g_print("closing client socket: %d\n", client[i].fd);
             close(client[i].fd);
             client[i].fd = -1;
         }
     }
 
     if (server_socket >= 0) {
-        g_print("setting SO_LINGER to 0 for server_socket: %d\n",
-                server_socket);
         if (setsockopt(server_socket, SOL_SOCKET, SO_LINGER,
                        (const char *)&linger, sizeof(linger)) == -1) {
-            perror("setsockopt(...,SO_LINGER,...) failed for server");
+            log_debug("setsockopt(...,SO_LINGER,...) failed for server: %s", strerror(errno));
         }
-        g_print("closing server_socket: %d\n", server_socket);
         close(server_socket);
         server_socket = -1;
     }
@@ -778,12 +773,13 @@ long long rigctl_getFrequency() {
 //
 void send_resp(int fd, char *msg) {
     if (fd == -1) {
-	g_print("RIGCTL: invalid file descriptor\n");
-	perror("send_resp");
+	log_error("RIGCTL: invalid file descriptor");
 	return;
     }
-    if (rigctl_debug)
-        g_print("RIGCTL: RESP=%s\n", msg);
+
+    if (rigctl_debug) {
+        log_debug("RIGCTL: RESP=%s", msg);
+    }
 
     int length = strlen(msg);
     int written = 0;
@@ -791,7 +787,7 @@ void send_resp(int fd, char *msg) {
     while (written < length) {
 	ssize_t n = write(fd, &msg[written], length - written);
 	if (n < 0) {
-	    perror("send_resp");
+	    log_error("send_resp: %s", strerror(errno));
 	    break;
 	}
         written += n;
@@ -809,11 +805,9 @@ static gpointer rigctl_server(gpointer data) {
     int on = 1;
     int i;
 
-    g_print("rigctl_server: starting server on port %d\n", port);
-
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
-        perror("rigctl_server: listen socket failed");
+        log_error("rigctl_server: listen socket failed: %s", strerror(errno));
         return NULL;
     }
 
@@ -851,35 +845,29 @@ static gpointer rigctl_server(gpointer data) {
 	    }
             return NULL;
         }
-	g_print("rigctl server: listen succeeded\n");
 
         // find a spare thread
         for (i = 0; i < MAX_CLIENTS; i++) {
             if (client[i].fd == -1) {
-                g_print("Using client: %d\n", i);
 
                 client[i].fd =
                     accept(server_socket, (struct sockaddr *)&client[i].address,
                            &client[i].address_length);
                 if (client[i].fd < 0) {
-                    perror("rigctl_server: client accept failed");
+                    log_error("rigctl_server: client accept failed: %s", strerror(errno));
                     continue;
                 }
 
                 client[i].thread_id = g_thread_new(
                     "rigctl client", rigctl_client, (gpointer)&client[i]);
                 if (client[i].thread_id == NULL) {
-                    g_print("g_thread_new failed (n rigctl_client\n");
-                    g_print("setting SO_LINGER to 0 for client_socket: %d\n",
-                            client[i].fd);
                     struct linger linger = {0};
                     linger.l_onoff = 1;
                     linger.l_linger = 0;
                     if (setsockopt(client[i].fd, SOL_SOCKET, SO_LINGER,
                                    (const char *)&linger,
                                    sizeof(linger)) == -1) {
-                        perror(
-                            "setsockopt(...,SO_LINGER,...) failed for client");
+                        log_error("setsockopt(...,SO_LINGER,...) failed for client: %s", strerror(errno));
                     }
                     close(client[i].fd);
 		    client[i].fd = -1;
@@ -896,12 +884,10 @@ static gpointer rigctl_client(gpointer data) {
 
     CLIENT *client = (CLIENT *)data;
 
-    g_print("rigctl_client: starting rigctl_client: socket=%d\n", client->fd);
-
     g_mutex_lock(&mutex_a->m);
     cat_control++;
     if (rigctl_debug)
-        g_print("RIGCTL: CTLA INC cat_control=%d\n", cat_control);
+        log_debug("RIGCTL: CTLA INC cat_control=%d", cat_control);
     g_mutex_unlock(&mutex_a->m);
     g_idle_add(ext_vfo_update, NULL);
 
@@ -921,7 +907,7 @@ static gpointer rigctl_client(gpointer data) {
 		if (cmd_input[i] == ';') {
 		    command[command_index] = '\0';
 		    if (rigctl_debug)
-			g_print("RIGCTL: command=%s\n", command);
+			log_debug("RIGCTL: command=%s", command);
 		    COMMAND *info = g_new(COMMAND, 1);
 		    info->client = client;
 		    info->command = command;
@@ -942,23 +928,22 @@ static gpointer rigctl_client(gpointer data) {
 	}
     }
 
-    g_print("RIGCTL: Leaving rigctl_client thread: numbytes = %d\n", numbytes);
     if (client->fd != -1) {
-        g_print("setting SO_LINGER to 0 for client_socket: %d\n", client->fd);
         struct linger linger = {0};
         linger.l_onoff = 1;
         linger.l_linger = 0;
         if (setsockopt(client->fd, SOL_SOCKET, SO_LINGER, (const char *)&linger,
                        sizeof(linger)) == -1) {
-            perror("setsockopt(...,SO_LINGER,...) failed for client");
+            log_error("setsockopt(...,SO_LINGER,...) failed for client: %s", strerror(errno));
         }
         close(client->fd);
         client->fd = -1;
         // Decrement CAT_CONTROL
         g_mutex_lock(&mutex_a->m);
         cat_control--;
-        if (rigctl_debug)
-            g_print("RIGCTL: CTLA DEC - cat_control=%d\n", cat_control);
+        if (rigctl_debug) {
+            log_debug("RIGCTL: CTLA DEC - cat_control=%d", cat_control);
+	}
         g_mutex_unlock(&mutex_a->m);
         g_idle_add(ext_vfo_update, NULL);
     }
@@ -4276,8 +4261,9 @@ int parse_cmd(void *data) {
     }
 
     if (!implemented) {
-        if (rigctl_debug)
-            g_print("RIGCTL: UNIMPLEMENTED COMMAND: %s\n", info->command);
+        if (rigctl_debug) {
+            log_debug("RIGCTL: UNIMPLEMENTED COMMAND: %s", info->command);
+	}
         send_resp(client->fd, "?;");
     }
 
@@ -4291,7 +4277,7 @@ int set_interface_attribs(int fd, int speed, int parity) {
     struct termios tty;
     memset(&tty, 0, sizeof tty);
     if (tcgetattr(fd, &tty) != 0) {
-        g_print("RIGCTL: Error %d from tcgetattr", errno);
+        log_error("tcgetattr: %s", strerror(errno));
         return -1;
     }
 
@@ -4319,7 +4305,7 @@ int set_interface_attribs(int fd, int speed, int parity) {
     tty.c_cflag &= ~CRTSCTS;
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
-        g_print("RIGCTL: Error %d from tcsetattr", errno);
+        log_error("tcsetattr: %s", strerror(errno));
         return -1;
     }
     return 0;
@@ -4339,15 +4325,15 @@ void set_blocking (int fd, int should_block) {
   fcntl(fd, F_SETFL, flags);
 
   if (tcgetattr (fd, &tty) != 0) {
-    g_print ("RIGCTL (tggetattr):");
-    return;
+      log_error("tggetattr error");
+      return;
   }
 
   tty.c_cc[VMIN]  = should_block > 0? 1: 0;
   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
   if (tcsetattr (fd, TCSANOW, &tty) != 0) {
-    g_print("RIGCTL (tcsetattr):");
+    log_error("tcsetattr error");
   }
 }
 
@@ -4361,6 +4347,7 @@ static gpointer serial_server(gpointer data) {
     int numbytes;
     int i;
     cat_control++;
+
     serial_running = TRUE;
     while (serial_running) {
         numbytes = read(fd, cmd_input, sizeof cmd_input);
@@ -4370,8 +4357,9 @@ static gpointer serial_server(gpointer data) {
                 command_index++;
                 if (cmd_input[i] == ';') {
                     command[command_index] = '\0';
-                    if (rigctl_debug)
-                        g_print("RIGCTL: command=%s\n", command);
+                    if (rigctl_debug) {
+                        log_debug("RIGCTL: command=%s", command);
+		    }
                     COMMAND *info = g_new(COMMAND, 1);
                     info->client = client;
                     info->command = command;
@@ -4396,7 +4384,6 @@ static gpointer serial_server(gpointer data) {
 }
 
 int launch_serial() {
-    g_print("RIGCTL: Launch Serial port %s\n", ser_port);
     if (mutex_b_exists == 0) {
         mutex_b = g_new(GT_MUTEX, 1);
         g_mutex_init(&mutex_b->m);
@@ -4405,18 +4392,16 @@ int launch_serial() {
 
     if (mutex_busy == NULL) {
         mutex_busy = g_new(GT_MUTEX, 1);
-        g_print("launch_serial: mutex_busy=%p\n", mutex_busy);
+        log_trace("launch_serial: mutex_busy=%p", mutex_busy);
         g_mutex_init(&mutex_busy->m);
     }
 
     fd = open(ser_port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
     if (fd < 0) {
-        g_print("RIGCTL: Error %d opening %s: %s\n", errno, ser_port,
-                strerror(errno));
-        return 0;
+        log_error("error opening %s: %s\n", ser_port, strerror(errno));
+        return -1;
     }
 
-    g_print("serial port fd=%d\n", fd);
     set_interface_attribs(fd, serial_baud_rate, serial_parity);
     set_blocking(fd, 1); // set no blocking
 
@@ -4427,16 +4412,16 @@ int launch_serial() {
         g_thread_new("Serial server", serial_server, serial_client);
     if (!serial_server_thread_id) {
         g_free(serial_client);
-        g_print("g_thread_new failed on serial_server\n");
-        return 0;
+        log_error("g_thread_new failed on serial_server");
+        return -1;
     }
 
-    return 1;
+    return 0;
 }
 
 // Serial Port close
 void disable_serial() {
-    g_print("RIGCTL: Disable Serial port %s\n", ser_port);
+    log_trace("RIGCTL: Disable Serial port %s", ser_port);
     serial_running = FALSE;
 }
 
@@ -4445,8 +4430,7 @@ void disable_serial() {
 //                   (Port numbers now const ints instead of defines..)
 //
 void launch_rigctl() {
-
-    g_print("LAUNCHING RIGCTL!!\n");
+    log_trace("LAUNCHING RIGCTL!!");
 
     rigctl_busy = 1;
     mutex_a = g_new(GT_MUTEX, 1);
@@ -4462,14 +4446,14 @@ void launch_rigctl() {
     g_mutex_init(&mutex_c->m);
 
     mutex_busy = g_new(GT_MUTEX, 1);
-    g_print("launch_rigctl: mutex_busy=%p\n", mutex_busy);
+    log_trace("launch_rigctl: mutex_busy=%p", mutex_busy);
     g_mutex_init(&mutex_busy->m);
 
     // This routine encapsulates the thread call
     rigctl_server_thread_id = g_thread_new("rigctl server", rigctl_server,
                                            (gpointer)(long)rigctl_port_base);
     if (!rigctl_server_thread_id) {
-        g_print("g_thread_new failed on rigctl_server\n");
+        log_error("g_thread_new failed on rigctl_server");
     }
 }
 
@@ -4505,7 +4489,6 @@ void set_freqB(long long new_freqB) {
 int set_alc(gpointer data) {
     int *lcl_ptr = (int *)data;
     alc = *lcl_ptr;
-    g_print("RIGCTL: set_alc=%d\n", alc);
     return 0;
 }
 

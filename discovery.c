@@ -285,7 +285,7 @@ void discovery() {
 //
 // first: look on USB for an Ozy
 //
-  fprintf(stderr,"looking for USB based OZY devices\n");
+  log_trace("looking for USB based OZY devices");
 
   if (ozy_discover() != 0)
   {
@@ -312,7 +312,7 @@ void discovery() {
 
   status_text("Discovery");
   
-    fprintf(stderr,"discovery: found %d devices\n", devices);
+    log_info("discovery: found %d devices", devices);
     gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
 
     discovery_dialog = gtk_dialog_new();
@@ -349,7 +349,7 @@ void discovery() {
       char text[256];
       for(row=0;row<devices;row++) {
         d=&discovered[row];
-fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
+	log_trace("%p Protocol=%d name=%s",d,d->protocol,d->name);
         sprintf(version,"v%d.%d",
                           d->software_version/10,
                           d->software_version%10);
@@ -493,7 +493,6 @@ fprintf(stderr,"%p Protocol=%d name=%s\n",d,d->protocol,d->name);
 
     gtk_container_add (GTK_CONTAINER (content), grid);
     gtk_widget_show_all(discovery_dialog);
-fprintf(stderr,"showing device dialog\n");
 
     // autostart if one device and autostart enabled
     log_trace("%s: devices=%d autostart=%d",__FUNCTION__,devices,autostart);

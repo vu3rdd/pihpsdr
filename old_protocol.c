@@ -465,7 +465,6 @@ static gpointer receive_thread(gpointer arg) {
   int ep;
   uint32_t sequence;
 
-  g_print( "old_protocol: receive_thread\n");
   running=1;
 
   //metis_restart();
@@ -501,7 +500,6 @@ static gpointer receive_thread(gpointer arg) {
 	  } else if (data_socket >= 0) {
             bytes_read=recvfrom(data_socket,buffer,sizeof(buffer),0,(struct sockaddr*)&addr,&length);
             if(bytes_read < 0 && errno != EAGAIN) perror("old_protocol recvfrom UDP:");
-	    //g_print("%s: bytes_read=%d\n",__FUNCTION__,bytes_read);
           } else {
 	    // This could happen in METIS start/stop sequences
 	    usleep(100000);
@@ -525,8 +523,8 @@ static gpointer receive_thread(gpointer arg) {
 	      // A sequence error with a seqnum of zero usually indicates a METIS restart
 	      // and is no error condition
               if (sequence != 0 && sequence != last_seq_num+1) {
-		g_print("SEQ ERROR: last %ld, recvd %ld\n", (long) last_seq_num, (long) sequence);
-                sequence_errors++;
+		  log_error("SEQ ERROR: last %ld, recvd %ld", (long) last_seq_num, (long) sequence);
+		  sequence_errors++;
 	      }
 	      last_seq_num=sequence;
               switch(ep) {
@@ -551,19 +549,19 @@ static gpointer receive_thread(gpointer arg) {
 */
                   break;
                 default:
-                  g_print("unexpected EP %d length=%d\n",ep,bytes_read);
+                  log_error("unexpected EP %d length=%d",ep,bytes_read);
                   break;
               }
               break;
             case 2:  // response to a discovery packet
-              g_print("unexepected discovery response when not in discovery mode\n");
+              log_error("unexepected discovery response when not in discovery mode");
               break;
             default:
-              g_print("unexpected packet type: 0x%02X\n",buffer[2]);
+              log_error("unexpected packet type: 0x%02X",buffer[2]);
               break;
           }
         } else {
-          g_print("received bad header bytes on data port %02X,%02X\n",buffer[0],buffer[1]);
+          log_debug("received bad header bytes on data port %02X,%02X",buffer[0],buffer[1]);
         }
         break;
     }
@@ -979,7 +977,7 @@ static void process_ozy_input_buffer(unsigned char  *buffer) {
     time(&t);
     gmt=gmtime(&t);
 
-    g_print("%s: process_ozy_input_buffer: did not find sync: restarting\n",
+    log_debug("%s: process_ozy_input_buffer: did not find sync: restarting\n",
             asctime(gmt));
 
 
@@ -1053,16 +1051,16 @@ static void process_control_bytes() {
         IO3=(control_in[1]&0x08)?0:1;
         if(mercury_software_version!=control_in[2]) {
           mercury_software_version=control_in[2];
-          g_print("  Mercury Software version: %d (0x%0X)\n",mercury_software_version,mercury_software_version);
+          log_info("  Mercury Software version: %d (0x%0X)",mercury_software_version,mercury_software_version);
         }
         if(penelope_software_version!=control_in[3]) {
           penelope_software_version=control_in[3];
-          g_print("  Penelope Software version: %d (0x%0X)\n",penelope_software_version,penelope_software_version);
+          log_info("  Penelope Software version: %d (0x%0X)",penelope_software_version,penelope_software_version);
         }
       }
       if(ozy_software_version!=control_in[4]) {
         ozy_software_version=control_in[4];
-        g_print("FPGA firmware version: %d.%d\n",ozy_software_version/10,ozy_software_version%10);
+        log_info("FPGA firmware version: %d.%d",ozy_software_version/10,ozy_software_version%10);
       }
       break;
     case 1:
@@ -1526,7 +1524,7 @@ void ozy_send_buffer() {
       // Out of paranoia: print warning and choose ANT1
       //
       if (i<0 || i>2) {
-          g_print("WARNING: illegal TX antenna chosen, using ANT1\n");
+          log_warn("WARNING: illegal TX antenna chosen, using ANT1");
           transmitter->alex_antenna=0;
           i=0;
       }
@@ -1940,7 +1938,7 @@ void ozy_send_buffer() {
  * ship out line after each complete run
  */
   if (proto_mod && command == 1) {
-    g_print("DIS=%d DRIVE=%3d PTT=%d i1=%4d RXout=%d RXant=%d i2=%d TXrel=%d FB=%d BP=%d LNA=%d HPF=%02x LPF=%02x\n",
+    log_info("DIS=%d DRIVE=%3d PTT=%d i1=%4d RXout=%d RXant=%d i2=%d TXrel=%d FB=%d BP=%d LNA=%d HPF=%02x LPF=%02x",
      C3_TXDIS, C1_DRIVE, PC_PTT, CASE1, C3_RX1_OUT, C3_RX1_ANT, CASE2, C4_TX_REL,
      C2_FB, C3_BP, C3_LNA, C3_HPF, C4_LPF);
     proto_mod=0;
@@ -1969,9 +1967,9 @@ static void ozyusb_write(unsigned char* buffer,int length)
   i = ozy_write(EP2_OUT_ID,buffer,length);
   if(i!=length) {
     if(i==USB_TIMEOUT) {
-      g_print("%s: ozy_write timeout for %d bytes\n",__FUNCTION__,length);
+	log_trace("%s: ozy_write timeout for %d bytes",__FUNCTION__,length);
     } else {
-      g_print("%s: ozy_write for %d bytes returned %d\n",__FUNCTION__,length,i);
+	log_trace("%s: ozy_write for %d bytes returned %d",__FUNCTION__,length,i);
     }
   }
 
@@ -2066,7 +2064,6 @@ static int metis_write(unsigned char ep,unsigned char* buffer,int length) {
 static void metis_restart() {
   int i;
 
-  g_print("%s\n",__FUNCTION__);
   //
   // In TCP-ONLY mode, we possibly need to re-connect
   // since if we come from a METIS-stop, the server
@@ -2116,7 +2113,6 @@ static void metis_start_stop(int command) {
   int tmp;
   unsigned char buffer[1032];
     
-  g_print("%s: %d\n",__FUNCTION__,command);
 #ifdef USBOZY
   if(device!=DEVICE_OZY)
   {
@@ -2159,7 +2155,6 @@ static void metis_start_stop(int command) {
     tcp_socket=-1;
     usleep(100000);  // give some time to swallow incoming TCP packets
     close(tmp);
-    g_print("TCP socket closed\n");
   }
 
 #ifdef USBOZY
@@ -2178,7 +2173,7 @@ static void metis_send_buffer(unsigned char* buffer,int length) {
 
   if (tcp_socket >= 0) {
     if (length != 1032) {
-       g_print("PROGRAMMING ERROR: TCP LENGTH != 1032\n");
+       log_error("PROGRAMMING ERROR: TCP LENGTH != 1032");
        exit(-1);
     }
     if(sendto(tcp_socket,buffer,length,0,NULL, 0) != length) {
@@ -2188,12 +2183,12 @@ static void metis_send_buffer(unsigned char* buffer,int length) {
 //g_print("%s: sendto %d for %s:%d length=%d\n",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port),length);
     bytes_sent=sendto(data_socket,buffer,length,0,(struct sockaddr*)&data_addr,sizeof(data_addr));
     if(bytes_sent!=length) {
-      g_print("%s: UDP sendto failed: %d: %s\n",__FUNCTION__,errno,strerror(errno));
+      log_error("%s: UDP sendto failed: %d: %s",__FUNCTION__,errno,strerror(errno));
       //perror("sendto socket failed for UDP metis_send_data\n");
     }
   } else {
     // This should not happen
-    g_print("METIS send: neither UDP nor TCP socket available!\n");
+    log_error("METIS send: neither UDP nor TCP socket available!");
     exit(-1);
   }
 }

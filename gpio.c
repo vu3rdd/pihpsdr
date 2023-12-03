@@ -65,6 +65,7 @@
 #include "zoompan.h"
 #ifdef LOCALCW
 #include "iambic.h"
+#include "log.h"
 
 //
 // Broadcom pins #9, 10, 11 are not used
@@ -367,7 +368,6 @@ static gpointer rotary_encoder_thread(gpointer data) {
   int i;
 
   usleep(250000);
-  g_print("%s\n",__FUNCTION__);
   while(TRUE) {
     g_mutex_lock(&encoder_mutex);
     for(i=0;i<MAX_ENCODERS;i++) {
@@ -590,7 +590,7 @@ static void process_edge(int offset,int value) {
         if(t<switches[i].switch_debounce) {
           return;
         }
-//g_print("%s: switches=%p function=%d (%s)\n",__FUNCTION__,switches,switches[i].switch_function,sw_string[switches[i].switch_function]);
+        //g_print("%s: switches=%p function=%d (%s)\n",__FUNCTION__,switches,switches[i].switch_function,sw_string[switches[i].switch_function]);
         switches[i].switch_debounce=t+settle_time;
         PROCESS_ACTION *a=g_new(PROCESS_ACTION,1);
         a->action=switches[i].switch_function;
@@ -603,7 +603,7 @@ static void process_edge(int offset,int value) {
 
 
   if(!found) {
-    g_print("%s: could not find %d\n",__FUNCTION__,offset);
+    log_trace("%s: could not find %d",__FUNCTION__,offset);
   }
 }
 
@@ -629,7 +629,6 @@ static int interrupt_cb(int event_type, unsigned int line, const struct timespec
 
 void gpio_set_defaults(int ctrlr) {
   int i;
-  g_print("%s: %d\n",__FUNCTION__,ctrlr);
   switch(ctrlr) {
     case NO_CONTROLLER:
       encoders=encoders_no_controller;
@@ -901,12 +900,6 @@ static gpointer monitor_thread(gpointer arg) {
   struct timespec t;
 
   // thread to monitor gpio events
-  g_print("%s: start event monitor lines=%d\n",__FUNCTION__,lines);
-  g_print("%s:",__FUNCTION__);
-  for(int i=0;i<lines;i++) {
-    g_print(" %d",monitor_lines[i]);
-  }
-  g_print("\n");
   t.tv_sec=60;
   t.tv_nsec=0;
 
@@ -915,10 +908,9 @@ static gpointer monitor_thread(gpointer arg) {
 			monitor_lines, lines, FALSE,
 			consumer, &t, NULL, interrupt_cb,NULL);
   if (ret<0) {
-    g_print("%s: ctxless event monitor failed: %s\n",__FUNCTION__,g_strerror(errno));
+    log_debug("%s: ctxless event monitor failed: %s",__FUNCTION__,g_strerror(errno));
   }
 
-  g_print("%s: exit\n",__FUNCTION__);
   return NULL;
 }
 
@@ -926,11 +918,10 @@ static int setup_line(struct gpiod_chip *chip, int offset, gboolean pullup) {
   int ret;
   struct gpiod_line_request_config config;
 
-  g_print("%s: %d\n",__FUNCTION__,offset);
   struct gpiod_line *line=gpiod_chip_get_line(chip, offset);
   if (!line) {
-    g_print("%s: get line %d failed: %s\n",__FUNCTION__,offset,g_strerror(errno));
-    return -1;
+      log_error("%s: get line %d failed: %s",__FUNCTION__,offset,g_strerror(errno));
+      return -1;
   }
 
   config.consumer=consumer;
@@ -942,8 +933,8 @@ static int setup_line(struct gpiod_chip *chip, int offset, gboolean pullup) {
 #endif
   ret=gpiod_line_request(line,&config,1);
   if (ret<0) {
-    g_print("%s: line %d gpiod_line_request failed: %s\n",__FUNCTION__,offset,g_strerror(errno));
-    return ret;
+      log_error("%s: line %d gpiod_line_request failed: %s",__FUNCTION__,offset,g_strerror(errno));
+      return ret;
   }
 
   gpiod_line_release(line);
@@ -957,18 +948,17 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
   int ret;
   struct gpiod_line_request_config config;
 
-  g_print("%s: %d\n",__FUNCTION__,offset);
   struct gpiod_line *line=gpiod_chip_get_line(chip, offset);
   if (!line) {
-    g_print("%s: get line %d failed: %s\n",__FUNCTION__,offset,g_strerror(errno));
-    return -1;
+      log_error("%s: get line %d failed: %s",__FUNCTION__,offset,g_strerror(errno));
+      return -1;
   }
 
   config.consumer=consumer;
   config.request_type=GPIOD_LINE_REQUEST_DIRECTION_OUTPUT;
   ret=gpiod_line_request(line,&config,1);
   if (ret<0) {
-    g_print("%s: line %d gpiod_line_request failed: %s\n",__FUNCTION__,offset,g_strerror(errno));
+    log_error("%s: line %d gpiod_line_request failed: %s",__FUNCTION__,offset,g_strerror(errno));
     return ret;
   }
 
@@ -982,7 +972,7 @@ static int setup_output_line(struct gpiod_chip *chip, int offset, int _initial_v
 #endif
 
 int gpio_init() {
-  int ret=0;
+    int ret=0;
 
 #ifdef GPIO
   initialiseEpoch();
@@ -993,12 +983,11 @@ int gpio_init() {
 
   chip=NULL;
 
-//g_print("%s: open gpio 0\n",__FUNCTION__);
   chip=gpiod_chip_open_by_number(0);
   if(chip==NULL) {
-    g_print("%s: open chip failed: %s\n",__FUNCTION__,g_strerror(errno));
-    ret=-1;
-    goto err;
+      log_error("%s: open chip failed: %s",__FUNCTION__,g_strerror(errno));
+      ret=-1;
+      goto err;
   }
   
 #ifdef LOCALCW  
@@ -1009,14 +998,13 @@ int gpio_init() {
 		// for local CW the following pins are set.
 		CWL_BUTTON=17;
 		CWR_BUTTON=21;
-		g_print("LOCALCW is on ; NO controller selected; CW Buttons reconfigured\n");
+		log_debug("LOCALCW is on; NO controller selected; CW Buttons reconfigured");
 	}
 	// Radioberry device driver uses GPIO ports.
 	if(controller != NO_CONTROLLER) {
 #endif
 
   // setup encoders
-  g_print("%s: setup encoders\n",__FUNCTION__);
   for(int i=0;i<MAX_ENCODERS;i++) {
     if(encoders[i].bottom_encoder_enabled) {
       if(setup_line(chip,encoders[i].bottom_encoder_address_a,encoders[i].bottom_encoder_pullup)<0) {
@@ -1044,7 +1032,6 @@ int gpio_init() {
   }
 
   // setup switches
-  g_print("%s: setup switches\n",__FUNCTION__);
   for(int i=0;i<MAX_SWITCHES;i++) {
     if(switches[i].switch_enabled) {
       if(setup_line(chip,switches[i].switch_address,switches[i].switch_pullup)<0) {
@@ -1058,14 +1045,13 @@ int gpio_init() {
 
   if(controller==CONTROLLER2_V1 || controller==CONTROLLER2_V2) {
     i2c_init();
-    g_print("%s: setup i2c interrupt %d\n",__FUNCTION__,I2C_INTERRUPT);
     if((ret=setup_line(chip,I2C_INTERRUPT,TRUE))<0) {
       goto err;
     }
   }
 
 #ifdef LOCALCW
-  g_print("%s: ENABLE_CW_BUTTONS=%d  CWL_BUTTON=%d CWR_BUTTON=%d\n", __FUNCTION__, ENABLE_CW_BUTTONS, CWL_BUTTON, CWR_BUTTON);
+  log_trace("%s: ENABLE_CW_BUTTONS=%d  CWL_BUTTON=%d CWR_BUTTON=%d", __FUNCTION__, ENABLE_CW_BUTTONS, CWL_BUTTON, CWR_BUTTON);
   if(ENABLE_CW_BUTTONS) {
     if((ret=setup_line(chip,CWL_BUTTON,CW_ACTIVE_LOW==1))<0) {
       goto err;
@@ -1092,16 +1078,16 @@ int gpio_init() {
     ) {
     monitor_thread_id = g_thread_new( "gpiod monitor", monitor_thread, NULL);
     if(!monitor_thread_id ) {
-      g_print("%s: g_thread_new failed for monitor_thread\n",__FUNCTION__);
+      log_trace("%s: g_thread_new failed for monitor_thread",__FUNCTION__);
     }
 
     if(controller!=NO_CONTROLLER) {
       rotary_encoder_thread_id = g_thread_new( "encoders", rotary_encoder_thread, NULL);
       if(!rotary_encoder_thread_id ) {
-        g_print("%s: g_thread_new failed on rotary_encoder_thread\n",__FUNCTION__);
+        log_trace("%s: g_thread_new failed on rotary_encoder_thread",__FUNCTION__);
         exit( -1 );
       }
-      g_print("%s: rotary_encoder_thread: id=%p\n",__FUNCTION__,rotary_encoder_thread_id);
+      log_trace("%s: rotary_encoder_thread: id=%p",__FUNCTION__,rotary_encoder_thread_id);
     }
   }
 
@@ -1109,7 +1095,6 @@ int gpio_init() {
   return 0;
 
 err:
-g_print("%s: err\n",__FUNCTION__);
 #ifdef GPIO
   if(chip!=NULL) {
     gpiod_chip_close(chip);
@@ -1136,7 +1121,7 @@ void gpio_cw_sidetone_set(int level) {
 #else
     if((rc=gpiod_ctxless_set_value_ext(gpio_device,SIDETONE_GPIO,level,FALSE,consumer,NULL,NULL,0))<0) {
 #endif
-      g_print("%s: err=%d\n",__FUNCTION__,rc);
+	log_trace("%s: err=%d",__FUNCTION__,rc);
     }
 #endif
   }
