@@ -17,25 +17,21 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
-#include "pa_menu.h"
-#include "band.h"
-#include "bandstack.h"
-#include "filter.h"
-#include "radio.h"
-#include "receiver.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "iambic.h"
-#include "ext.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, g_idle_add, gboolean, FALSE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, GtkW...
+#include <stdint.h>            // for uintptr_t
+#include <stdio.h>             // for NULL
+#include "discovered.h"        // for NEW_PROTOCOL
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "iambic.h"            // for keyer_update
+#include "new_menu.h"          // for sub_menu
+#include "new_protocol.h"      // for schedule_high_priority
+#include "radio.h"             // for cw_keyer_mode, cw_breakin, cw_is_on_vf...
+#include "receiver.h"          // for receiver_filter_changed
 
 static GtkWidget *parent_window=NULL;
 

@@ -1,38 +1,29 @@
-#include <gtk/gtk.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "discovery.h"
-#include "receiver.h"
-#include "sliders.h"
-#include "band_menu.h"
-#include "diversity_menu.h"
-#include "vfo.h"
-#include "radio.h"
-#include "radio_menu.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#ifdef PURESIGNAL
-#include "ps_menu.h"
-#endif
-#include "agc.h"
-#include "filter.h"
-#include "mode.h"
-#include "band.h"
-#include "bandstack.h"
-#include "noise_menu.h"
-#include "wdsp.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "ext.h"
-#include "zoompan.h"
 #include "actions.h"
-#include "gpio.h"
-#include "toolbar.h"
-#ifdef LOCALCW
-#include "iambic.h"
-#endif
+#include <glib/gtypes.h>     // for GINT_TO_POINTER
+#include <string.h>          // for NULL, strlen
+#include "adc.h"             // for ADC
+#include "agc.h"             // for AGC_LAST
+#include "band.h"            // for BAND, band_get_band, canTransmit, BANDS
+#include "bandstack.h"       // for BANDSTACK
+#include "discovered.h"      // for NEW_PROTOCOL, DISCOVERED
+#include "diversity_menu.h"  // for update_diversity_gain, update_diversity_...
+#include "ext.h"             // for ext_vfo_update, ext_num_pad, local_set_f...
+#include "filter.h"          // for filter_shift_changed, filter_width_changed
+#include "gpio.h"            // for switches_controller1, MAX_FUNCTIONS, swi...
+#include "iambic.h"          // for keyer_event
+#include "main.h"            // for CONTROLLER1, CONTROLLER2_V1, CONTROLLER2_V2
+#include "mode.h"            // for MODES, modeCWL, modeCWU, modeLSB, modeUSB
+#include "new_menu.h"        // for start_agc, start_band, start_bandstack
+#include "new_protocol.h"    // for schedule_high_priority, setMox, setTune
+#include "noise_menu.h"      // for update_noise
+#include "radio.h"           // for active_receiver, transmitter, receiver
+#include "receiver.h"        // for RECEIVER, set_agc, set_offset
+#include "sliders.h"         // for set_af_gain, set_agc_gain, set_rf_gain
+#include "toolbar.h"         // for function, update_toolbar_labels, mox_update
+#include "transmitter.h"     // for TRANSMITTER, transmitter_set_out_of_band
+#include "vfo.h"             // for _vfo, vfo_band_changed, vfo, _mode_settings
+#include "wdsp.h"            // for SetRXAANFRun
+#include "zoompan.h"         // for update_pan, update_zoom
 
 ACTION_TABLE ActionTable[] = {
   {NO_ACTION,		"NONE",			NULL,		TYPE_NONE},

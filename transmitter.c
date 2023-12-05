@@ -17,36 +17,34 @@
  *
  */
 
-#include <gtk/gtk.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <wdsp.h>
-
-#include "alex.h"
-#include "audio.h"
-#include "band.h"
-#include "bandstack.h"
-#include "channel.h"
-#include "ext.h"
-#include "filter.h"
-#include "log.h"
-#include "main.h"
-#include "meter.h"
-#include "mode.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "property.h"
-#include "radio.h"
-#include "receiver.h"
-#include "toolbar.h"
 #include "transmitter.h"
-#include "tx_panadapter.h"
-#include "vfo.h"
-#include "vox.h"
-#include "waterfall.h"
+#include <gdk/gdk.h>           // for gdk_threads_add_timeout_full, GDK_KEY_...
+#include <glib-object.h>       // for g_signal_connect, g_object_ref
+#include <glib/gtypes.h>       // for GINT_TO_POINTER
+#include <gtk/gtk.h>           // for gtk_widget_set_size_request, GTK_WINDOW
+#include <math.h>              // for ceil, floor, sin, pow, sqrt
+#include <stdio.h>             // for sprintf, NULL
+#include <stdlib.h>            // for atoi, atof, atoll
+#include <string.h>            // for strcpy, strlen
+#include <wdsp.h>              // for SetTXAPostGenRun, SetTXAAMCarrierLevel
+#include "alex.h"              // for ALEX_TX_ANTENNA_1
+#include "audio.h"             // for cw_audio_write
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DEVIC...
+#include "ext.h"               // for ext_vfo_update, ext_mox_update
+#include "filter.h"            // for FILTER, filters
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace, log_error, log_warn
+#include "main.h"              // for display_width, keypress_cb, display_he...
+#include "meter.h"             // for meter_update, POWER
+#include "mode.h"              // for modeCWL, modeCWU, modeDIGL, modeFMN
+#include "new_protocol.h"      // for new_protocol_iq_samples, new_protocol_...
+#include "old_protocol.h"      // for old_protocol_iq_samples, old_protocol_...
+#include "property.h"          // for getProperty, setProperty
+#include "radio.h"             // for transmitter, protocol, active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "tx_panadapter.h"     // for tx_panadapter_init, tx_panadapter_update
+#include "vfo.h"               // for get_tx_mode, _vfo, vfo
+#include "vox.h"               // for update_vox
 
 double getNextSideToneSample();
 double getNextInternalSideToneSample();

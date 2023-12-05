@@ -15,20 +15,23 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "audio.h"
-#include "new_menu.h"
-#include "radio.h"
-#include "sliders.h"
-#include "transmitter.h"
-#include "ext.h"
-#include "filter.h"
-#include "mode.h"
-#include "vfo.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, g_malloc, g_idle_add, g_mall...
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, GtkW...
+#include <stdio.h>             // for NULL, sprintf
+#include <string.h>            // for strcpy, strlen, strcmp
+#include "audio.h"             // for AUDIO_DEVICE, input_devices, audio_clo...
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DEVIC...
+#include "ext.h"               // for ext_sliders_update, ext_vfo_update
+#include "filter.h"            // for FILTER, filters
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "mode.h"              // for modeFMN
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for transmitter, tx_filter_high, tx_filter...
+#include "receiver.h"          // for RECEIVER
+#include "transmitter.h"       // for TRANSMITTER, tx_set_filter, transmitte...
+#include "vfo.h"               // for _vfo, vfo
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

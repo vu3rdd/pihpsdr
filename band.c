@@ -17,19 +17,19 @@
 *
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "bandstack.h"
 #include "band.h"
-#include "filter.h"
-#include "mode.h"
-#include "alex.h"
-#include "property.h"
-#include "radio.h"
-#include "vfo.h"
+#include <glib.h>         // for g_print, TRUE
+#include <stdio.h>        // for sprintf, NULL
+#include <stdlib.h>       // for atoi, atoll, strtod
+#include <string.h>       // for strlen, strcpy
+#include "alex.h"         // for ALEX_ATTENUATION_0dB
+#include "bandstack.h"    // for BANDSTACK_ENTRY, BANDSTACK
+#include "filter.h"       // for filterF6, filterF5, filterF3
+#include "mode.h"         // for modeUSB, modeCWU, modeCWL, modeSAM, modeLSB
+#include "property.h"     // for setProperty, getProperty
+#include "radio.h"        // for cw_is_on_vfo_freq, cw_keyer_sidetone_frequency
+#include "transmitter.h"  // for TRANSMITTER
+#include "vfo.h"          // for _vfo, get_tx_freq, get_tx_mode, get_tx_vfo
 
 #define LINESDR
 

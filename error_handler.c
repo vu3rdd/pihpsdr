@@ -1,11 +1,9 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <gtk/gtk.h>
-#include <stdbool.h>
-
 #include "error_handler.h"
-#include "main.h"
+#include <glib.h>     // for g_idle_add, g_timeout_add, FALSE, gint, gpointer
+#include <gtk/gtk.h>  // for GtkWidget, gtk_container_add, gtk_dialog_get_co...
+#include <stdio.h>    // for sprintf, NULL, fprintf, stderr
+#include <stdlib.h>   // for exit
+#include "main.h"     // for top_window
 
 static GtkWidget *dialog;
 static gint timer;

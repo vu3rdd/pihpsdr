@@ -1,5 +1,9 @@
-#include <gtk/gtk.h>
-#include "actions.h"
+#include <glib-object.h>       // for g_signal_handler_block, g_signal_handl...
+#include <glib.h>              // for g_malloc0, TRUE, g_free, g_malloc0_n
+#include <gtk/gtk.h>           // for GtkWidget, gtk_container_add, gtk_togg...
+#include <stddef.h>            // for NULL
+#include "actions.h"           // for ACTION_TABLE, ActionTable, ACTIONS
+#include "gobject/gclosure.h"  // for G_CALLBACK
 
 #define GRID_WIDTH 6
 

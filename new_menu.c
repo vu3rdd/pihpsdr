@@ -17,58 +17,47 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "audio.h"
 #include "new_menu.h"
-#include "about_menu.h"
-#include "exit_menu.h"
-#include "radio_menu.h"
-#include "rx_menu.h"
-#include "ant_menu.h"
-#include "display_menu.h"
-#include "dsp_menu.h"
-#include "pa_menu.h"
-#include "rigctl_menu.h"
-#include "oc_menu.h"
-#include "cw_menu.h"
-#include "nb_menu.h"
-#include "store_menu.h"
-#include "xvtr_menu.h"
-#include "equalizer_menu.h"
-#include "radio.h"
-#include "step_menu.h"
-#include "meter_menu.h"
-#include "band_menu.h"
-#include "bandstack_menu.h"
-#include "mode_menu.h"
-#include "filter_menu.h"
-#include "noise_menu.h"
-#include "agc_menu.h"
-#include "vox_menu.h"
-#include "diversity_menu.h"
-#include "tx_menu.h"
-#include "ps_menu.h"
-#include "encoder_menu.h"
-#include "switch_menu.h"
-#include "toolbar_menu.h"
-#include "vfo_menu.h"
-#include "fft_menu.h"
-#include "main.h"
-#include "actions.h"
-#include "gpio.h"
-#include "old_protocol.h"
-#include "new_protocol.h"
-#ifdef CLIENT_SERVER
-#include "server_menu.h"
-#endif
-#ifdef MIDI
-#include "midi_menu.h"
-#endif
+#include <gdk/gdk.h>           // for GdkEventButton, GdkRGBA, GdkEvent
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for TRUE, gboolean, gpointer, FALSE
+#include <gtk/gtk.h>           // for gtk_button_new_with_label, gtk_grid_at...
+#include <stdio.h>             // for NULL
+#include "about_menu.h"        // for about_menu
+#include "agc_menu.h"          // for agc_menu
+#include "ant_menu.h"          // for ant_menu
+#include "band_menu.h"         // for band_menu
+#include "bandstack_menu.h"    // for bandstack_menu
+#include "cw_menu.h"           // for cw_menu
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL
+#include "display_menu.h"      // for display_menu
+#include "diversity_menu.h"    // for diversity_menu
+#include "dsp_menu.h"          // for dsp_menu
+#include "encoder_menu.h"      // for encoder_menu
+#include "equalizer_menu.h"    // for equalizer_menu
+#include "exit_menu.h"         // for exit_menu
+#include "fft_menu.h"          // for fft_menu
+#include "filter_menu.h"       // for filter_menu
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "main.h"              // for top_window, CONTROLLER1, CONTROLLER2_V1
+#include "meter_menu.h"        // for meter_menu
+#include "mode_menu.h"         // for mode_menu
+#include "nb_menu.h"           // for nb_menu
+#include "noise_menu.h"        // for noise_menu
+#include "oc_menu.h"           // for oc_menu
+#include "pa_menu.h"           // for pa_menu
+#include "radio.h"             // for can_transmit, protocol, RECEIVERS, n_adc
+#include "radio_menu.h"        // for radio_menu
+#include "rigctl_menu.h"       // for rigctl_menu
+#include "rx_menu.h"           // for rx_menu
+#include "step_menu.h"         // for step_menu
+#include "store_menu.h"        // for store_menu
+#include "switch_menu.h"       // for switch_menu
+#include "toolbar_menu.h"      // for toolbar_menu
+#include "tx_menu.h"           // for tx_menu
+#include "vfo_menu.h"          // for vfo_menu
+#include "vox_menu.h"          // for vox_menu
+#include "xvtr_menu.h"         // for xvtr_menu
 
 static GtkWidget *dialog=NULL;
 

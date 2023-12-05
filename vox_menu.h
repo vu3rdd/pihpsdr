@@ -16,6 +16,9 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+#include <gdk/gdk.h>  // for GdkEventButton
+#include <glib.h>     // for gboolean, gpointer
+#include <gtk/gtk.h>  // for GtkWidget
 
 void vox_menu(GtkWidget *parent);
 gboolean vox_cb (GtkWidget *widget, GdkEventButton *event, gpointer data);

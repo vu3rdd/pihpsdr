@@ -17,24 +17,21 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "receiver.h"
-#include "radio.h"
-#include "vfo.h"
-#include "sliders.h"
 #include "zoompan.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "actions.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkRGBA
+#include <glib-object.h>       // for g_signal_handler_block, g_signal_handl...
+#include <glib.h>              // for g_print, g_mutex_lock, g_mutex_unlock
+#include <gtk/gtk.h>           // for gtk_range_set_value, GTK_RANGE, gtk_wi...
+#include <stdio.h>             // for NULL, sprintf
+#include "actions.h"           // for PAN, ZOOM
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace
+#include "main.h"              // for top_window
+#include "pango/pango-font.h"  // for pango_font_description_from_string
+#include "radio.h"             // for active_receiver, receiver, display_zoo...
+#include "receiver.h"          // for RECEIVER, receiver_change_pan, receive...
+#include "sliders.h"           // for scale_status, scale_dialog, scale_time...
+#include "vfo.h"               // for vfo_update
 
 static int width;
 static int height;

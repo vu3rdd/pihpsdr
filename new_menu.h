@@ -1,3 +1,5 @@
+#include <gtk/gtk.h>
+
 extern GtkWidget *sub_menu;
 
 extern void new_menu();

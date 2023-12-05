@@ -18,20 +18,15 @@
 *
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "bandstack.h"
-#include "band.h"
-#include "filter.h"
-#include "mode.h"
-#include "alex.h"
-#include "property.h"
 #include "store.h"
-#include "store_menu.h"
-#include "log.h"
+#include <stdio.h>       // for sprintf
+#include <stdlib.h>      // for atoi, atoll
+#include <string.h>      // for strcpy, strlen
+#include "filter.h"      // for filterF0
+#include "log.h"         // for log_trace
+#include "mode.h"        // for modeCWU
+#include "property.h"    // for getProperty, setProperty
+#include "store_menu.h"  // for NUM_OF_MEMORYS
 
 /*
 struct MEM {

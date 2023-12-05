@@ -17,35 +17,24 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <math.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "agc.h"
-#include "band.h"
-#include "channel.h"
-#include "discovered.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
 #include "rx_panadapter.h"
-#include "vfo.h"
-#include "mode.h"
-#include "actions.h"
-#ifdef GPIO
-#include "gpio.h"
-#endif
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
+#include <gdk/gdk.h>           // for gdk_window_create_similar_surface, Gdk...
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gboolean, gpointer, gfloat, FALSE, TRUE
+#include <gtk/gtk.h>           // for GtkWidget, gtk_widget_get_allocated_he...
+#include <math.h>              // for floor
+#include <stdio.h>             // for sprintf
+#include <stdlib.h>            // for abs, NULL
+#include "adc.h"               // for ADC
+#include "agc.h"               // for AGC_FAST, AGC_MEDIUM, AGC_OFF
+#include "band.h"              // for BAND, CHANNEL, band_channels_60m, band...
+#include "cairo.h"             // for cairo_move_to, cairo_set_source_rgb
+#include "discovered.h"        // for DEVICE_HERMES_LITE2, ORIGINAL_PROTOCOL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "mode.h"              // for modeCWL, modeCWU
+#include "radio.h"             // for adc, filter_board, ALEX, cw_keyer_side...
+#include "receiver.h"          // for RECEIVER, receiver_button_press_event
+#include "vfo.h"               // for _vfo, vfo
 
 #define LINE_WIDTH 0.5
 

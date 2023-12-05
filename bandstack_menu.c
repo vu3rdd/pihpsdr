@@ -17,22 +17,22 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "bandstack_menu.h"
-#include "band.h"
-#include "bandstack.h"
-#include "filter.h"
-#include "radio.h"
-#include "receiver.h"
-#include "vfo.h"
-#include "button_text.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, TRUE, gboolean, FALSE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for GtkWidget, GTK_GRID, gtk_button_new_wi...
+#include <stdio.h>             // for NULL, sprintf
+#include "band.h"              // for band_get_band, BAND
+#include "bandstack.h"         // for BANDSTACK_ENTRY, BANDSTACK
+#include "button_text.h"       // for set_button_text_color
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "mode.h"              // for mode_string
+#include "new_menu.h"          // for sub_menu, NO_MENU, active_menu
+#include "radio.h"             // for active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "vfo.h"               // for _vfo, vfo_bandstack_changed, vfo
 
 static GtkWidget *parent_window=NULL;
 

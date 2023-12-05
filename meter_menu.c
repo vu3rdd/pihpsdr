@@ -17,20 +17,17 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "new_menu.h"
-#include "receiver.h"
 #include "meter_menu.h"
-#include "meter.h"
-#include "radio.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, TRUE, gboolean, FALSE
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_toggle_button_set...
+#include <stdlib.h>            // for NULL
+#include <wdsp.h>              // for RXA_S_AV, RXA_S_PK, TXA_ALC_AV, TXA_AL...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for alc, smeter, analog_meter, with_gain
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

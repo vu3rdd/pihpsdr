@@ -17,14 +17,13 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdbool.h>
-
-#include "radio.h"
-#include "transmitter.h"
 #include "vox.h"
-#include "vfo.h"
-#include "ext.h"
+#include <glib.h>         // for g_idle_add, g_source_remove, g_timeout_add
+#include <glib/gtypes.h>  // for GINT_TO_POINTER
+#include <stddef.h>       // for NULL
+#include "ext.h"          // for ext_vfo_update, ext_vox_changed
+#include "radio.h"        // for vox_enabled, vox_hang, vox_threshold
+#include "transmitter.h"  // for TRANSMITTER
 
 static guint vox_timeout=0;
 

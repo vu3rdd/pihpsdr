@@ -14,25 +14,23 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "filter_menu.h"
-#include "band.h"
-#include "bandstack.h"
-#include "filter.h"
-#include "mode.h"
-#include "radio.h"
-#include "receiver.h"
-#include "vfo.h"
-#include "button_text.h"
-#include "ext.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, gboolean, FALSE, TRUE, g_idl...
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_button...
+#include <stdio.h>             // for NULL, sprintf
+#include "button_text.h"       // for set_button_text_color
+#include "ext.h"               // for ext_vfo_update
+#include "filter.h"            // for FILTER, filters, FILTERS
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "mode.h"              // for modeCWL, modeCWU, modeFMN
+#include "new_menu.h"          // for sub_menu, NO_MENU, active_menu
+#include "radio.h"             // for active_receiver, transmitter
+#include "receiver.h"          // for RECEIVER, set_filter, set_deviation
+#include "transmitter.h"       // for tx_set_filter, transmitter_set_deviation
+#include "vfo.h"               // for _vfo, vfo, vfo_filter_changed
 
 static GtkWidget *parent_window=NULL;
 

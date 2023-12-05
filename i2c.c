@@ -1,26 +1,14 @@
 #ifdef GPIO
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <stdbool.h>
-#include <gtk/gtk.h>
-
 #include "i2c.h"
-#include "actions.h"
-#include "gpio.h"
-#include "band.h"
-#include "band_menu.h"
-#include "bandstack.h"
-#include "radio.h"
-#include "toolbar.h"
-#include "vfo.h"
-#include "ext.h"
+#include <errno.h>          // for errno
+#include <fcntl.h>          // for open, O_RDWR
+#include <glib.h>           // for g_print, g_strerror, g_malloc, g_idle_add
+#include <i2c/smbus.h>      // for i2c_smbus_read_word_data, i2c_smbus_write...
+#include <linux/i2c-dev.h>  // for I2C_SLAVE
+#include <stdio.h>          // for fprintf, stderr
+#include <sys/ioctl.h>      // for ioctl
+#include "actions.h"        // for PROCESS_ACTION, process_action, PRESSED
+#include "gpio.h"           // for SWITCH, switches
 
 char *i2c_device="/dev/i2c-1";
 unsigned int i2c_address_1=0X20;

@@ -17,17 +17,17 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "fft_menu.h"
-#include "radio.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, gboolean, FALSE, TRUE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_toggle...
+#include <stdio.h>             // for NULL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for set_filter_type, receiver
+#include "receiver.h"          // for RECEIVER
 
 static GtkWidget *parent_window=NULL;
 

@@ -17,33 +17,24 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <math.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <stdbool.h>
-#include <wdsp.h>
-
-#include "agc.h"
-#include "band.h"
-#include "channel.h"
-#include "discovered.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
 #include "tx_panadapter.h"
-#include "vfo.h"
-#include "mode.h"
-#include "actions.h"
-#ifdef GPIO
-#include "gpio.h"
-#endif
-#include "ext.h"
-#include "new_menu.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkEventButton, GdkEventMotion, gdk_wi...
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for TRUE, gboolean, FALSE, gpointer, g_idl...
+#include <gtk/gtk.h>           // for gtk_widget_get_allocated_width, GtkWidget
+#include <math.h>              // for floor
+#include <stdio.h>             // for sprintf
+#include <stdlib.h>            // for abs, NULL
+#include "band.h"              // for BAND, band_get_band
+#include "cairo.h"             // for cairo_move_to, cairo_set_source_rgb
+#include "discovered.h"        // for DEVICE_HERMES_LITE2, ORIGINAL_PROTOCOL
+#include "ext.h"               // for ext_start_tx
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace
+#include "mode.h"              // for modeCWL, modeCWU
+#include "radio.h"             // for transmitter, cw_keyer_sidetone_frequency
+#include "transmitter.h"       // for TRANSMITTER
+#include "vfo.h"               // for vfo_move, _vfo, vfo, get_tx_mode, get_...
 
 static gint last_x;
 static gboolean has_moved=FALSE;

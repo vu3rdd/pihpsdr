@@ -17,7 +17,6 @@
 *
 */
 
-#include <gtk/gtk.h>
 #include "discovered.h"
 
 int selected_device=0;

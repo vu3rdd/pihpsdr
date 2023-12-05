@@ -18,27 +18,23 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "store_menu.h"
-#include "band.h"
-#include "bandstack.h"
-#include "filter.h"
-#include "mode.h"
-#include "radio.h"
-#include "rigctl.h"
-#include "band.h"
-#include "vfo.h"
-#include "button_text.h"
-#include "store.h"
-#include "ext.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, gboolean, FALSE, TRUE, g_idl...
+#include <glib/gtypes.h>       // for GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for GtkWidget, gtk_button_new_with_label
+#include <stdio.h>             // for sprintf, NULL
+#include <string.h>            // for strcpy
+#include "band.h"              // for get_band_from_frequency
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_debug, log_trace
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "store.h"             // for MEM, mem, memSaveState
+#include "vfo.h"               // for _vfo, vfo, vfo_filter_changed, vfo_mod...
 
 static GtkWidget *parent_window=NULL;
 

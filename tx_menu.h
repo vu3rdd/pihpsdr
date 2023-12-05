@@ -14,6 +14,7 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+#include <gtk/gtk.h>  // for GtkWidget
 
 extern void tx_menu(GtkWidget *parent);
 extern void set_tune(double value);

@@ -1,7 +1,9 @@
 #ifndef RIGCTL_H
 #define RIGCTL_H
 
-#include <stdbool.h>
+#include <glib.h>     // for gpointer
+#include <stdbool.h>  // for bool
+#include <stdint.h>   // for uint32_t
 
 void launch_rigctl ();
 int launch_serial ();

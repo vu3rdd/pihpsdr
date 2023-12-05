@@ -17,4 +17,6 @@
 *
 */
 
+#include <gtk/gtk.h>  // for GtkWidget
+
 extern void about_menu(GtkWidget *parent);

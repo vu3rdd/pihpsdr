@@ -18,7 +18,5 @@
 */
 
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <string.h>
 
 extern void pa_menu(GtkWidget *parent);

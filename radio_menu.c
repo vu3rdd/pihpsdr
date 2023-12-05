@@ -17,35 +17,24 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "discovered.h"
-#include "new_menu.h"
 #include "radio_menu.h"
-#include "adc.h"
-#include "band.h"
-#include "filter.h"
-#include "radio.h"
-#include "receiver.h"
-#include "sliders.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "actions.h"
-#ifdef GPIO
-#include "gpio.h"
-#endif
-#include "vfo.h"
-#include "ext.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, g_idle_add, FALSE, gboolean
+#include <glib/gtypes.h>       // for GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_toggle_button_set...
+#include <stdio.h>             // for NULL
+#include "band.h"              // for band_get_band, BAND, band_get_current_...
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DISCO...
+#include "ext.h"               // for ext_vfo_update, ext_split_toggle
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "main.h"              // for display_width, display_height
+#include "new_menu.h"          // for sub_menu
+#include "new_protocol.h"      // for filter_board_changed, schedule_high_pr...
+#include "radio.h"             // for filter_board, protocol, active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "sliders.h"           // for att_type_changed
+#include "transmitter.h"       // for reconfigure_transmitter, TRANSMITTER
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

@@ -17,25 +17,21 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <wdsp.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
-#include "band.h"
-#include "filter.h"
-#include "mode.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
-#include "vfo.h"
-#include "button_text.h"
-#include "ext.h"
+#include <ctype.h>             // for isdigit
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for g_idle_add, gpointer, g_malloc, gchar
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_label_...
+#include <stdio.h>             // for sprintf, NULL
+#include <stdlib.h>            // for atof
+#include <string.h>            // for strcmp, strcpy, strlen
+#include "button_text.h"       // for set_button_text_color
+#include "ext.h"               // for ext_vfo_update, ext_set_frequency
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu, NO_MENU, active_menu
+#include "radio.h"             // for locked, rit_increment, active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "vfo.h"               // for SET_FREQUENCY, steps, STEPS, step_labels
 
 static GtkWidget *parent_window=NULL;
 static gint v;

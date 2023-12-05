@@ -20,49 +20,42 @@
  * greatly with hamlib integration!
  */
 
-#include <stdbool.h>
-
-#include <errno.h>
-#include <fcntl.h>
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-// #include <semaphore.h>
-#include "agc.h"
-#include "band.h"
-#include "band_menu.h"
-#include "bandstack.h"
-#include "channel.h"
-#include "ext.h"
-#include "filter.h"
-#include "filter_menu.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#include "noise_menu.h"
-#include "old_protocol.h"
-#include "radio.h"
-#include "receiver.h"
 #include "rigctl.h"
-#include "rigctl_menu.h"
-#include "rx_menu.h"
-#include "sliders.h"
-#include "store.h"
-#include "toolbar.h"
-#include "transmitter.h"
-#include "vfo.h"
-#include "zoompan.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <wdsp.h>
-#ifdef LOCALCW
-#include "iambic.h" // declare keyer_update()
-#endif
-#include <math.h>
-#include "log.h"
+#include <termios.h>
+#include <errno.h>                 // for errno
+#include <fcntl.h>                 // for fcntl, O_NONBLOCK, open, F_GETFL
+#include <glib/gtypes.h>           // for GPOINTER_TO_INT
+#include <math.h>                  // for fmin, fmax, round
+#include <netinet/in.h>            // for sockaddr_in, INADDR_ANY, htons
+#include <stdbool.h>               // for false, true, bool
+#include <stdio.h>                 // for sprintf, NULL, perror, FILE, ssize_t
+#include <stdlib.h>                // for atoi, strtol, atoll, abs, atof
+#include <string.h>                // for strcpy, strerror, strncpy, memset
+#include <sys/socket.h>            // for setsockopt, linger, SOL_SOCKET
+#include <termios.h>               // for tcgetattr, tcsetattr, cc_t, cfseti...
+#include <unistd.h>                // for usleep, close, _exit, read, write
+#include <wdsp.h>                  // for SetRXAANFRun
+#include "adc.h"                   // for ADC
+#include "band.h"                  // for band20, band10, band12, band136
+#include "discovered.h"            // for ORIGINAL_PROTOCOL
+#include "ext.h"                   // for local_set_frequency, band_minus
+#include "filter.h"                // for FILTER, filterVar1, filters, FILTERS
+#include "iambic.h"                // for keyer_update
+#include "log.h"                   // for log_error, log_debug, log_trace
+#include "mode.h"                  // for modeLSB, modeAM, modeCWL, modeCWU
+#include "new_menu.h"              // for start_bandstack
+#include "new_protocol.h"          // for new_protocol_stop
+#include "noise_menu.h"            // for update_noise
+#include "old_protocol.h"          // for old_protocol_stop
+#include "radio.h"                 // for receiver, active_receiver, transmi...
+#include "receiver.h"              // for RECEIVER, set_agc
+#include "rigctl_menu.h"           // for rigctl_debug, ser_port, disable_se...
+#include "rx_menu.h"               // for toggle_audio_output_device
+#include "sliders.h"               // for update_af_gain, set_agc_gain, set_...
+#include "toolbar.h"               // for mox_update, tune_update
+#include "transmitter.h"           // for TRANSMITTER, tx_set_mode, cw_not_r...
+#include "vfo.h"                   // for _vfo, vfo_update, vfo, VFO_A, vfo_...
+#include "zoompan.h"               // for set_zoom
 
 #define NEW_PARSER
 

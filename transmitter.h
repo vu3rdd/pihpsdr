@@ -20,7 +20,9 @@
 #ifndef _TRANSMITTER_H
 #define _TRANSMITTER_H
 
-#include <gtk/gtk.h>
+#include <glib.h>     // for gint, gboolean, gchar
+#include <gtk/gtk.h>  // for GtkWidget
+#include "cairo.h"    // for cairo_surface_t
 
 #define CTCSS_FREQUENCIES 38
 extern double ctcss_frequencies[CTCSS_FREQUENCIES];

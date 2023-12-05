@@ -17,40 +17,23 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "actions.h"
-#include "gpio.h"
 #include "toolbar.h"
-#include "mode.h"
-#include "filter.h"
-#include "bandstack.h"
-#include "band.h"
-#include "discovered.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "vfo.h"
-#include "alex.h"
-#include "agc.h"
-#include "channel.h"
-#include "wdsp.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
-#include "property.h"
-#include "new_menu.h"
-#include "button_text.h"
-#include "ext.h"	
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkRGBA
+#include <glib-object.h>       // for G_OBJECT, g_signal_connect
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for GtkWidget, gtk_button_new_with_label
+#include <stdio.h>             // for NULL
+#include "actions.h"           // for ACTION_TABLE, ActionTable, PROCESS_ACTION
+#include "band.h"              // for canTransmit
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for SWITCH, switches_controller1
+#include "log.h"               // for log_trace
+#include "new_menu.h"          // for start_agc, start_band, start_bandstack
+#include "radio.h"             // for setTune, setMox, getMox, getTune, tran...
+#include "receiver.h"          // for set_offset, RECEIVER
+#include "transmitter.h"       // for transmitter_set_out_of_band
+#include "vfo.h"               // for _vfo, vfo
 
 int function=0;
 

@@ -17,21 +17,19 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-
-#include "new_menu.h"
 #include "rigctl_menu.h"
-#include "rigctl.h"
-#include "band.h"
-#include "radio.h"
-#include "vfo.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib/gtypes.h>       // for GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, GtkW...
+#include <stdio.h>             // for NULL
+#include <string.h>            // for strcpy
+#include <termios.h>           // for B9600, B19200, B38400, B4800
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace, log_debug
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for disable_rigctl
+#include "rigctl.h"            // for launch_rigctl, launch_serial, rigctl_e...
 
 gboolean  serial_enable = TRUE; // edit (enable serial at startup)
 char ser_port[64]="/dev/ttyACM0";

@@ -17,17 +17,20 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "pa_menu.h"
-#include "band.h"
-#include "radio.h"
-#include "vfo.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for FALSE, TRUE, gpointer, gboolean, g_print
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_combo_...
+#include <stdio.h>             // for NULL, sprintf
+#include <string.h>            // for strlen
+#include "band.h"              // for BAND, band_get_band, BANDS, band10, band6
+#include "discovered.h"        // for DEVICE_HERMES_LITE, DEVICE_HERMES_LITE2
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for pa_trim, pa_power, calcDriveLevel, tx_...
+#include "vfo.h"               // for get_tx_vfo, _vfo, vfo
 
 static GtkWidget *parent_window=NULL;
 

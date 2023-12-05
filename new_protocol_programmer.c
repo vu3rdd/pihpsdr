@@ -16,31 +16,17 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if_arp.h>
-#include <net/if.h>
-#include <sys/stat.h>
-#include <ifaddrs.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <time.h>
-#include <math.h>
-#include <errno.h>
-
-#include <gtk/gtk.h>
-
-#include "discovered.h"
-#include "new_protocol.h"
+#include <errno.h>         // for errno, ETIMEDOUT
+#include <netinet/in.h>    // for sockaddr_in, htons
+#include <pthread.h>       // for pthread_create, pthread_t
+#include <semaphore.h>     // for sem_timedwait
+#include <stdio.h>         // for fprintf, stderr, fseek, NULL, fclose, fopen
+#include <stdlib.h>        // for exit, malloc
+#include <string.h>        // for memcpy, memset
+#include <sys/socket.h>    // for sendto
+#include <time.h>          // for clock_gettime, timespec, CLOCK_REALTIME
+#include "discovered.h"    // for DISCOVERED, _DISCOVERED::(anonymous), network
+#include "new_protocol.h"  // for response, response_sem, data_socket, PROGR...
 
 static long sequence;
 static long block_sequence;

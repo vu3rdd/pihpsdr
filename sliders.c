@@ -29,36 +29,23 @@
 //#define COMPRESSION_SLIDER_INSTEAD_OF_SQUELCH 1
 //
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <stdbool.h>
-
-#include "receiver.h"
 #include "sliders.h"
-#include "mode.h"
-#include "filter.h"
-#include "bandstack.h"
-#include "band.h"
-#include "discovered.h"
-#include "new_protocol.h"
-#include "vfo.h"
-#include "alex.h"
-#include "agc.h"
-#include "channel.h"
-#include "wdsp.h"
-#include "radio.h"
-#include "transmitter.h"
-#include "property.h"
-#include "main.h"
-#include "ext.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "actions.h"
-#include "log.h"
+#include <glib-object.h>       // for g_signal_connect, G_OBJECT
+#include <gtk/gtk.h>           // for gtk_range_set_value, gtk_widget_show
+#include <math.h>              // for pow
+#include <stdio.h>             // for NULL, sprintf
+#include <stdlib.h>            // for atoi, free
+#include "actions.h"           // for AF_GAIN, AGC_GAIN, ATTENUATION, COMPRE...
+#include "adc.h"               // for ADC
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace
+#include "main.h"              // for top_window
+#include "pango/pango-font.h"  // for pango_font_description_from_string
+#include "radio.h"             // for active_receiver, adc, receiver, displa...
+#include "receiver.h"          // for RECEIVER
+#include "transmitter.h"       // for TRANSMITTER
+#include "wdsp.h"              // for GetRXAAGCHangLevel, GetRXAAGCThresh
 
 static int width;
 static int height;

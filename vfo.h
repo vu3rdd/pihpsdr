@@ -20,7 +20,9 @@
 #ifndef _VFO_H
 #define _VFO_H
 
-#include "mode.h"
+#include <glib.h>         // for gboolean
+#include <glib/gtypes.h>  // for gint64
+#include <gtk/gtk.h>      // for GtkWidget
 
 enum { VFO_A = 0, VFO_B, MAX_VFOS };
 

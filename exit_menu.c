@@ -17,23 +17,21 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "new_menu.h"
 #include "exit_menu.h"
-#include "discovery.h"
-#include "radio.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "actions.h"
-#ifdef GPIO
-#include "gpio.h"
-#endif
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEventButton, GdkEvent
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gboolean, gpointer, TRUE, FALSE
+#include <gtk/gtk.h>           // for GtkWidget, gtk_button_new_with_label
+#include <stdio.h>             // for NULL
+#include <stdlib.h>            // for system
+#include <unistd.h>            // for _exit
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for gpio_close
+#include "new_menu.h"          // for sub_menu
+#include "new_protocol.h"      // for new_protocol_stop
+#include "old_protocol.h"      // for old_protocol_stop
+#include "radio.h"             // for radioSaveState, protocol
 
 static GtkWidget *parent_window=NULL;
 

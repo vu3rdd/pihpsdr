@@ -17,21 +17,20 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
-#include <wdsp.h>
-
-#include "new_menu.h"
 #include "about_menu.h"
-#include "discovered.h"
-#include "radio.h"
+#include <arpa/inet.h>         // for inet_ntoa
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for TRUE, gboolean, gpointer, FALSE
+#include <gtk/gtk.h>           // for GtkWidget, gtk_grid_attach, GTK_GRID
+#include <netinet/in.h>        // for sockaddr_in
+#include <stdio.h>             // for sprintf, NULL
+#include <string.h>            // for strcat, strcpy
+#include <wdsp.h>              // for GetWDSPVersion
+#include "discovered.h"        // for DISCOVERED, _DISCOVERED::(anonymous)
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for radio
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

@@ -1,4 +1,8 @@
-#include <gtk/gtk.h>
+#include <glib-object.h>         // for g_object_unref
+#include <glib.h>                // for g_snprintf, gchar
+#include <gtk/gtk.h>             // for gtk_style_context_add_provider, gtk_...
+#include <stddef.h>              // for NULL
+#include "gtk/gtkcssprovider.h"  // for gtk_css_provider_load_from_data, gtk...
 
 void set_button_text_color(GtkWidget *widget,char *color) {
   GtkStyleContext *style_context;

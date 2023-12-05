@@ -17,7 +17,13 @@
 *
 */
 
-#include <gtk/gtk.h>
+#include <gdk/gdk.h>           // for GdkRGBA
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, FALSE, gboolean
+#include <gtk/gtk.h>           // for GtkWidget, gtk_drawing_area_new, gtk_w...
+#include <stdio.h>             // for fprintf, stderr
+#include "cairo.h"             // for cairo_paint, cairo_set_source_rgb, cai...
+#include "gobject/gclosure.h"  // for G_CALLBACK
 
 static gboolean draw_led_cb (GtkWidget *widget, cairo_t *cr, gpointer data) {
   GdkRGBA *color=(GdkRGBA *)data;

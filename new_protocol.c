@@ -20,47 +20,34 @@
 
 //#define ECHO_MIC
 
-#include <gtk/gtk.h>
-
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if_arp.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#include <semaphore.h>
-#include <math.h>
-#include <sys/select.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "alex.h"
-#include "audio.h"
-#include "band.h"
 #include "new_protocol.h"
-#include "channel.h"
-#include "discovered.h"
-#include "mode.h"
-#include "filter.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
-#include "signal.h"
-#include "vfo.h"
-#include "toolbar.h"
-#include "vox.h"
-#include "ext.h"
-#include "iambic.h"
+#include <arpa/inet.h>    // for inet_ntoa
+#include <errno.h>        // for errno
+#include <glib.h>         // for g_print, gpointer, g_thread_new, GThread
+#include <glib/gtypes.h>  // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <math.h>         // for sqrt
+#include <netinet/in.h>   // for sockaddr_in, htons, ntohs, IPPROTO_UDP
+#include <pthread.h>      // for pthread_mutex_lock, pthread_mutex_unlock
+#include <semaphore.h>    // for sem_init, sem_post, sem_wait, sem_t
+#include <stdio.h>        // for NULL
+#include <stdlib.h>       // for exit, free, malloc, abort
+#include <string.h>       // for memset, memcpy
+#include <sys/select.h>   // for select, FD_SET, FD_ZERO, fd_set
+#include <sys/socket.h>   // for sendto, recvfrom, setsockopt, bind, socket
+#include <sys/time.h>     // for timeval, gettimeofday
+#include <unistd.h>       // for usleep, close
+#include "adc.h"          // for ADC
+#include "alex.h"         // for ALEX_RX_ANTENNA_BYPASS, ALEX_RX_ANTENNA_EXT1
+#include "audio.h"        // for audio_get_next_mic_sample, audio_open_input
+#include "band.h"         // for band_get_band, BAND
+#include "discovered.h"   // for DISCOVERED, _DISCOVERED::(anonymous), network
+#include "ext.h"          // for ext_mox_update
+#include "iambic.h"       // for keyer_event
+#include "mode.h"         // for modeCWL, modeCWU
+#include "radio.h"        // for isTransmitting, radio, receiver, transmitter
+#include "receiver.h"     // for RECEIVER, add_iq_samples, add_div_iq_samples
+#include "transmitter.h"  // for TRANSMITTER, add_mic_sample, add_ps_iq_samples
+#include "vfo.h"          // for _vfo, vfo, get_tx_mode, get_tx_vfo, VFO_A
 
 #define min(x,y) (x<y?x:y)
 

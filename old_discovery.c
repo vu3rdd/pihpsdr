@@ -17,27 +17,23 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if_arp.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/select.h>
-
-#include "discovered.h"
-#include "discovery.h"
 #include "old_discovery.h"
-#include "log.h"
+#include <arpa/inet.h>   // for inet_ntoa, inet_aton
+#include <errno.h>       // for errno, EINPROGRESS
+#include <fcntl.h>       // for fcntl, F_SETFL, O_NONBLOCK, F_GETFL
+#include <glib.h>        // for gpointer, g_main_context_iteration, g_thread...
+#include <ifaddrs.h>     // for ifaddrs, freeifaddrs, getifaddrs
+#include <net/if.h>      // for IFF_RUNNING, IFF_UP
+#include <netinet/in.h>  // for sockaddr_in, in_addr, htons, INADDR_BROADCAST
+#include <stdio.h>       // for perror, NULL, size_t
+#include <stdlib.h>      // for exit
+#include <string.h>      // for strcpy, memcpy, memset, strerror
+#include <sys/select.h>  // for timeval, select, FD_SET, FD_ZERO, fd_set
+#include <sys/socket.h>  // for setsockopt, socket, AF_INET, SOL_SOCKET, bind
+#include <unistd.h>      // for close
+#include "discovered.h"  // for DISCOVERED, discovered, devices, _DISCOVERED...
+#include "discovery.h"   // for ipaddr_tcp
+#include "log.h"         // for log_trace, log_error, log_debug
 
 static char interface_name[64];
 static struct sockaddr_in interface_addr={0};

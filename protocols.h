@@ -17,6 +17,9 @@
 *
 */
 
+#include <glib.h>     // for gboolean
+#include <gtk/gtk.h>  // for GtkWidget
+
 extern gboolean enable_protocol_1;
 extern gboolean enable_protocol_2;
 extern gboolean autostart;

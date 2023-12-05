@@ -17,41 +17,34 @@
  *
  */
 
-#include <gtk/gtk.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "agc.h"
-#include "audio.h"
-#include "band.h"
-#include "bandstack.h"
-#include "channel.h"
-#include "discovered.h"
-#include "ext.h"
-#include "filter.h"
-#include "main.h"
-#include "meter.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "property.h"
-#include "radio.h"
 #include "receiver.h"
-#include "rx_panadapter.h"
-#include "sliders.h"
-#include "transmitter.h"
-#include "vfo.h"
-#include "waterfall.h"
-#include "zoompan.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "log.h"
+#include <glib-object.h>    // for g_object_weak_ref, G_OBJECT, GObject
+#include <gtk/gtk.h>        // for gtk_fixed_put, gtk_widget_set_size_request
+#include <math.h>           // for ceil, fmax
+#include <stdio.h>          // for sprintf, NULL
+#include <stdlib.h>         // for atoi, atof, malloc
+#include <string.h>         // for strcpy, strlen
+#include <wdsp.h>           // for SetRXAAGCAttack, SetRXAAGCDecay, SetRXAAG...
+#include "agc.h"            // for AGC_MEDIUM, AGC_FAST, AGC_LONG, AGC_OFF
+#include "audio.h"          // for audio_open_output, audio_write
+#include "band.h"           // for BAND, band_get_band
+#include "discovered.h"     // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DEVICE_H...
+#include "ext.h"            // for ext_start_rx, ext_vfo_update
+#include "filter.h"         // for FILTER, filters
+#include "log.h"            // for log_trace, log_debug, log_error
+#include "meter.h"          // for meter_update, SMETER
+#include "mode.h"           // for modeCWL, modeCWU, modeFMN
+#include "new_menu.h"       // for menu_active_receiver_changed
+#include "new_protocol.h"   // for new_protocol_audio_samples, schedule_high...
+#include "old_protocol.h"   // for old_protocol_audio_samples
+#include "property.h"       // for getProperty, setProperty
+#include "radio.h"          // for active_receiver, isTransmitting, cw_keyer...
+#include "rx_panadapter.h"  // for rx_panadapter_init, rx_panadapter_update
+#include "sliders.h"        // for sliders_active_receiver_changed
+#include "transmitter.h"    // for tx_set_filter, tx_set_mode, TRANSMITTER
+#include "vfo.h"            // for _vfo, vfo, vfo_move, vfo_step, get_tx_mode
+#include "waterfall.h"      // for waterfall_init, waterfall_update
+#include "zoompan.h"        // for set_pan, zoompan_active_receiver_changed
 
 #define min(x, y) (x < y ? x : y)
 #define max(x, y) (x < y ? y : x)

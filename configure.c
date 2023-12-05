@@ -17,26 +17,16 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <glib.h>
-#include <glib/gprintf.h>
-#include <math.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "channel.h"
-#include "discovered.h"
-#include "actions.h"
-#include "gpio.h"
-#include "i2c.h"
-
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for g_print, gint, FALSE, TRUE, gchar, gpo...
+#include <glib/gprintf.h>      // for g_sprintf
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_label_new, gtk_la...
+#include <stdio.h>             // for sprintf
+#include <stdlib.h>            // for NULL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for ENCODER, encoders, gpio_restore_state
+#include "i2c.h"               // for i2c_sw, i2c_address_1, i2c_device
+#include "main.h"              // for controller, CONTROLLER2_V2, CONTROLLER1
 
 #ifdef GPIO
 

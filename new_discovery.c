@@ -17,25 +17,18 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if_arp.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <ifaddrs.h>
-#include <string.h>
-#include <errno.h>
-
-#include "discovered.h"
-//#include "discovery.h"
-
+#include <arpa/inet.h>   // for inet_ntoa
+#include <glib.h>        // for gpointer, g_main_context_iteration, g_thread...
+#include <ifaddrs.h>     // for ifaddrs, freeifaddrs, getifaddrs
+#include <net/if.h>      // for IFF_RUNNING, IFF_UP
+#include <netinet/in.h>  // for sockaddr_in, in_addr, htons, INADDR_BROADCAST
+#include <stdio.h>       // for fprintf, perror, stderr, NULL
+#include <stdlib.h>      // for exit
+#include <string.h>      // for strcpy, memcpy
+#include <sys/socket.h>  // for setsockopt, SOL_SOCKET, AF_INET, bind, recvfrom
+#include <sys/time.h>    // for timeval
+#include <unistd.h>      // for close
+#include "discovered.h"  // for DISCOVERED, discovered, devices, _DISCOVERED...
 
 static char interface_name[64];
 static struct sockaddr_in interface_addr={0};

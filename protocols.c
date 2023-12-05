@@ -17,19 +17,14 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <math.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include "protocols.h"
-#include "property.h"
-
+#include <gdk/gdk.h>           // for GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_check_...
+#include <stdio.h>             // for sprintf
+#include <stdlib.h>            // for atoi, NULL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "property.h"          // for getProperty, setProperty, clearProperties
 
 static GtkWidget *dialog;
 

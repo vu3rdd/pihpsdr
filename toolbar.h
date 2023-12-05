@@ -20,7 +20,10 @@
 #ifndef _TOOLBAR_H
 #define _TOOLBAR_H
 
-#include "gpio.h"
+#include <glib.h>     // for gpointer
+#include <gtk/gtk.h>  // for GtkWidget
+#include "gpio.h"     // for SWITCH
+
 #define MAX_FUNCTION 5
 
 extern int function;

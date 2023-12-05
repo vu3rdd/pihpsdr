@@ -17,20 +17,19 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "new_menu.h"
 #include "equalizer_menu.h"
-#include "radio.h"
-#include "channel.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEventButton, GdkEvent
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, FALSE, gboolean, TRUE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_scale_add_mark, gtk_range_set_value
+#include <stdio.h>             // for NULL
+#include <wdsp.h>              // for SetRXAEQRun, SetRXAGrphEQ, SetTXAEQRun
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for rx_equalizer, tx_equalizer, can_transmit
+#include "receiver.h"          // for RECEIVER
+#include "transmitter.h"       // for TRANSMITTER
 
 static GtkWidget *parent_window=NULL;
 

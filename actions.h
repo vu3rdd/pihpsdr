@@ -1,3 +1,4 @@
+#include <glib.h>  // for gint
 
 enum ACTION {
   NO_ACTION=0,

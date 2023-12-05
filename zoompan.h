@@ -18,6 +18,8 @@
 #ifndef _ZOOMPAN_H
 #define _ZOOMPAN_H
 
+#include <gtk/gtk.h>  // for GtkWidget
+
 #define MAX_ZOOM 8
 
 extern GtkWidget *zoompan_init(int my_width, int my_height);

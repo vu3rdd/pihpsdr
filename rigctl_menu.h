@@ -17,9 +17,8 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <string.h>
+#include <glib.h>     // for gboolean
+#include <gtk/gtk.h>  // for GtkWidget
 
 extern void rigctl_menu(GtkWidget *parent);
 extern char ser_port[];

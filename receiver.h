@@ -19,13 +19,13 @@
 #ifndef _RECEIVER_H
 #define _RECEIVER_H
 
-#include <gtk/gtk.h>
-#ifdef PORTAUDIO
-#include "portaudio.h"
-#else
-#include <pulse/pulseaudio.h>
-#include <pulse/simple.h>
-#endif
+#include <gdk-pixbuf/gdk-pixbuf.h>  // for GdkPixbuf
+#include <gdk/gdk.h>                // for GdkEventButton, GdkEventMotion
+#include <glib.h>                   // for gint, gdouble, gboolean, gpointer
+#include <glib/gtypes.h>            // for gint64, guint32
+#include <gtk/gtk.h>                // for GtkWidget
+#include <pulse/simple.h>           // for pa_simple
+#include "cairo.h"                  // for cairo_surface_t
 
 enum _audio_t {
     STEREO=0,

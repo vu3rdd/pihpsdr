@@ -17,44 +17,31 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <net/if_arp.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#include <semaphore.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "audio.h"
-#include "band.h"
-#include "channel.h"
-#include "discovered.h"
-#include "mode.h"
-#include "filter.h"
 #include "old_protocol.h"
-#include "radio.h"
-#include "receiver.h"
-#include "transmitter.h"
-#include "signal.h"
-#include "toolbar.h"
-#include "vfo.h"
-#include "ext.h"
-#include "iambic.h"
-#include "error_handler.h"
-#include "log.h"
+#include <arpa/inet.h>    // for inet_ntoa
+#include <errno.h>        // for errno, EAGAIN
+#include <glib.h>         // for gpointer, g_idle_add, g_thread_new, GThread
+#include <math.h>         // for sqrt
+#include <netinet/in.h>   // for sockaddr_in, htons, ntohs, IPPROTO_UDP
+#include <stdint.h>       // for uint32_t
+#include <stdio.h>        // for perror, NULL, size_t
+#include <stdlib.h>       // for exit
+#include <string.h>       // for memcpy, strerror
+#include <sys/socket.h>   // for setsockopt, SOL_SOCKET, recvfrom, sendto
+#include <sys/time.h>     // for timeval, gettimeofday
+#include <unistd.h>       // for usleep, close
+#include "adc.h"          // for ADC
+#include "audio.h"        // for audio_get_next_mic_sample, audio_open_input
+#include "band.h"         // for band_get_band, BAND, band_get_current, band...
+#include "discovered.h"   // for DISCOVERED, _DISCOVERED::(anonymous), network
+#include "ext.h"          // for ext_mox_update
+#include "iambic.h"       // for keyer_event
+#include "log.h"          // for log_error, log_trace, log_info, log_debug
+#include "mode.h"         // for modeCWL, modeCWU
+#include "radio.h"        // for isTransmitting, transmitter, receiver, device
+#include "receiver.h"     // for RECEIVER, add_iq_samples, add_div_iq_samples
+#include "transmitter.h"  // for TRANSMITTER, add_mic_sample, add_ps_iq_samples
+#include "vfo.h"          // for _vfo, vfo, get_tx_vfo, get_tx_mode, VFO_A
 
 #define min(x,y) (x<y?x:y)
 
@@ -404,7 +391,7 @@ static void open_udp_socket() {
     }
 
     // bind to the interface
-    log_trace("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
+    log_trace("binding UDP socket to %s:%d",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
     if(bind(tmp,(struct sockaddr*)&radio->info.network.interface_address,radio->info.network.interface_length)<0) {
 	log_error("old_protocol: bind socket failed for data_socket: %s", strerror(errno));
 	exit(-1);

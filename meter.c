@@ -17,23 +17,21 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <stdbool.h>
-
-#include "receiver.h"
 #include "meter.h"
-#include "radio.h"
-#include "wdsp.h"
-#include "radio.h"
-#include "mode.h"
-#include "vox.h"
-#include "new_menu.h"
-#include "vfo.h"
+#include <gdk/gdk.h>           // for gdk_window_create_similar_surface, GDK...
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gboolean, gpointer, TRUE, FALSE
+#include <gtk/gtk.h>           // for GtkWidget, gtk_drawing_area_new, gtk_w...
+#include <math.h>              // for M_PI, fmax, sqrt
+#include <stdio.h>             // for sprintf, NULL
+#include "adc.h"               // for ADC
+#include "cairo.h"             // for cairo_move_to, cairo_line_to, cairo_se...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for start_meter
+#include "radio.h"             // for adc, filter_board, vox_threshold, vox_...
+#include "receiver.h"          // for RECEIVER
+#include "vfo.h"               // for _vfo, vfo
+#include "vox.h"               // for vox_get_peak
 
 static GtkWidget *parent_window;
 

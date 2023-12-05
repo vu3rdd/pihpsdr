@@ -17,45 +17,26 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <math.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
-
-#ifdef MIDI
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#endif
-
-#include "discovered.h"
-#include "old_discovery.h"
-#include "new_discovery.h"
-#include "main.h"
-#include "radio.h"
-#ifdef USBOZY
-#include "ozyio.h"
-#endif
-#include "ext.h"
-#ifdef GPIO
-#include "actions.h"
-#include "gpio.h"
-#include "configure.h"
-#endif
-#include "protocols.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "property.h"
-#include "log.h"
+#include <arpa/inet.h>         // for inet_ntoa
+#include <gdk/gdk.h>           // for GdkEventButton, GdkRGBA, gdk_cursor_new
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, TRUE, gboolean, g_idle_add
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_button...
+#include <netinet/in.h>        // for sockaddr_in, in_addr
+#include <stdio.h>             // for NULL, fclose, fopen, sprintf, fgets
+#include <string.h>            // for strnlen, strncpy
+#include <unistd.h>            // for _exit
+#include "configure.h"         // for configure_gpio
+#include "discovered.h"        // for DISCOVERED, _DISCOVERED::(anonymous)
+#include "ext.h"               // for ext_discovery
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for gpio_set_defaults, gpio_restore_state
+#include "log.h"               // for log_trace, log_info
+#include "main.h"              // for status_text, controller, top_window
+#include "old_discovery.h"     // for old_discovery
+#include "pango/pango-font.h"  // for pango_font_description_from_string
+#include "protocols.h"         // for configure_protocols, protocols_restore...
+#include "radio.h"             // for start_radio, radio
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;

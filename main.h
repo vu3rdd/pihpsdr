@@ -20,7 +20,12 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#include <sys/utsname.h>
+#include <gdk/gdk.h>      // for GdkEventKey
+#include <glib.h>         // for gpointer
+#include <gtk/gtk.h>      // for GtkWidget
+#include <stdbool.h>      // for bool
+#include <sys/utsname.h>  // for utsname
+
 extern struct utsname unameData;
 
 enum {

@@ -23,45 +23,31 @@
 #define MAX_DISPLAY_WIDTH 1024 // edit
 #define MAX_DISPLAY_HEIGHT 600 // edit
 
-#include <arpa/inet.h>
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-#include <math.h>
-#include <netinet/in.h>
-#include <semaphore.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdbool.h>
-
-#include "actions.h"
-#include "audio.h"
-#include "band.h"
-#include "bandstack.h"
-#include "channel.h"
-#include "configure.h"
-#include "discovered.h"
 #include "main.h"
-#ifdef GPIO
-#include "gpio.h"
-#endif
-#include "button_text.h"
-#include "new_menu.h"
-#include "radio.h"
-#include "wdsp.h"
-#ifdef I2C
-#include "i2c.h"
-#endif
-#include "discovery.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "css.h"
-#include "ext.h"
-#include "vfo.h"
-
-#include "log.h"
+#include <gdk/gdk.h>           // for gdk_cursor_new, GdkEventKey, gdk_scree...
+#include <gio/gio.h>           // for g_application_run, G_APPLICATION, G_AP...
+#include <glib-object.h>       // for g_object_unref, g_signal_connect
+#include <gtk/gtk.h>           // for GtkWidget, gtk_events_pending, gtk_gri...
+#include <pthread.h>           // for pthread_create, pthread_t
+#include <stdbool.h>           // for bool
+#include <stdio.h>             // for perror
+#include <string.h>            // for strcpy, strlen
+#include <unistd.h>            // for _exit, usleep, getcwd
+#include "audio.h"             // for audio_get_cards
+#include "band.h"              // for canTransmit
+#include "css.h"               // for load_css
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL
+#include "ext.h"               // for ext_discovery, ext_vfo_update
+#include "gdk/gdkkeysyms.h"    // for GDK_KEY_d, GDK_KEY_space, GDK_KEY_u
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for gpio_close
+#include "log.h"               // for log_debug, log_warn
+#include "new_protocol.h"      // for setMox, getMox, getTune, new_protocol_...
+#include "old_protocol.h"      // for old_protocol_stop
+#include "radio.h"             // for radioSaveState, radio, step, protocol
+#include "transmitter.h"       // for transmitter_set_out_of_band
+#include "vfo.h"               // for vfo_move
+#include "wdsp.h"              // for WDSPwisdom, wisdom_get_status
 
 struct utsname unameData;
 

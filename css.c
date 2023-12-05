@@ -1,5 +1,9 @@
-#include <gtk/gtk.h>
 #include "css.h"
+#include <gdk/gdk.h>             // for gdk_display_get_default, gdk_display...
+#include <glib-object.h>         // for g_object_unref
+#include <gtk/gtk.h>             // for gtk_style_context_add_provider_for_s...
+#include <stddef.h>              // for NULL
+#include "gtk/gtkcssprovider.h"  // for gtk_css_provider_load_from_data, gtk...
 
 char *css=
 "  @define-color TOGGLE_ON rgb(100%,0%,0%);\n"

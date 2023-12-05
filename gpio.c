@@ -21,63 +21,38 @@
 // Note that all pin numbers are now the Broadcom GPIO
 
 
-#include <gtk/gtk.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <sched.h>
-
-#ifdef GPIO
-#include <gpiod.h>
-#include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
-#include <sys/ioctl.h>
-#endif
-
-#include "band.h"
-#include "channel.h"
-#include "discovered.h"
-#include "mode.h"
-#include "filter.h"
-#include "bandstack.h"
-#include "toolbar.h"
-#include "radio.h"
-#include "toolbar.h"
-#include "main.h"
-#include "property.h"
-#include "vfo.h"
-#include "wdsp.h"
-#include "new_menu.h"
-#include "encoder_menu.h"
-#include "diversity_menu.h"
-#include "actions.h"
 #include "gpio.h"
-#include "i2c.h"
-#include "ext.h"
-#include "sliders.h"
-#include "new_protocol.h"
-#include "zoompan.h"
-#ifdef LOCALCW
-#include "iambic.h"
-#include "log.h"
+#include <errno.h>     // for errno
+#include <gpiod.h>     // for gpiod_line_request_config, gpiod_chip_close
+#include <sched.h>     // for timespec
+#include <stdint.h>    // for uint64_t, uint32_t
+#include <stdio.h>     // for sprintf, NULL
+#include <stdlib.h>    // for atoi, exit
+#include <time.h>      // for clock_gettime, CLOCK_MONOTONIC_RAW
+#include <unistd.h>    // for usleep
+#include "actions.h"   // for NO_ACTION, MOX, FUNCTION, MENU_FREQUENCY, PROC...
+#include "i2c.h"       // for i2c_init, i2c_interrupt
+#include "iambic.h"    // for keyer_event
+#include "log.h"       // for log_trace, log_error, log_debug
+#include "main.h"      // for controller, NO_CONTROLLER, CONTROLLER2_V1, CON...
+#include "property.h"  // for setProperty, getProperty, clearProperties, loa...
+#include "radio.h"     // for vfo_encoder_divisor
+#include "toolbar.h"   // for function, update_toolbar_labels
 
 //
 // Broadcom pins #9, 10, 11 are not used
 // by Controller1 and Controller2_V1
 // (and keep #2,3 reserved for I2C extensions)
 //
+#ifdef LOCALCW
+
 int CWL_BUTTON=17; // was 9
 int CWR_BUTTON=21;  //was 11
 int SIDETONE_GPIO=10;
 int ENABLE_GPIO_SIDETONE=0;
 int ENABLE_CW_BUTTONS=1;
 int CW_ACTIVE_LOW=1;
+
 #endif
 
 #ifdef PTT

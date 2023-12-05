@@ -17,27 +17,20 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <glib/gprintf.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "new_menu.h"
-#include "agc_menu.h"
-#include "agc.h"
-#include "band.h"
-#include "channel.h"
-#include "radio.h"
-#include "receiver.h"
-#include "vfo.h"
-#include "button_text.h"
-#include "toolbar.h"
-#include "actions.h"
-#include "action_dialog.h"
-#include "gpio.h"
-#include "i2c.h"
+#include <gdk/gdk.h>           // for GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gint, gpointer, TRUE, g_print, gboolean
+#include <glib/gprintf.h>      // for g_sprintf
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_button_new_with_label, gtk_grid_at...
+#include <stdio.h>             // for NULL
+#include "action_dialog.h"     // for action_dialog
+#include "actions.h"           // for ACTION_TABLE, ActionTable, CONTROLLER_...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for SWITCH, switches_controller1, MAX_FUNC...
+#include "main.h"              // for controller, CONTROLLER1, NO_CONTROLLER
+#include "new_menu.h"          // for sub_menu, NO_MENU, active_menu
+#include "toolbar.h"           // for update_toolbar_labels
 
 static GtkWidget *parent_window=NULL;
 

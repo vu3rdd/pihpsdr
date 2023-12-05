@@ -20,7 +20,8 @@
 #ifndef _METER_H
 #define _METER_H
 
-#include <gtk/gtk.h>
+#include <gtk/gtk.h>   // for GtkWidget
+#include "receiver.h"  // for RECEIVER
 
 #define SMETER 0
 #define POWER 1

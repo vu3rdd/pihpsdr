@@ -17,22 +17,19 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "led.h"
-#include "new_menu.h"
-#include "radio.h"
-#include "transmitter.h"
-#include "vfo.h"
 #include "vox_menu.h"
-#include "vox.h"
-#include "ext.h"
-#include "log.h"
+#include <glib-object.h>       // for g_signal_connect, G_OBJECT
+#include <glib/gtypes.h>       // for GINT_TO_POINTER
+#include <gtk/gtk.h>           // for gtk_grid_attach, GtkWidget, gtk_widget...
+#include <stdio.h>             // for NULL
+#include <unistd.h>            // for usleep
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "led.h"               // for led_set_color, create_led
+#include "log.h"               // for log_debug
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for vox_enabled, vox_hang, vox_threshold
+#include "vox.h"               // for vox_get_peak
 
 static GtkWidget *parent_window=NULL;
 

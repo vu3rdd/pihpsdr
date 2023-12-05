@@ -17,5 +17,7 @@
  *
  */
 
+#include <gtk/gtk.h>  // for GtkWidget
+
 extern void rx_menu(GtkWidget *parent);
 extern void toggle_audio_output_device(void);

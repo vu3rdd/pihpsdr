@@ -17,44 +17,30 @@
  *
  */
 
-#include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <math.h>
-#include <net/if.h>
-#include <net/if_arp.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <semaphore.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <gtk/gtk.h>
-
-#include "agc.h"
-#include "band.h"
-#include "bandstack.h"
-#include "channel.h"
-#include "discovered.h"
-#include "filter.h"
-#include "main.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#include "property.h"
-#include "radio.h"
-#include "receiver.h"
-#include "rigctl.h"
-#include "toolbar.h"
-#include "transmitter.h"
 #include "vfo.h"
-#include "wdsp.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
-#include "ext.h"
-#include "screen.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkEventButton, gdk_window_create_simi...
+#include <glib-object.h>       // for g_signal_connect
+#include <gtk/gtk.h>           // for GtkWidget, gtk_drawing_area_new, gtk_w...
+#include <stdio.h>             // for sprintf
+#include <stdlib.h>            // for atoi, malloc, NULL, atoll, free, size_t
+#include <string.h>            // for memset, strncpy, strlen
+#include <sys/types.h>         // for uint
+#include "band.h"              // for BAND, band_get_band, bandstack_get_ban...
+#include "bandstack.h"         // for BANDSTACK_ENTRY, BANDSTACK
+#include "cairo.h"             // for cairo_set_source_rgb, cairo_show_text
+#include "discovered.h"        // for NEW_PROTOCOL
+#include "ext.h"               // for ext_vfo_update, ext_update_noise
+#include "filter.h"            // for FILTER, filterF6, filters
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace, log_debug
+#include "mode.h"              // for modeCWU, modeCWL, mode_string, MODES
+#include "new_menu.h"          // for start_vfo
+#include "new_protocol.h"      // for schedule_general, schedule_high_priority
+#include "property.h"          // for getProperty, setProperty
+#include "radio.h"             // for active_receiver, receiver, step, recei...
+#include "receiver.h"          // for RECEIVER, receiver_frequency_changed
+#include "screen.h"            // for widget_props_t, colour_t, default_widg...
+#include "transmitter.h"       // for tx_set_mode, TRANSMITTER
 
 static GtkWidget *parent_window;
 static int my_width;

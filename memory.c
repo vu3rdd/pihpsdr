@@ -17,9 +17,9 @@
 *
 */
 
-#include <sys/resource.h>
-#include <stdio.h>
-#include "log.h"
+#include <bits/types/struct_rusage.h>  // for rusage, rusage::(anonymous)
+#include <sys/resource.h>              // for getrusage, RUSAGE_SELF
+#include "log.h"                       // for log_trace
 
 void show_memory(char *title) {
   struct rusage r_usage;

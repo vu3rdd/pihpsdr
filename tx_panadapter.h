@@ -20,6 +20,8 @@
 #ifndef _PANADAPTER_H
 #define _PANADAPTER_H
 
+#include "transmitter.h"  // for TRANSMITTER
+
 void tx_panadapter_update(TRANSMITTER *tx);
 
 void tx_panadapter_init(TRANSMITTER *tx,int width,int height);

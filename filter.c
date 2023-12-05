@@ -17,16 +17,15 @@
 *
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-#include "sliders.h"
 #include "filter.h"
-#include "receiver.h"
-#include "vfo.h"
-#include "radio.h"
-#include "property.h"
+#include <glib.h>      // for gint
+#include <stdio.h>     // for sprintf, fprintf, stderr
+#include <stdlib.h>    // for atoi
+#include "property.h"  // for getProperty, setProperty
+#include "radio.h"     // for receiver
+#include "receiver.h"  // for RECEIVER
+#include "sliders.h"   // for set_filter_shift, set_filter_width
+#include "vfo.h"       // for _vfo, vfo, vfo_filter_changed
 
 FILTER filterLSB[FILTERS]={
     {-5150,-150,"5.0k"},

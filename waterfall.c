@@ -17,17 +17,18 @@
  *
  */
 
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-#include <math.h>
-#include <semaphore.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdbool.h>
-
-#include "radio.h"
-#include "vfo.h"
 #include "waterfall.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>  // for gdk_pixbuf_get_pixels, gdk_pixbuf...
+#include <gdk/gdk.h>                // for gdk_cairo_set_source_pixbuf, GdkE...
+#include <glib-object.h>            // for g_signal_connect
+#include <glib.h>                   // for gboolean, gpointer, FALSE, g_mute...
+#include <gtk/gtk.h>                // for GtkWidget, gtk_drawing_area_new
+#include <string.h>                 // for memset, memmove, size_t, NULL
+#include "adc.h"                    // for ADC
+#include "cairo.h"                  // for cairo_paint, cairo_t
+#include "gobject/gclosure.h"       // for G_CALLBACK
+#include "radio.h"                  // for adc, have_rx_gain, rx_gain_calibr...
+#include "vfo.h"                    // for _vfo, vfo
 
 #ifdef CLIENT_SERVER
 #include "client_server.h"

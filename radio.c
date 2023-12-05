@@ -17,71 +17,49 @@
  *
  */
 
-#include <arpa/inet.h>
-#include <gtk/gtk.h>
-#include <math.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <stdbool.h>
-
-#include <wdsp.h>
-
-#include "adc.h"
-#include "audio.h"
-#include "dac.h"
-#include "discovered.h"
-// #include "discovery.h"
-#include "actions.h"
-#include "agc.h"
-#include "band.h"
-#include "channel.h"
-#include "ext.h"
-#include "filter.h"
-#include "gpio.h"
-#include "main.h"
-#include "meter.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "property.h"
 #include "radio.h"
-#include "receiver.h"
-#include "rigctl.h"
-#include "rx_panadapter.h"
-#include "screen.h"
-#include "sliders.h"
-#include "store.h"
-#include "toolbar.h"
-#include "transmitter.h"
-#include "tx_panadapter.h"
-#include "vfo.h"
-#include "vox.h"
-#include "waterfall.h"
-#include "zoompan.h"
-#include "log.h"
-
-#ifdef LOCALCW
-#include "iambic.h"
-#endif
-#ifdef MIDI
-#include "alsa_midi.h"
-#include "midi_menu.h"
-// rather than including MIDI.h with all its internal stuff
-// (e.g. enum components) we just declare the single bit thereof
-// we need here to make a strict compiler happy.
-// extern void MIDIstartup();
-#endif
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
+#include <arpa/inet.h>         // for inet_ntoa
+#include <gdk/gdk.h>           // for gdk_cursor_new, gdk_window_set_cursor
+#include <glib-object.h>       // for g_object_ref, g_signal_connect
+#include <gtk/gtk.h>           // for gtk_fixed_put, gtk_container_remove
+#include <math.h>              // for fmin, pow, exp, log10, sqrt
+#include <netinet/in.h>        // for sockaddr_in
+#include <stdio.h>             // for sprintf, NULL
+#include <stdlib.h>            // for atoi, atof, atoll
+#include <string.h>            // for strcpy
+#include <sys/time.h>          // for gettimeofday, timeval
+#include <unistd.h>            // for usleep
+#include <wdsp.h>              // for SetChannelState, CloseChannel, SetTXAP...
+#include "adc.h"               // for ADC, ANTENNA_1, AUTOMATIC, HPF_13, HPF...
+#include "band.h"              // for bandstack60, get_band_from_frequency
+#include "bandstack.h"         // for BANDSTACK
+#include "channel.h"           // for CHANNEL_TX
+#include "dac.h"               // for DAC
+#include "discovered.h"        // for DISCOVERED, NEW_PROTOCOL, _DISCOVERED:...
+#include "ext.h"               // for ext_vfo_update
+#include "filter.h"            // for filterRestoreState, filterSaveState
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for gpio_init, gpio_restore_actions, gpio_...
+#include "iambic.h"            // for keyer_update
+#include "log.h"               // for log_trace, log_error
+#include "main.h"              // for display_width, top_window, display_height
+#include "meter.h"             // for meter_init
+#include "mode.h"              // for modeUSB, modeCWL, modeCWU, modeLSB
+#include "new_menu.h"          // for new_menu
+#include "new_protocol.h"      // for schedule_high_priority, schedule_recei...
+#include "old_protocol.h"      // for old_protocol_run, old_protocol_stop
+#include "pango/pango-font.h"  // for pango_font_description_from_string
+#include "property.h"          // for setProperty, getProperty, clearProperties
+#include "receiver.h"          // for RECEIVER, set_displaying, set_offset
+#include "rigctl.h"            // for close_rigctl_ports, launch_rigctl, lau...
+#include "screen.h"            // for SLIDERS_HEIGHT, ZOOMPAN_HEIGHT, TOOLBA...
+#include "sliders.h"           // for sliders_init, att_type_changed
+#include "store.h"             // for memRestoreState, memSaveState
+#include "toolbar.h"           // for toolbar_init
+#include "transmitter.h"       // for TRANSMITTER, tx_set_mode, create_trans...
+#include "vfo.h"               // for _vfo, vfo, get_tx_mode, get_tx_vfo
+#include "vox.h"               // for vox_cancel
+#include "zoompan.h"           // for zoompan_init
 
 #define min(x, y) (x < y ? x : y)
 #define max(x, y) (x < y ? y : x)

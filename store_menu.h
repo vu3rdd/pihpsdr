@@ -16,5 +16,9 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+
 #define NUM_OF_MEMORYS 5
+
+#include <gtk/gtk.h>  // for GtkWidget
+
 extern void store_menu(GtkWidget *parent);

@@ -20,6 +20,8 @@
 #ifndef _OLD_PROTOCOL_H
 #define _OLD_PROTOCOL_H
 
+#include "receiver.h"  // for RECEIVER
+
 extern void old_protocol_stop();
 extern void old_protocol_run();
 

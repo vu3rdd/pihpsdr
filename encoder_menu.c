@@ -17,26 +17,19 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <glib/gprintf.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "new_menu.h"
-#include "agc_menu.h"
-#include "agc.h"
-#include "band.h"
-#include "channel.h"
-#include "radio.h"
-#include "receiver.h"
-#include "vfo.h"
-#include "button_text.h"
-#include "actions.h"
-#include "action_dialog.h"
-#include "gpio.h"
-#include "i2c.h"
+#include <gdk/gdk.h>           // for GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for TRUE, gboolean, gpointer, gint, FALSE
+#include <glib/gprintf.h>      // for g_sprintf
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_set_name
+#include <stdio.h>             // for NULL, sprintf
+#include "action_dialog.h"     // for action_dialog
+#include "actions.h"           // for ACTION_TABLE, ActionTable, CONTROLLER_...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "gpio.h"              // for ENCODER, encoders
+#include "main.h"              // for CONTROLLER1, CONTROLLER2_V1, CONTROLLE...
+#include "new_menu.h"          // for sub_menu, NO_MENU, active_menu
 
 static GtkWidget *parent_window=NULL;
 

@@ -17,13 +17,11 @@
 *
 */
 
-#include <gtk/gtk.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "property.h"
-#include "log.h"
+#include <stdio.h>   // for NULL, fclose, fopen, sprintf, fgets, fwrite, FILE
+#include <stdlib.h>  // for malloc, free, atof
+#include <string.h>  // for strlen, strcpy, strcmp, strtok
+#include "log.h"     // for log_error
 
 PROPERTY* properties=NULL;
 

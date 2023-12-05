@@ -20,6 +20,9 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
+#include <time.h>      // for clock_gettime, CLOCK_MONOTONIC_RAW
+#include <glib.h>
+
 #define MAX_ENCODERS 5
 #define MAX_SWITCHES 16
 #define MAX_FUNCTIONS 6

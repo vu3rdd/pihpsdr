@@ -17,17 +17,18 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
-#include "radio.h"
-#include "vfo.h"
-#include "ext.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, TRUE, g_idle_add, gboolean
+#include <glib/gtypes.h>       // for GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for GtkWidget, gtk_grid_attach, GTK_GRID
+#include <stdio.h>             // for NULL
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "pango/pango-font.h"  // for pango_font_description_from_string
+#include "radio.h"             // for step
+#include "vfo.h"               // for step_labels, steps, STEPS
 
 static GtkWidget *parent_window=NULL;
 

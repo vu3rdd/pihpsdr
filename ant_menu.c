@@ -17,19 +17,20 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "ant_menu.h"
-#include "band.h"
-#include "radio.h"
-#include "new_protocol.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEventButton, GdkEvent
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, TRUE, gboolean, FALSE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, gtk_...
+#include <stdio.h>             // for NULL
+#include <string.h>            // for strlen
+#include "band.h"              // for BAND, BANDS, band_get_band, XVTRS, band10
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DEVIC...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for device, protocol, new_pa_board, set_al...
+#include "receiver.h"          // for RECEIVER
 
 static GtkWidget *parent_window=NULL;
 static GtkWidget *dialog=NULL;

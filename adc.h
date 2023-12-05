@@ -20,6 +20,8 @@
 #ifndef ADC_H
 #define ADC_H
 
+#include <stdbool.h>
+
 enum {
   AUTOMATIC=0,
   MANUAL

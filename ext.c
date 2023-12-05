@@ -17,40 +17,35 @@
 *
 */
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <gtk/gtk.h>
-#include <stdbool.h>
-
-#include "main.h"
-#include "discovery.h"
-#include "receiver.h"
-#include "sliders.h"
-#include "toolbar.h"
-#include "band_menu.h"
-#include "diversity_menu.h"
-#include "vfo.h"
-#include "radio.h"
-#include "radio_menu.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#ifdef PURESIGNAL
-#include "ps_menu.h"
-#endif
-#include "agc.h"
-#include "filter.h"
-#include "mode.h"
-#include "band.h"
-#include "bandstack.h"
-#include "noise_menu.h"
-#include "wdsp.h"
-#ifdef CLIENT_SERVER
-#include "client_server.h"
-#endif
 #include "ext.h"
-#include "zoompan.h"
+#include <glib.h>            // for g_idle_add, g_print, FALSE, g_timeout_add
+#include <glib/gtypes.h>     // for GPOINTER_TO_INT
+#include <gtk/gtk.h>         // for gtk_window_set_title, GTK_WINDOW
+#include <stdio.h>           // for NULL
+#include <stdlib.h>          // for free
+#include <string.h>          // for strlen
+#include "agc.h"             // for AGC_LAST
+#include "band.h"            // for BAND, band_get_band, BANDS, get_band_fro...
+#include "band_menu.h"       // for band_select_cb
+#include "bandstack.h"       // for BANDSTACK
+#include "discovered.h"      // for DISCOVERED, NEW_PROTOCOL
+#include "discovery.h"       // for discovery
+#include "diversity_menu.h"  // for update_diversity_gain, update_diversity_...
+#include "filter.h"          // for FILTERS
+#include "main.h"            // for top_window
+#include "mode.h"            // for MODES
+#include "new_menu.h"        // for start_filter, start_mode, start_band
+#include "new_protocol.h"    // for schedule_high_priority, schedule_receive...
+#include "noise_menu.h"      // for update_noise
+#include "radio.h"           // for active_receiver, transmitter, can_transmit
+#include "radio_menu.h"      // for setDuplex
+#include "receiver.h"        // for RECEIVER, set_agc, set_offset
+#include "sliders.h"         // for set_af_gain, set_agc_gain, set_attenuati...
+#include "toolbar.h"         // for function, mox_update, tune_update, updat...
+#include "transmitter.h"     // for TRANSMITTER, tx_set_mode, tx_set_twotone
+#include "vfo.h"             // for _vfo, vfo, _mode_settings, mode_settings
+#include "wdsp.h"            // for SetRXAANFRun
+#include "zoompan.h"         // for remote_set_pan, remote_set_zoom, set_pan
 
 
 // The following calls functions can be called usig g_idle_add

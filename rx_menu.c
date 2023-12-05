@@ -17,24 +17,24 @@
  *
  */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "audio.h"
-#include "band.h"
-#include "discovered.h"
-#include "filter.h"
-#include "new_menu.h"
-#include "new_protocol.h"
-#include "radio.h"
-#include "receiver.h"
 #include "rx_menu.h"
-#include "sliders.h"
-#include "log.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, g_malloc, g_free, g_malloc_n
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_toggle_button_set...
+#include <stdint.h>            // for intptr_t
+#include <stdio.h>             // for NULL, sprintf, size_t
+#include <string.h>            // for strcpy, strlen, strcmp
+#include "audio.h"             // for AUDIO_DEVICE, audio_close_output, audi...
+#include "discovered.h"        // for NEW_PROTOCOL, ORIGINAL_PROTOCOL, DEVIC...
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "log.h"               // for log_trace, log_error
+#include "new_menu.h"          // for sub_menu
+#include "new_protocol.h"      // for schedule_high_priority
+#include "radio.h"             // for active_receiver, protocol, device, set...
+#include "receiver.h"          // for RECEIVER, receiver_change_adc, receive...
+#include "sliders.h"           // for update_att_preamp
 
 static GtkWidget *parent_window = NULL;
 static GtkWidget *dialog = NULL;

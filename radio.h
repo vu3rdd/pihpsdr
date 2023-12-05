@@ -20,11 +20,13 @@
 #ifndef _RADIO_H
 #define _RADIO_H
 
-#include "adc.h"
-#include "dac.h"
-#include "discovered.h"
-#include "receiver.h"
-#include "transmitter.h"
+#include <glib.h>         // for gboolean, gint, GMutex
+#include <gtk/gtk.h>      // for GtkWidget
+#include "adc.h"          // for ADC
+#include "dac.h"          // for DAC
+#include "discovered.h"   // for DISCOVERED
+#include "receiver.h"     // for RECEIVER
+#include "transmitter.h"  // for TRANSMITTER
 
 #define NEW_MIC_IN 0x00
 #define NEW_LINE_IN 0x01

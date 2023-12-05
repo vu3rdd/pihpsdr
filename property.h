@@ -22,6 +22,7 @@
 
 #define PROPERTY_VERSION 3.0
 
+struct _PROPERTY;
 typedef struct _PROPERTY PROPERTY;
 
 /* --------------------------------------------------------------------------*/

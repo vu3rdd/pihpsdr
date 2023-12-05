@@ -17,23 +17,22 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "diversity_menu.h"
-#include "radio.h"
-#include "new_protocol.h"
-#include "old_protocol.h"
-#include "sliders.h"
-#include "ext.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect, G_OBJECT
+#include <glib.h>              // for gpointer, g_idle_add, gboolean, FALSE
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, gtk_...
+#include <math.h>              // for round, cos, pow, sin
+#include <stdio.h>             // for NULL
+#include "discovered.h"        // for ORIGINAL_PROTOCOL, NEW_PROTOCOL
+#include "ext.h"               // for ext_vfo_update
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "new_protocol.h"      // for schedule_high_priority, schedule_recei...
+#include "old_protocol.h"      // for old_protocol_run, old_protocol_stop
+#include "radio.h"             // for div_gain, div_phase, diversity_enabled
+#include "sliders.h"           // for show_diversity_gain, show_diversity_phase
 
-#include <math.h> 
 
 static GtkWidget *parent_window=NULL;
 

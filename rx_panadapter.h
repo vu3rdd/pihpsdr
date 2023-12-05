@@ -20,6 +20,8 @@
 #ifndef _PANADAPTER_H
 #define _PANADAPTER_H
 
+#include "receiver.h"  // for RECEIVER
+
 void rx_panadapter_update(RECEIVER* rx);
 
 void rx_panadapter_init(RECEIVER *rx,int width,int height);

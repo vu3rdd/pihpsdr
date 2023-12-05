@@ -17,20 +17,24 @@
  *
  */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "band.h"
-#include "filter.h"
-#include "mode.h"
-#include "new_menu.h"
-#include "radio.h"
-#include "vfo.h"
 #include "xvtr_menu.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for FALSE, gpointer, TRUE, gboolean
+#include <glib/gtypes.h>       // for GINT_TO_POINTER, GPOINTER_TO_INT
+#include <gtk/gtk.h>           // for GtkWidget, gtk_grid_attach, gtk_entry_...
+#include <stdio.h>             // for NULL, sprintf
+#include <stdlib.h>            // for atof, atoll
+#include <string.h>            // for strcpy, strlen
+#include "band.h"              // for BAND, band_get_band, BANDS, XVTRS
+#include "bandstack.h"         // for BANDSTACK_ENTRY, BANDSTACK
+#include "filter.h"            // for filterF6
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "mode.h"              // for modeUSB
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for frequency_changed, active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "vfo.h"               // for _vfo, vfo, vfo_xvtr_changed
 
 static GtkWidget *parent_window = NULL;
 static GtkWidget *dialog = NULL;

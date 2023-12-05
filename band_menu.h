@@ -16,6 +16,8 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 *
 */
+#include <glib.h>     // for gboolean, gpointer
+#include <gtk/gtk.h>  // for GtkWidget
 
 extern void band_menu(GtkWidget *parent);
 extern gboolean band_select_cb (GtkWidget *widget, gpointer        data);

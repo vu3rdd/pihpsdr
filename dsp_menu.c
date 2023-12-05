@@ -17,21 +17,19 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
 #include "dsp_menu.h"
-#include "agc.h"
-#include "channel.h"
-#include "radio.h"
-#include "receiver.h"
-#include "wdsp.h"
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect, G_OBJECT
+#include <glib.h>              // for gpointer, gboolean, FALSE, TRUE
+#include <glib/gtypes.h>       // for GPOINTER_TO_UINT
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, GtkW...
+#include <stdio.h>             // for NULL
+#include "agc.h"               // for AGC_LONG, AGC_SLOW
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "radio.h"             // for active_receiver
+#include "receiver.h"          // for RECEIVER
+#include "wdsp.h"              // for SetRXAAGCHangThreshold, SetRXAEMNRPosi...
 
 static GtkWidget *parent_window=NULL;
 

@@ -18,19 +18,16 @@
 *
 */
 
-#include <gtk/gtk.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "new_menu.h"
-#include "noise_menu.h"
-#include "radio.h"
-
-#include <wdsp.h>
+#include <gdk/gdk.h>           // for GdkRGBA, GdkEvent, GdkEventButton
+#include <glib-object.h>       // for g_signal_connect
+#include <glib.h>              // for gpointer, gboolean, FALSE, TRUE
+#include <gtk/gtk.h>           // for gtk_grid_attach, gtk_widget_show, GtkW...
+#include <stdio.h>             // for NULL
+#include "gobject/gclosure.h"  // for G_CALLBACK
+#include "new_menu.h"          // for sub_menu
+#include "noise_menu.h"        // for update_nb
+#include "radio.h"             // for active_receiver
+#include "receiver.h"          // for RECEIVER
 
 static GtkWidget *parent_window = NULL;
 static GtkWidget *dialog = NULL;

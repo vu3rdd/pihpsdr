@@ -18,9 +18,9 @@
 #ifndef _SLIDERS_H
 #define _SLIDERS_H
 
-// include these since we are using RECEIVER and TRANSMITTER
-#include "receiver.h"
-#include "transmitter.h"
+#include <glib.h>         // for gint, gpointer
+#include <gtk/gtk.h>      // for GtkWidget
+#include "transmitter.h"  // for TRANSMITTER
 
 enum {
   NO_FUNCTION=0,
