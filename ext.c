@@ -944,7 +944,7 @@ g_print("LOCK: locked=%d\n",locked);
     case CMD_RESP_CTUN:
       {
       CTUN_COMMAND *ctun_command=(CTUN_COMMAND *)data;
-g_print("CTUN: vfo=%d ctun=%d\n",ctun_command->id,ctun_command->ctun);
+      g_print("CTUN: vfo=%d ctun=%d\n",ctun_command->id,ctun_command->ctun);
       int v=ctun_command->id;
       vfo[v].ctun=ctun_command->ctun;
       if(!vfo[v].ctun) {
