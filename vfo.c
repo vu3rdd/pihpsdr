@@ -597,7 +597,6 @@ void vfo_step(int steps) {
 #endif
 
     if (!locked) {
-
         if (vfo[id].ctun) {
             // don't let ctun go beyond end of passband
             long long frequency = vfo[id].frequency;

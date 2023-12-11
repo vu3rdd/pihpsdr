@@ -63,6 +63,12 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event,
                                      gpointer data) {
     RECEIVER *rx = (RECEIVER *)data;
     if (rx == active_receiver) {
+        // button has the following values:
+        // 1. left mouse button
+        // 2. middle button.
+        // 3. right button.
+        // 4. ??
+        // 5. ??
         if (event->button == 1) {
             last_x = (int)event->x;
             has_moved = FALSE;
