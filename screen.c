@@ -13,7 +13,7 @@ widget_props_t default_widget_prop_table[NUM_ACTIVE_BUTTONS] = {
     // label, x, y, font_size, off_colour, on_colour
     [SCR_VFO_A] = { 285, 95, 66, { green, white }, { "", "" } },
     [SCR_VFO_B] = { 285, 18, 18, { cyan, grey}, { "", "" } },
-    [SCR_ACTIVE_VFO] = { 400, 20, 18, { yellow, yellow }, { "", "" } },
+    [SCR_ACTIVE_VFO] = { 400, 18, 18, { yellow, yellow }, { "", "" } },
     [SCR_MODE] = { 70, 80, 30, { yellow, yellow }, { "MODE", "MODE" } },
     [SCR_PS] = { 120, 50, 12, { grey, yellow }, { "PS", "PS" } },
     [SCR_RIT] = { 220, 40, 16, { grey, red }, { "RIT", "RIT" } },
