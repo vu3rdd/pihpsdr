@@ -1,0 +1,17 @@
+- skip discovery and connect to provided ip:port. (discovery-fixes branch)
+- pico to pihpsdr handshake with ID or something similar. Reply with TS-2000 command.
+- enable/disable rigctl serial port mutex issue.
+  a. Possibly remove mutex_busy.
+- define a logging API similar to Go logging API. (logging-cleanup branch)
+  a. preserve the last log.
+  b. current log becomes last log during the next boot.
+- rewrite makefile. (may be use ninja or mk)
+- get rid of all the warnings.
+- [SOLVED] debug NR settings. - (git clone https://github.com/vu3rdd/wdsp && make NEW_NR_ALGORITHMS=1 && sudo make install) and edit props file and set receiver.0.nr, nr2, nr3, nr4 to 0.
+- move to using sqlite for settings.
+- define a pihpsdr API and make GUI use it.
+- websocket output for alternate control programs.
+- Every option should be settable from menu. Currently NR/NB etc can only be set from the bottom toolbar.
+- refactor rigctl: whether it is serial port or tcp, given a file descriptor, rest should be the same code. (branch - serial-cleanup)
+- remove unnecessary header file #include statements. (done in fix-includes branch)
+
