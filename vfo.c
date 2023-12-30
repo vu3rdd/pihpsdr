@@ -757,8 +757,25 @@ void vfo_id_move(int id, long long hz, int round) {
             long long max_freq = frequency + half;
 
             if (rx_low <= min_freq) {
+		// XXX: move the background. how do we move the
+		// background? Set the freq to the new center freq?
+		// i.e. in ctun mode, vfo[id].ctune_frequency is the
+		// vfo freq and around it is where we draw the filter
+		// band limits, but the display is centered around
+		// vfo[id].frequency. But when we want to move the
+		// background, we move the vfo[id].freq by the
+		// required offset and let ctun_freq remain as it is.
+		long long delta_move = min_freq - rx_low;
+		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+		receiver_frequency_changed(receiver[id]);
+		g_idle_add(ext_vfo_update, NULL);
                 return;
             } else if (rx_high >= max_freq) {
+		// XXX: move the background
+		long long delta_move = rx_high - max_freq;
+		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+		receiver_frequency_changed(receiver[id]);
+		g_idle_add(ext_vfo_update, NULL);
                 return;
             }
 
