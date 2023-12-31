@@ -751,7 +751,7 @@ void vfo_id_move(int id, long long hz, int round) {
             } else if (rx_high >= max_freq) {
 		// XXX: move the background
 		long long delta_move = rx_high - max_freq;
-		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+		vfo[id].frequency = vfo[id].frequency + hz + delta_move;
 		vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
 		receiver_frequency_changed(receiver[id]);
 		g_idle_add(ext_vfo_update, NULL);
