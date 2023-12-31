@@ -616,6 +616,7 @@ void vfo_id_step(int id, int steps) {
             long long frequency = vfo[id].frequency;
             /* long long rx_low = */
             /*     vfo[id].ctun_frequency + hz + active_receiver->filter_low; */
+
 	    // convert frequency in terms of steps, then add the given
 	    // number of steps in the argument and then convert it
 	    // back to frequency.
@@ -626,26 +627,31 @@ void vfo_id_step(int id, int steps) {
             long long rx_high =
                 ((vfo[id].ctun_frequency / step + steps) * step) +
                 active_receiver->filter_high;
-            long long half = (long long)active_receiver->sample_rate / 2LL;
-            long long min_freq = frequency - half;
+
+	    long long half = (long long)active_receiver->sample_rate / 2LL;
+
+	    long long min_freq = frequency - half;
             long long max_freq = frequency + half;
 
+	    if (min_freq < 0) {
+		min_freq = 0;
+	    }
 	    log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
 	    log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
             if (rx_low <= min_freq) {
 		// XXX handle ctune beyond the screen limits
 		long long delta_move = min_freq - rx_low;
 		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) - delta_move;
-		//vfo[id].ctun_frequency = ((vfo[id].ctun_frequency / step + steps) * step);
-		receiver_frequency_changed(receiver[id]);
+
 		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
+		receiver_frequency_changed(receiver[id]);
 		g_idle_add(ext_vfo_update, NULL);
                 return;
             } else if (rx_high >= max_freq) {
 		// XXX: move the background
 		long long delta_move = rx_high - max_freq;
-		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) - delta_move;
-		//vfo[id].ctun_frequency = (vfo[id].ctun_frequency / step + steps) * step;
+		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) + delta_move;
+
 		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
 		receiver_frequency_changed(receiver[id]);
 		g_idle_add(ext_vfo_update, NULL);
