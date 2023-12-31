@@ -1566,22 +1566,24 @@ void setFrequency(long long f) {
     case NEW_PROTOCOL:
     case ORIGINAL_PROTOCOL:
         if (vfo[v].ctun) {
-            long long minf = vfo[v].frequency -
-                             (long long)(active_receiver->sample_rate / 2);
-            long long maxf = vfo[v].frequency +
-                             (long long)(active_receiver->sample_rate / 2);
-            if (f < minf)
-                f = minf;
-            if (f > maxf)
-                f = maxf;
-            vfo[v].ctun_frequency = f;
-            vfo[v].offset = f - vfo[v].frequency;
-            set_offset(active_receiver, vfo[v].offset);
-            return;
-        } else {
-            vfo[v].frequency = f;
-        }
-        break;
+	    long long minf = vfo[v].frequency -
+		(long long)(active_receiver->sample_rate / 2);
+	    long long maxf = vfo[v].frequency +
+		(long long)(active_receiver->sample_rate / 2);
+	    if (f < minf)
+	        f = minf;
+	    if (f > maxf)
+	        f = maxf;
+	    // XXX: handle ctune going beyond the band limits.
+	    // See XXX notes in vfo.c
+	    vfo[v].ctun_frequency = f;
+	    vfo[v].offset = f - vfo[v].frequency;
+	    set_offset(active_receiver, vfo[v].offset);
+	    return;
+	} else {
+	    vfo[v].frequency = f;
+	}
+	break;
     }
 
     switch (protocol) {

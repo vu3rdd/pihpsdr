@@ -1053,6 +1053,7 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
                     hz = (long long)steps[step_index];
                 }
                 if (hz != 0LL) {
+		    log_info("rigctl: move vfo down");
                     vfo_id_move(VFO_A, -hz, FALSE);
                 }
             } else {

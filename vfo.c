@@ -597,24 +597,29 @@ void vfo_a_swap_b() {
     g_idle_add(ext_vfo_update, NULL);
 }
 
+/* static int steps_to_freq(int steps) { */
+/*     return step * steps; */
+/* } */
+
 void vfo_step(int steps) {
-    int id = active_receiver->id;
+    return vfo_id_step(active_receiver->id, steps);
+}
+
+void vfo_id_step(int id, int steps) {
     long long delta;
     int sid;
     RECEIVER *other_receiver;
 
-#ifdef CLIENT_SERVER
-    if (radio_is_remote) {
-        update_vfo_step(id, steps);
-        return;
-    }
-#endif
-
     if (!locked) {
-
         if (vfo[id].ctun) {
             // don't let ctun go beyond end of passband
             long long frequency = vfo[id].frequency;
+            /* long long rx_low = */
+            /*     vfo[id].ctun_frequency + hz + active_receiver->filter_low; */
+	    // convert frequency in terms of steps, then add the given
+	    // number of steps in the argument and then convert it
+	    // back to frequency.
+
             long long rx_low =
                 ((vfo[id].ctun_frequency / step + steps) * step) +
                 active_receiver->filter_low;
@@ -625,9 +630,25 @@ void vfo_step(int steps) {
             long long min_freq = frequency - half;
             long long max_freq = frequency + half;
 
+	    log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
+	    log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
             if (rx_low <= min_freq) {
+		// XXX handle ctune beyond the screen limits
+		long long delta_move = min_freq - rx_low;
+		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) - delta_move;
+		//vfo[id].ctun_frequency = ((vfo[id].ctun_frequency / step + steps) * step);
+		receiver_frequency_changed(receiver[id]);
+		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
+		g_idle_add(ext_vfo_update, NULL);
                 return;
             } else if (rx_high >= max_freq) {
+		// XXX: move the background
+		long long delta_move = rx_high - max_freq;
+		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) - delta_move;
+		//vfo[id].ctun_frequency = (vfo[id].ctun_frequency / step + steps) * step;
+		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
+		receiver_frequency_changed(receiver[id]);
+		g_idle_add(ext_vfo_update, NULL);
                 return;
             }
 
@@ -670,65 +691,14 @@ void vfo_step(int steps) {
             }
             break;
         }
+
         receiver_frequency_changed(active_receiver);
         g_idle_add(ext_vfo_update, NULL);
     }
 }
-//
-// DL1YCF: essentially a duplicate of vfo_step but
-//         changing a specific VFO freq instead of
-//         changing the VFO of the active receiver
-//
-void vfo_id_step(int id, int steps) {
-    long long delta;
-    int sid;
-    RECEIVER *other_receiver;
 
-    if (!locked) {
-        if (vfo[id].ctun) {
-            delta = vfo[id].ctun_frequency;
-            vfo[id].ctun_frequency =
-                (vfo[id].ctun_frequency / step + steps) * step;
-            delta = vfo[id].ctun_frequency - delta;
-        } else {
-            delta = vfo[id].frequency;
-            vfo[id].frequency = (vfo[id].frequency / step + steps) * step;
-            delta = vfo[id].frequency - delta;
-        }
-
-        sid = id == 0 ? 1 : 0;
-        other_receiver = receiver[sid];
-
-        switch (sat_mode) {
-        case SAT_NONE:
-            break;
-        case SAT_MODE:
-            // A and B increment and decrement together
-            if (vfo[sid].ctun) {
-                vfo[sid].ctun_frequency += delta;
-            } else {
-                vfo[sid].frequency += delta;
-            }
-            if (receivers == 2) {
-                receiver_frequency_changed(other_receiver);
-            }
-            break;
-        case RSAT_MODE:
-            // A increments and B decrements or A decrments and B increments
-            if (vfo[sid].ctun) {
-                vfo[sid].ctun_frequency -= delta;
-            } else {
-                vfo[sid].frequency -= delta;
-            }
-            if (receivers == 2) {
-                receiver_frequency_changed(other_receiver);
-            }
-            break;
-        }
-
-        receiver_frequency_changed(active_receiver);
-        g_idle_add(ext_vfo_update, NULL);
-    }
+void vfo_move(long long hz, int round) {
+    return vfo_id_move(active_receiver->id, hz, round);
 }
 
 void vfo_id_move(int id, long long hz, int round) {
@@ -746,6 +716,7 @@ void vfo_id_move(int id, long long hz, int round) {
 
     if (!locked) {
         if (vfo[id].ctun) {
+	    log_trace("vfo_id_move: ctune, vfo changed");
             // don't let ctun go beyond end of passband
             long long frequency = vfo[id].frequency;
             long long rx_low =
@@ -767,6 +738,7 @@ void vfo_id_move(int id, long long hz, int round) {
 		// required offset and let ctun_freq remain as it is.
 		long long delta_move = min_freq - rx_low;
 		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+		vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
 		receiver_frequency_changed(receiver[id]);
 		g_idle_add(ext_vfo_update, NULL);
                 return;
@@ -774,6 +746,7 @@ void vfo_id_move(int id, long long hz, int round) {
 		// XXX: move the background
 		long long delta_move = rx_high - max_freq;
 		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+		vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
 		receiver_frequency_changed(receiver[id]);
 		g_idle_add(ext_vfo_update, NULL);
                 return;
@@ -828,10 +801,6 @@ void vfo_id_move(int id, long long hz, int round) {
     }
 }
 
-void vfo_move(long long hz, int round) {
-    vfo_id_move(active_receiver->id, hz, round);
-}
-
 void vfo_move_to(long long hz) {
     // hz is the offset from the min displayed frequency
     int id = active_receiver->id;
@@ -857,6 +826,7 @@ void vfo_move_to(long long hz) {
 
     if (!locked) {
         if (vfo[id].ctun) {
+	    log_trace("vfo_move_to: ctune, vfo changed");
             delta = vfo[id].ctun_frequency;
             vfo[id].ctun_frequency = f;
             if (vfo[id].mode == modeCWL) {
