@@ -16,3 +16,5 @@
 - remove unnecessary header file #include statements. (done in fix-includes branch)
 - [Partially SOLVED] ctune: scroll beyond band edges.
 - when moving vfo by touching on the screen, snap on to a frequency that is a multiple of step size.
+- touching on the vfo freq (or A or B), switches the active VFO.
+
