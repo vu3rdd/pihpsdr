@@ -14,4 +14,5 @@
 - Every option should be settable from menu. Currently NR/NB etc can only be set from the bottom toolbar.
 - refactor rigctl: whether it is serial port or tcp, given a file descriptor, rest should be the same code. (branch - serial-cleanup)
 - remove unnecessary header file #include statements. (done in fix-includes branch)
-
+- [Partially SOLVED] ctune: scroll beyond band edges.
+- when moving vfo by touching on the screen, snap on to a frequency that is a multiple of step size.
