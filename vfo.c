@@ -18,6 +18,7 @@
  */
 
 #include <arpa/inet.h>
+#include <gtk/gtk.h>
 #include <ifaddrs.h>
 #include <math.h>
 #include <net/if.h>
@@ -25,11 +26,10 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <semaphore.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <gtk/gtk.h>
 
 #include "agc.h"
 #include "band.h"
@@ -53,8 +53,8 @@
 #include "client_server.h"
 #endif
 #include "ext.h"
-#include "screen.h"
 #include "log.h"
+#include "screen.h"
 
 static GtkWidget *parent_window;
 static int my_width;
@@ -147,7 +147,7 @@ void modesettings_restore_state() {
         if (value)
             mode_settings[i].nr = atoi(value);
 
-	sprintf(name, "modeset.%d.nr2", i);
+        sprintf(name, "modeset.%d.nr2", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nr2 = atoi(value);
@@ -162,7 +162,7 @@ void modesettings_restore_state() {
         if (value)
             mode_settings[i].nr4 = atoi(value);
 
-	sprintf(name, "modeset.%d.nb", i);
+        sprintf(name, "modeset.%d.nb", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].nb = atoi(value);
@@ -172,12 +172,12 @@ void modesettings_restore_state() {
         if (value)
             mode_settings[i].nb2 = atoi(value);
 
-	sprintf(name, "modeset.%d.anf", i);
+        sprintf(name, "modeset.%d.anf", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].anf = atoi(value);
 
-	sprintf(name, "modeset.%d.snb", i);
+        sprintf(name, "modeset.%d.snb", i);
         value = getProperty(name);
         if (value)
             mode_settings[i].snb = atoi(value);
@@ -245,7 +245,7 @@ void vfo_restore_state() {
         vfo[i].ctun = 0;
 
         log_trace("vfo_restore_state: band=%d frequency=%lld", vfo[i].band,
-                vfo[i].frequency);
+                  vfo[i].frequency);
 
         sprintf(name, "vfo.%d.band", i);
         value = getProperty(name);
@@ -601,9 +601,7 @@ void vfo_a_swap_b() {
 /*     return step * steps; */
 /* } */
 
-void vfo_step(int steps) {
-    return vfo_id_step(active_receiver->id, steps);
-}
+void vfo_step(int steps) { return vfo_id_step(active_receiver->id, steps); }
 
 void vfo_id_step(int id, int steps) {
     long long delta;
@@ -617,9 +615,9 @@ void vfo_id_step(int id, int steps) {
             /* long long rx_low = */
             /*     vfo[id].ctun_frequency + hz + active_receiver->filter_low; */
 
-	    // convert frequency in terms of steps, then add the given
-	    // number of steps in the argument and then convert it
-	    // back to frequency.
+            // convert frequency in terms of steps, then add the given
+            // number of steps in the argument and then convert it
+            // back to frequency.
 
             long long rx_low =
                 ((vfo[id].ctun_frequency / step + steps) * step) +
@@ -628,33 +626,37 @@ void vfo_id_step(int id, int steps) {
                 ((vfo[id].ctun_frequency / step + steps) * step) +
                 active_receiver->filter_high;
 
-	    long long half = (long long)active_receiver->sample_rate / 2LL;
+            long long half = (long long)active_receiver->sample_rate / 2LL;
 
-	    long long min_freq = frequency - half;
+            long long min_freq = frequency - half;
             long long max_freq = frequency + half;
 
-	    if (min_freq < 0) {
-		min_freq = 0;
-	    }
-	    log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
-	    log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
+            if (min_freq < 0) {
+                min_freq = 0;
+            }
+            log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
+            log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
             if (rx_low <= min_freq) {
-		// XXX handle ctune beyond the screen limits
-		long long delta_move = min_freq - rx_low;
-		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) - delta_move;
+                // XXX handle ctune beyond the screen limits
+                long long delta_move = min_freq - rx_low;
+                vfo[id].frequency =
+                    ((vfo[id].frequency / step + steps) * step) - delta_move;
 
-		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
-		receiver_frequency_changed(receiver[id]);
-		g_idle_add(ext_vfo_update, NULL);
+                log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency,
+                         vfo[id].ctun_frequency);
+                receiver_frequency_changed(receiver[id]);
+                g_idle_add(ext_vfo_update, NULL);
                 return;
             } else if (rx_high >= max_freq) {
-		// XXX: move the background
-		long long delta_move = rx_high - max_freq;
-		vfo[id].frequency = ((vfo[id].frequency / step + steps) * step) + delta_move;
+                // XXX: move the background
+                long long delta_move = rx_high - max_freq;
+                vfo[id].frequency =
+                    ((vfo[id].frequency / step + steps) * step) + delta_move;
 
-		log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency, vfo[id].ctun_frequency);
-		receiver_frequency_changed(receiver[id]);
-		g_idle_add(ext_vfo_update, NULL);
+                log_info("vfo_f = %lld, ctun_f = %lld", vfo[id].frequency,
+                         vfo[id].ctun_frequency);
+                receiver_frequency_changed(receiver[id]);
+                g_idle_add(ext_vfo_update, NULL);
                 return;
             }
 
@@ -722,7 +724,7 @@ void vfo_id_move(int id, long long hz, int round) {
 
     if (!locked) {
         if (vfo[id].ctun) {
-	    log_trace("vfo_id_move: ctune, vfo changed");
+            log_trace("vfo_id_move: ctune, vfo changed");
             // don't let ctun go beyond end of passband
             long long frequency = vfo[id].frequency;
             long long rx_low =
@@ -734,27 +736,27 @@ void vfo_id_move(int id, long long hz, int round) {
             long long max_freq = frequency + half;
 
             if (rx_low <= min_freq) {
-		// XXX: move the background. how do we move the
-		// background? Set the freq to the new center freq?
-		// i.e. in ctun mode, vfo[id].ctune_frequency is the
-		// vfo freq and around it is where we draw the filter
-		// band limits, but the display is centered around
-		// vfo[id].frequency. But when we want to move the
-		// background, we move the vfo[id].freq by the
-		// required offset and let ctun_freq remain as it is.
-		long long delta_move = min_freq - rx_low;
-		vfo[id].frequency = vfo[id].frequency + hz - delta_move;
-		vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
-		receiver_frequency_changed(receiver[id]);
-		g_idle_add(ext_vfo_update, NULL);
+                // XXX: move the background. how do we move the
+                // background? Set the freq to the new center freq?
+                // i.e. in ctun mode, vfo[id].ctune_frequency is the
+                // vfo freq and around it is where we draw the filter
+                // band limits, but the display is centered around
+                // vfo[id].frequency. But when we want to move the
+                // background, we move the vfo[id].freq by the
+                // required offset and let ctun_freq remain as it is.
+                long long delta_move = min_freq - rx_low;
+                vfo[id].frequency = vfo[id].frequency + hz - delta_move;
+                vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
+                receiver_frequency_changed(receiver[id]);
+                g_idle_add(ext_vfo_update, NULL);
                 return;
             } else if (rx_high >= max_freq) {
-		// XXX: move the background
-		long long delta_move = rx_high - max_freq;
-		vfo[id].frequency = vfo[id].frequency + hz + delta_move;
-		vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
-		receiver_frequency_changed(receiver[id]);
-		g_idle_add(ext_vfo_update, NULL);
+                // XXX: move the background
+                long long delta_move = rx_high - max_freq;
+                vfo[id].frequency = vfo[id].frequency + hz + delta_move;
+                vfo[id].ctun_frequency = vfo[id].ctun_frequency + hz;
+                receiver_frequency_changed(receiver[id]);
+                g_idle_add(ext_vfo_update, NULL);
                 return;
             }
 
@@ -832,7 +834,7 @@ void vfo_move_to(long long hz) {
 
     if (!locked) {
         if (vfo[id].ctun) {
-	    log_trace("vfo_move_to: ctune, vfo changed");
+            log_trace("vfo_move_to: ctune, vfo changed");
             delta = vfo[id].ctun_frequency;
             vfo[id].ctun_frequency = f;
             if (vfo[id].mode == modeCWL) {
@@ -1012,48 +1014,47 @@ char **draw_vfo_val_fixed(char *vfo_str, int step) {
 void draw_item(cairo_t *cr, size_t item, uint status) {
     widget_props_t *entry = &default_widget_prop_table[item];
     cairo_move_to(cr, entry->x, entry->y);
-    cairo_set_source_rgb(cr, entry->colours[status].r, entry->colours[status].g, entry->colours[status].b);
+    cairo_set_source_rgb(cr, entry->colours[status].r, entry->colours[status].g,
+                         entry->colours[status].b);
 
     cairo_set_font_size(cr, entry->font_size);
     cairo_show_text(cr, entry->label[status]);
 }
 
 // I am not proud of this code
-int get_nr(RECEIVER *rx)
-{
+int get_nr(RECEIVER *rx) {
     if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
-	return 0;
+        return 0;
     }
 
     if (rx->nr == 1 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 0) {
-	return 1;
+        return 1;
     }
 
     if (rx->nr == 0 && rx->nr2 == 1 && rx->nr3 == 0 && rx->nr4 == 0) {
-	return 2;
+        return 2;
     }
 
     if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 1 && rx->nr4 == 0) {
-	return 3;
+        return 3;
     }
 
     if (rx->nr == 0 && rx->nr2 == 0 && rx->nr3 == 0 && rx->nr4 == 1) {
-	return 4;
+        return 4;
     }
 
     return -1;
 }
 
-int get_nb(RECEIVER *rx)
-{
+int get_nb(RECEIVER *rx) {
     if (rx->nb == 0 && rx->nb2 == 0) {
-	return 0;
+        return 0;
     }
     if (rx->nb == 1 && rx->nb2 == 0) {
-	return 1;
+        return 1;
     }
     if (rx->nb == 0 && rx->nb2 == 1) {
-	return 2;
+        return 2;
     }
 
     return -1;
@@ -1102,12 +1103,13 @@ void vfo_update(void) {
             break;
         }
 
-	widget_props_t *entry;
+        widget_props_t *entry;
 
         // draw mode
-	entry = &default_widget_prop_table[SCR_MODE];
+        entry = &default_widget_prop_table[SCR_MODE];
         cairo_set_font_size(cr, entry->font_size);
-        cairo_set_source_rgb(cr, entry->colours[0].r, entry->colours[0].g, entry->colours[0].b);
+        cairo_set_source_rgb(cr, entry->colours[0].r, entry->colours[0].g,
+                             entry->colours[0].b);
         cairo_move_to(cr, entry->x, entry->y);
         cairo_show_text(cr, temp_text);
 
@@ -1141,7 +1143,7 @@ void vfo_update(void) {
         if (s >= STEPS)
             s = 0;
 
-	entry = &default_widget_prop_table[SCR_VFO_A];
+        entry = &default_widget_prop_table[SCR_VFO_A];
         // draw VFO A
         cairo_select_font_face(cr, "Cantarell", CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_NORMAL);
@@ -1160,7 +1162,8 @@ void vfo_update(void) {
             } else if (id == 0) {
                 cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
             } else {
-                cairo_set_source_rgb(cr, DARK_GREEN_R, DARK_GREEN_G, DARK_GREEN_B);
+                cairo_set_source_rgb(cr, DARK_GREEN_R, DARK_GREEN_G,
+                                     DARK_GREEN_B);
             }
         }
         cairo_move_to(cr, entry->x, entry->y);
@@ -1210,41 +1213,43 @@ void vfo_update(void) {
             }
         }
 
-	// show vfo-b
-	entry = &default_widget_prop_table[SCR_VFO_B];
+        // show vfo-b
+        entry = &default_widget_prop_table[SCR_VFO_B];
         cairo_move_to(cr, entry->x, entry->y);
         cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
         // show the currently active VFO.
         sprintf(temp_text, "%c", active_receiver->active_vfo == 0 ? 'A' : 'B');
-	entry = &default_widget_prop_table[SCR_ACTIVE_VFO];
-	cairo_move_to(cr, entry->x, entry->y);
-	cairo_set_source_rgb(cr, entry->colours[1].r, entry->colours[1].g, entry->colours[1].b);
+        entry = &default_widget_prop_table[SCR_ACTIVE_VFO];
+        cairo_move_to(cr, entry->x, entry->y);
+        cairo_set_source_rgb(cr, entry->colours[1].r, entry->colours[1].g,
+                             entry->colours[1].b);
         cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
 #ifdef PURESIGNAL
         if (can_transmit) {
-	    draw_item(cr, SCR_PS, transmitter->puresignal);
+            draw_item(cr, SCR_PS, transmitter->puresignal);
         }
 #endif
 
-	// RIT
-	entry = &default_widget_prop_table[SCR_RIT];
-	cairo_move_to(cr, entry->x, entry->y);
-	cairo_set_source_rgb(cr, entry->colours[vfo[id].rit_enabled].r, entry->colours[vfo[id].rit_enabled].g, entry->colours[vfo[id].rit_enabled].b);
+        // RIT
+        entry = &default_widget_prop_table[SCR_RIT];
+        cairo_move_to(cr, entry->x, entry->y);
+        cairo_set_source_rgb(cr, entry->colours[vfo[id].rit_enabled].r,
+                             entry->colours[vfo[id].rit_enabled].g,
+                             entry->colours[vfo[id].rit_enabled].b);
         sprintf(temp_text, "RIT: %lld", vfo[id].rit);
         cairo_set_font_size(cr, entry->font_size);
         cairo_show_text(cr, temp_text);
 
         if (can_transmit) {
-	    entry = &default_widget_prop_table[SCR_XIT];
-	    cairo_move_to(cr, entry->x, entry->y);
-	    cairo_set_source_rgb(cr,
-				 entry->colours[transmitter->xit_enabled].r,
-				 entry->colours[transmitter->xit_enabled].g,
-				 entry->colours[transmitter->xit_enabled].b);
+            entry = &default_widget_prop_table[SCR_XIT];
+            cairo_move_to(cr, entry->x, entry->y);
+            cairo_set_source_rgb(cr, entry->colours[transmitter->xit_enabled].r,
+                                 entry->colours[transmitter->xit_enabled].g,
+                                 entry->colours[transmitter->xit_enabled].b);
             sprintf(temp_text, "XIT: %lld", transmitter->xit);
 
             cairo_set_font_size(cr, entry->font_size);
@@ -1254,50 +1259,50 @@ void vfo_update(void) {
         // NB and NB2 are mutually exclusive, therefore
         // they are put to the same place in order to save
         // some space
-	int which_nb = get_nb(active_receiver);
-	if (which_nb < 0) {
-	    log_trace("RIGCTL: ERROR in NR determination used for display");
-	    which_nb = 0;
-	}
-	draw_item(cr, SCR_NB, which_nb);
+        int which_nb = get_nb(active_receiver);
+        if (which_nb < 0) {
+            log_trace("RIGCTL: ERROR in NR determination used for display");
+            which_nb = 0;
+        }
+        draw_item(cr, SCR_NB, which_nb);
 
-	// NR
+        // NR
         // NR, NR2, NR3 and NR4 are mutually exclusive
-	int which_nr = get_nr(active_receiver);
-	if (which_nr < 0) {
-	    log_trace("RIGCTL: ERROR in NR determination used for display");
-	    which_nr = 0;
-	}
-	draw_item(cr, SCR_NR, which_nr);
+        int which_nr = get_nr(active_receiver);
+        if (which_nr < 0) {
+            log_trace("RIGCTL: ERROR in NR determination used for display");
+            which_nr = 0;
+        }
+        draw_item(cr, SCR_NR, which_nr);
 
-	// anf
-	draw_item(cr, SCR_ANF, active_receiver->anf);
+        // anf
+        draw_item(cr, SCR_ANF, active_receiver->anf);
 
-	// snb
-	draw_item(cr, SCR_SNB, active_receiver->snb);
+        // snb
+        draw_item(cr, SCR_SNB, active_receiver->snb);
 
-	// agc
-	draw_item(cr, SCR_AGC, active_receiver->agc);
+        // agc
+        draw_item(cr, SCR_AGC, active_receiver->agc);
 
 #ifdef MIDI
-	draw_item(cr, SCR_MIDI, midi_enabled);
+        draw_item(cr, SCR_MIDI, midi_enabled);
 #endif
 
         if (can_transmit) {
-	    draw_item(cr, SCR_VOX, vox_enabled);
+            draw_item(cr, SCR_VOX, vox_enabled);
         }
 
-	// lock
-	draw_item(cr, SCR_LOCK, locked);
+        // lock
+        draw_item(cr, SCR_LOCK, locked);
 
-	// split
-	draw_item(cr, SCR_SPLIT, split);
+        // split
+        draw_item(cr, SCR_SPLIT, split);
 
-	// Ctun
-	draw_item(cr, SCR_CTUN, vfo[id].ctun);
+        // Ctun
+        draw_item(cr, SCR_CTUN, vfo[id].ctun);
 
-	// dup
-	draw_item(cr, SCR_DUP, duplex);
+        // dup
+        draw_item(cr, SCR_DUP, duplex);
 
         cairo_destroy(cr);
         gtk_widget_queue_draw(vfo_panel);
@@ -1311,13 +1316,13 @@ static gboolean vfo_press_event_cb(GtkWidget *widget, GdkEventButton *event,
     // vfo a and b are drawn at x = 280, so it is the y coordinate
     // that matters.
     if (event->x >= default_widget_prop_table[SCR_VFO_B].x &&
-	event->y <= default_widget_prop_table[SCR_VFO_B].y) {
+        event->y <= default_widget_prop_table[SCR_VFO_B].y) {
         // vfo B
         start_vfo(VFO_B);
         return TRUE;
     } else if (event->x >= default_widget_prop_table[SCR_VFO_A].x &&
-	       event->y > default_widget_prop_table[SCR_VFO_B].y &&
-	       event->y <= default_widget_prop_table[SCR_VFO_A].y) {
+               event->y > default_widget_prop_table[SCR_VFO_B].y &&
+               event->y <= default_widget_prop_table[SCR_VFO_A].y) {
         // vfo A
         start_vfo(VFO_A);
         return TRUE;
