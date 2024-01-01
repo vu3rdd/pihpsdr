@@ -196,6 +196,7 @@ extern void reconfigure_receiver(RECEIVER *rx,int height);
 extern void receiver_save_state(RECEIVER *rx);
 
 extern gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
+extern gboolean receiver_touch_event(GtkWidget *widget, GdkEventTouch *event, gpointer data);
 extern gboolean receiver_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer data);
 extern gboolean receiver_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer data);
 extern gboolean receiver_scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer data);

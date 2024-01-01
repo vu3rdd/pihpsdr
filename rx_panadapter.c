@@ -107,6 +107,11 @@ static gboolean panadapter_button_press_event_cb(GtkWidget *widget, GdkEventButt
   return receiver_button_press_event(widget,event,data);
 }
 
+// https://docs.gtk.org/gtk3/input-handling.html
+static gboolean panadapter_touch_event_cb(GtkWidget *widget, GdkEventTouch *event, gpointer data) {
+    return receiver_touch_event(widget, event, data);
+}
+
 static gboolean panadapter_button_release_event_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   return receiver_button_release_event(widget,event,data);
 }
@@ -646,7 +651,8 @@ void rx_panadapter_init(RECEIVER *rx, int width,int height) {
             G_CALLBACK (panadapter_button_release_event_cb), rx);
   g_signal_connect(rx->panadapter,"scroll_event",
             G_CALLBACK(panadapter_scroll_event_cb),rx);
-
+  g_signal_connect(rx->panadapter, "touch-event",
+		   G_CALLBACK(panadapter_touch_event_cb), rx);
   /* Ask to receive events the drawing area doesn't normally
    * subscribe to. In particular, we need to ask for the
    * button press and motion notify events that want to handle.

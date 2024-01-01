@@ -83,6 +83,25 @@ gboolean receiver_button_press_event(GtkWidget *widget, GdkEventButton *event,
     return TRUE;
 }
 
+gboolean receiver_touch_event(GtkWidget *widget, GdkEventTouch *event,
+			      gpointer data) {
+    // XXX: handle event.touch.type == TOUCH_BEGIN and TOUCH_END
+    /* RECEIVER *rx = (RECEIVER *)data; */
+    /* if (rx == active_receiver) { */
+    /*     if (event->button == 1) { */
+    /*         last_x = (int)event->x; */
+    /*         has_moved = FALSE; */
+    /*         pressed = TRUE; */
+    /*     } else if (event->button == 3) { */
+    /*         g_idle_add(ext_start_rx, NULL); */
+    /*     } */
+    /* } else { */
+    /*     making_active = TRUE; */
+    /* } */
+    log_info("someone touched me!");
+    return TRUE;
+}
+
 void receiver_set_active(RECEIVER *rx) {
     active_receiver = rx;
     g_idle_add(menu_active_receiver_changed, NULL);

@@ -2193,6 +2193,8 @@ gboolean parse_extended_cmd(char *command, CLIENT *client) {
                     receiver[0]->nr3 = 0;
                     receiver[0]->nr4 = 1;
                     break;
+		default:
+		    break;
                 }
                 update_noise();
             }
