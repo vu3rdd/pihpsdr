@@ -727,15 +727,24 @@ void vfo_id_move(int id, long long hz, int round) {
             log_trace("vfo_id_move: ctune, vfo changed");
             // don't let ctun go beyond end of passband
             long long frequency = vfo[id].frequency;
-            long long rx_low =
-                vfo[id].ctun_frequency + hz + active_receiver->filter_low;
-            long long rx_high =
-                vfo[id].ctun_frequency + hz + active_receiver->filter_high;
+
+	    // XXX: this calculation completely ignores the "zoom"
+	    // value and "pan" value.
             long long half = (long long)active_receiver->sample_rate / 2LL;
             long long min_freq = frequency - half;
             long long max_freq = frequency + half;
 
-            if (rx_low <= min_freq) {
+	    long long display_width = max_freq - min_freq;
+	    // display_margin is the margin from display edge to start
+	    // scrolling - in fraction of display width
+	    long long display_margin = 0.05;
+
+	    long long rx_low =
+                vfo[id].ctun_frequency + hz + active_receiver->filter_low;
+            long long rx_high =
+                vfo[id].ctun_frequency + hz + active_receiver->filter_high;
+
+            if (rx_low <= (min_freq + (display_width * display_margin))) {
                 // XXX: move the background. how do we move the
                 // background? Set the freq to the new center freq?
                 // i.e. in ctun mode, vfo[id].ctune_frequency is the
@@ -750,7 +759,7 @@ void vfo_id_move(int id, long long hz, int round) {
                 receiver_frequency_changed(receiver[id]);
                 g_idle_add(ext_vfo_update, NULL);
                 return;
-            } else if (rx_high >= max_freq) {
+	    } else if (rx_high >= (max_freq - (display_width * display_margin))) {
                 // XXX: move the background
                 long long delta_move = rx_high - max_freq;
                 vfo[id].frequency = vfo[id].frequency + hz + delta_move;
