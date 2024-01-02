@@ -645,7 +645,7 @@ void vfo_id_step(int id, int steps) {
 	    long long freq_margin = (long long)(display_width * display_margin);
 	    if (rx_low <= (min_freq + freq_margin)) {
                 // XXX handle ctune beyond the screen limits
-                long long delta_move = min_freq - rx_low;
+                long long delta_move = min_freq + freq_margin - rx_low;
                 vfo[id].frequency =
                     ((vfo[id].frequency / step + steps) * step) - delta_move;
 
@@ -656,7 +656,7 @@ void vfo_id_step(int id, int steps) {
                 return;
             } else if (rx_high >= (max_freq - freq_margin)) {
                 // XXX: move the background
-                long long delta_move = rx_high - max_freq;
+                long long delta_move = rx_high - max_freq + freq_margin;
                 vfo[id].frequency =
                     ((vfo[id].frequency / step + steps) * step) + delta_move;
 
