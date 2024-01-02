@@ -623,7 +623,7 @@ void vfo_id_step(int id, int steps) {
 	    long long display_width = max_freq - min_freq;
 	    // display_margin is the margin from display edge to start
 	    // scrolling - in fraction of display width
-	    long long display_margin = 0.05;
+	    float display_margin = 0.05;
 
             // convert frequency in terms of steps, then add the given
             // number of steps in the argument and then convert it
@@ -641,7 +641,9 @@ void vfo_id_step(int id, int steps) {
             }
             log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
             log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
-            if (rx_low <= (min_freq + (display_width * display_margin))) {
+
+	    long long freq_margin = (long long)(display_width * display_margin);
+	    if (rx_low <= (min_freq + freq_margin)) {
                 // XXX handle ctune beyond the screen limits
                 long long delta_move = min_freq - rx_low;
                 vfo[id].frequency =
@@ -652,7 +654,7 @@ void vfo_id_step(int id, int steps) {
                 receiver_frequency_changed(receiver[id]);
                 g_idle_add(ext_vfo_update, NULL);
                 return;
-            } else if (rx_high >= (max_freq - (display_width * display_margin))) {
+            } else if (rx_high >= (max_freq - freq_margin)) {
                 // XXX: move the background
                 long long delta_move = rx_high - max_freq;
                 vfo[id].frequency =
@@ -742,14 +744,16 @@ void vfo_id_move(int id, long long hz, int round) {
 	    long long display_width = max_freq - min_freq;
 	    // display_margin is the margin from display edge to start
 	    // scrolling - in fraction of display width
-	    long long display_margin = 0.05;
+	    float display_margin = 0.05;
 
 	    long long rx_low =
                 vfo[id].ctun_frequency + hz + active_receiver->filter_low;
             long long rx_high =
                 vfo[id].ctun_frequency + hz + active_receiver->filter_high;
 
-            if (rx_low <= (min_freq + (display_width * display_margin))) {
+	    long long freq_margin = (long long)(display_width * display_margin);
+
+            if (rx_low <= (min_freq + freq_margin)) {
                 // XXX: move the background. how do we move the
                 // background? Set the freq to the new center freq?
                 // i.e. in ctun mode, vfo[id].ctune_frequency is the
@@ -764,7 +768,7 @@ void vfo_id_move(int id, long long hz, int round) {
                 receiver_frequency_changed(receiver[id]);
                 g_idle_add(ext_vfo_update, NULL);
                 return;
-	    } else if (rx_high >= (max_freq - (display_width * display_margin))) {
+	    } else if (rx_high >= (max_freq - freq_margin)) {
                 // XXX: move the background
                 long long delta_move = rx_high - max_freq;
                 vfo[id].frequency = vfo[id].frequency + hz + delta_move;
