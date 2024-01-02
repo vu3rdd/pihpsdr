@@ -615,6 +615,16 @@ void vfo_id_step(int id, int steps) {
             /* long long rx_low = */
             /*     vfo[id].ctun_frequency + hz + active_receiver->filter_low; */
 
+            long long half = (long long)active_receiver->sample_rate / 2LL;
+
+            long long min_freq = frequency - half;
+            long long max_freq = frequency + half;
+
+	    long long display_width = max_freq - min_freq;
+	    // display_margin is the margin from display edge to start
+	    // scrolling - in fraction of display width
+	    long long display_margin = 0.05;
+
             // convert frequency in terms of steps, then add the given
             // number of steps in the argument and then convert it
             // back to frequency.
@@ -626,17 +636,12 @@ void vfo_id_step(int id, int steps) {
                 ((vfo[id].ctun_frequency / step + steps) * step) +
                 active_receiver->filter_high;
 
-            long long half = (long long)active_receiver->sample_rate / 2LL;
-
-            long long min_freq = frequency - half;
-            long long max_freq = frequency + half;
-
             if (min_freq < 0) {
                 min_freq = 0;
             }
             log_info("rx_low = %ld, rx_high = %ld", rx_low, rx_high);
             log_info("min_freq = %ld, max_freq = %ld", min_freq, max_freq);
-            if (rx_low <= min_freq) {
+            if (rx_low <= (min_freq + (display_width * display_margin))) {
                 // XXX handle ctune beyond the screen limits
                 long long delta_move = min_freq - rx_low;
                 vfo[id].frequency =
@@ -647,7 +652,7 @@ void vfo_id_step(int id, int steps) {
                 receiver_frequency_changed(receiver[id]);
                 g_idle_add(ext_vfo_update, NULL);
                 return;
-            } else if (rx_high >= max_freq) {
+            } else if (rx_high >= (max_freq - (display_width * display_margin))) {
                 // XXX: move the background
                 long long delta_move = rx_high - max_freq;
                 vfo[id].frequency =
