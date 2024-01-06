@@ -146,6 +146,7 @@ static void nr_cb(GtkToggleButton *widget, gpointer data) {
     mode_settings[vfo[active_receiver->id].mode].nr=1;
     mode_settings[vfo[active_receiver->id].mode].nr2=0;
     mode_settings[vfo[active_receiver->id].mode].nr3=0;
+    mode_settings[vfo[active_receiver->id].mode].nr4=0;
     update_noise();
   }
 }
