@@ -604,12 +604,18 @@ int ext_mode_minus(void *data) {
 }
 
 void ctun_update(int id,int state) {
-  vfo[id].ctun=state;
-  if(!vfo[id].ctun) {
-    vfo[id].offset=0;
-  }
-  vfo[id].ctun_frequency=vfo[id].frequency;
-  set_offset(receiver[id],vfo[id].offset);
+    if (vfo[id].ctun == 1 && state == 0) {
+	// ctune was on and now we are switching off
+	vfo[id].frequency = vfo[id].ctun_frequency;
+    } else if (vfo[id].ctun == 0 && state == 1) {
+	// ctun was off, now we turned on
+	vfo[id].ctun_frequency=vfo[id].frequency;
+    }
+    vfo[id].ctun=state;
+    if(!vfo[id].ctun) {
+	vfo[id].offset=0;
+    }
+    set_offset(receiver[id],vfo[id].offset);
 }
 
 int ext_ctun_update(void *data) {
