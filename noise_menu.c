@@ -271,7 +271,7 @@ void noise_menu(GtkWidget *parent) {
   col++;
 
   GtkWidget *b_nr_none=gtk_radio_button_new_with_label(NULL, "None");
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_nr_none), active_receiver->nr==0 && active_receiver->nr2==0 && active_receiver->nr3 ==0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (b_nr_none), active_receiver->nr==0 && active_receiver->nr2==0 && active_receiver->nr3 == 0 && active_receiver->nr4 == 0);
   gtk_widget_show(b_nr_none);
   gtk_grid_attach(GTK_GRID(grid),b_nr_none,col,row,1,1);
   g_signal_connect(b_nr_none,"toggled",G_CALLBACK(nr_none_cb),NULL);
