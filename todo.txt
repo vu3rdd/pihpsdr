@@ -14,7 +14,9 @@
 - Every option should be settable from menu. Currently NR/NB etc can only be set from the bottom toolbar.
 - refactor rigctl: whether it is serial port or tcp, given a file descriptor, rest should be the same code. (branch - serial-cleanup)
 - remove unnecessary header file #include statements. (done in fix-includes branch)
-- [Partially SOLVED] ctune: scroll beyond band edges.
+- [SOLVED] ctune: scroll beyond band edges.
 - when moving vfo by touching on the screen, snap on to a frequency that is a multiple of step size.
 - touching on the vfo freq (or A or B), switches the active VFO.
-- switching from ctune to non-ctune should center the frequency to the last ctune frequency.
+- ctune: switching from ctune to non-ctune should center the frequency to the last ctune frequency.
+- ctune: ctune broken with zoom value is greater than 1.
+
