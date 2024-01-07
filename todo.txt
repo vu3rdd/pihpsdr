@@ -17,6 +17,7 @@
 - [SOLVED] ctune: scroll beyond band edges.
 - when moving vfo by touching on the screen, snap on to a frequency that is a multiple of step size.
 - touching on the vfo freq (or A or B), switches the active VFO.
-- ctune: switching from ctune to non-ctune should center the frequency to the last ctune frequency.
+- [SOLVED] ctune: switching from ctune to non-ctune should center the frequency to the last ctune frequency.
 - ctune: ctune broken with zoom value is greater than 1.
+- use pangocairo to render text instead of using the cairo text API.
 
