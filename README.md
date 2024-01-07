@@ -2,6 +2,33 @@
 
 Fork of John Melton G0ORX's pihpsdr.
 
+# Why a fork?
+
+This fork started as a way to make a table-top radio around the
+PA3GSB's Radioberry board. A pico based board was built. The pico
+talked CAT commands to control the pihpsdr running on the Raspberry
+pi. The original codebase has mostly remained stagnant.
+
+A number of rigctl fixes and a bit of customizations were
+done. Another fork by Christoph, DL1YCF gained prominence in the HL2
+world. Christoph added more radios, made fixes etc. It is now a
+defacto pihpsdr source. If I knew that that another fork would develop
+further, I would not have made a fork. But now it is too late. We both
+have taken slightly different approach. I have some strong opinions
+about the quality of the current codebase and the way it is
+structured. I think making big refactoring in the pihpsdr codebase is
+hard. There are globals all over the place. This fork has thrown off a
+bit of code (soapysdr etc). There is a lot more code that I want to
+throw away.
+
+May be this fork has only got some ~10 users perhaps. We hardly
+promote it in various mailing lists. But this application is like my
+[home cooked
+meal](https://www.robinsloan.com/notes/home-cooked-app/). We add
+features very carefully and instead focus on long term maintenance and
+quality. We are not there yet in terms of quality expectations of the
+code, but I have some concrete plans to reach there.
+
 ## Related repositories
 
 * [Radioberry controller firmware](https://github.com/vu3rdd/rb_controller)
