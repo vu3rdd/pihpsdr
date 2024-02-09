@@ -183,231 +183,9 @@ COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 
 PROGRAM=pihpsdr
 
-SOURCES= \
-band.c \
-discovered.c \
-discovery.c \
-filter.c \
-main.c \
-new_menu.c \
-about_menu.c \
-exit_menu.c \
-radio_menu.c \
-rx_menu.c \
-ant_menu.c \
-display_menu.c \
-dsp_menu.c \
-pa_menu.c \
-cw_menu.c \
-nb_menu.c \
-oc_menu.c \
-xvtr_menu.c \
-equalizer_menu.c \
-step_menu.c \
-meter_menu.c \
-band_menu.c \
-bandstack_menu.c \
-mode_menu.c \
-filter_menu.c \
-noise_menu.c \
-agc_menu.c \
-vox_menu.c \
-fft_menu.c \
-diversity_menu.c \
-tx_menu.c \
-vfo_menu.c \
-meter.c \
-mode.c \
-old_discovery.c \
-new_discovery.c \
-old_protocol.c \
-new_protocol.c \
-new_protocol_programmer.c \
-rx_panadapter.c \
-tx_panadapter.c \
-property.c \
-radio.c \
-receiver.c \
-rigctl.c \
-rigctl_menu.c \
-toolbar.c \
-transmitter.c \
-zoompan.c \
-sliders.c \
-vfo.c \
-waterfall.c \
-button_text.c \
-vox.c \
-store.c \
-store_menu.c \
-memory.c \
-led.c \
-ext.c \
-error_handler.c \
-cwramp.c \
-protocols.c \
-css.c \
-actions.c \
-action_dialog.c \
-configure.c \
-i2c.c \
-gpio.c \
-encoder_menu.c \
-switch_menu.c \
-toolbar_menu.c \
-screen.c \
-log.c
-
-HEADERS= \
-agc.h \
-alex.h \
-band.h \
-bandstack.h \
-channel.h \
-discovered.h \
-discovery.h \
-filter.h \
-new_menu.h \
-about_menu.h \
-rx_menu.h \
-exit_menu.h \
-radio_menu.h \
-ant_menu.h \
-display_menu.h \
-dsp_menu.h \
-pa_menu.h \
-cw_menu.h \
-nb_menu.h \
-oc_menu.h \
-xvtr_menu.h \
-equalizer_menu.h \
-step_menu.h \
-meter_menu.h \
-band_menu.h \
-bandstack_menu.h \
-mode_menu.h \
-filter_menu.h \
-noise_menu.h \
-agc_menu.h \
-vox_menu.h \
-fft_menu.h \
-diversity_menu.h \
-tx_menu.h \
-vfo_menu.h \
-meter.h \
-mode.h \
-old_discovery.h \
-new_discovery.h \
-old_protocol.h \
-new_protocol.h \
-rx_panadapter.h \
-tx_panadapter.h \
-property.h \
-radio.h \
-receiver.h \
-rigctl.h \
-rigctl_menu.h \
-toolbar.h \
-transmitter.h \
-zoompan.h \
-sliders.h \
-vfo.h \
-waterfall.h \
-button_text.h \
-vox.h \
-store.h \
-store_menu.h \
-memory.h \
-led.h \
-ext.h \
-error_handler.h \
-protocols.h \
-css.h \
-actions.h \
-action_dialog.h \
-configure.h \
-i2c.h \
-gpio.h \
-encoder_menu.h \
-switch_menu.h \
-toolbar_menu.h \
-screen.h \
-log.h
-
-OBJS= \
-band.o \
-discovered.o \
-discovery.o \
-filter.o \
-main.o \
-new_menu.o \
-about_menu.o \
-rx_menu.o \
-exit_menu.o \
-radio_menu.o \
-ant_menu.o \
-display_menu.o \
-dsp_menu.o \
-pa_menu.o \
-cw_menu.o \
-nb_menu.o \
-oc_menu.o \
-xvtr_menu.o \
-equalizer_menu.o \
-step_menu.o \
-meter_menu.o \
-band_menu.o \
-bandstack_menu.o \
-mode_menu.o \
-filter_menu.o \
-noise_menu.o \
-agc_menu.o \
-vox_menu.o \
-fft_menu.o \
-diversity_menu.o \
-tx_menu.o \
-vfo_menu.o \
-meter.o \
-mode.o \
-old_discovery.o \
-new_discovery.o \
-old_protocol.o \
-new_protocol.o \
-new_protocol_programmer.o \
-rx_panadapter.o \
-tx_panadapter.o \
-property.o \
-radio.o \
-receiver.o \
-rigctl.o \
-rigctl_menu.o \
-toolbar.o \
-transmitter.o \
-zoompan.o \
-sliders.o \
-vfo.o \
-waterfall.o \
-button_text.o \
-vox.o \
-store.o \
-store_menu.o \
-memory.o \
-led.o \
-ext.o \
-error_handler.o \
-cwramp.o \
-protocols.o \
-css.o \
-actions.o \
-action_dialog.o \
-configure.o \
-i2c.o \
-gpio.o \
-encoder_menu.o \
-switch_menu.o \
-toolbar_menu.o \
-screen.o \
-log.o
+SRC = $(filter-out hpsdrsim.c mac_midi.c midi2.c midi_menu.c ps_menu.c server_menu.c soundio.c ozyio.c newhpsdrsim.c beep.c alsa_midi.c iambic.c  pulseaudio.c frequency.c audio.c client_server.c freqent_menu.c general_menu.c gpio_mraa.c, $(wildcard *.c))
+HEADERS = $(wildcard *.h)
+OBJS = $(SRC:.c=.o)
 
 $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 		$(LOCALCW_OBJS) $(PURESIGNAL_OBJS) \
@@ -420,7 +198,7 @@ $(PROGRAM):  $(OBJS) $(AUDIO_OBJS) $(REMOTE_OBJS) $(USBOZY_OBJS) \
 all:	$(PROGRAM) $(HEADERS) $(AUDIO_HEADERS) $(USBOZY_HEADERS) \
 	$(LOCALCW_HEADERS) \
 	$(PURESIGNAL_HEADERS) $(MIDI_HEADERS) $(SERVER_HEADERS) \
-	$(AUDIO_SOURCES) $(SOURCES) \
+	$(AUDIO_SOURCES) $(SRC) \
 	$(USBOZY_SOURCES) $(LOCALCW_SOURCE) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(SERVER_SOURCES)
 
@@ -435,7 +213,7 @@ CPPINCLUDES:=$(shell echo $(INCLUDES) | sed -e "s/-pthread / /" )
 
 .PHONY:	cppcheck
 cppcheck:
-	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SOURCES) $(REMOTE_SOURCES) \
+	cppcheck $(CPPOPTIONS) $(OPTIONS) $(CPPINCLUDES) $(AUDIO_SOURCES) $(SRC) $(REMOTE_SOURCES) \
 	$(USBOZY_SOURCES) \
 	$(PURESIGNAL_SOURCES) $(MIDI_SOURCES) $(LOCALCW_SOURCES) \
 	$(SERVER_SOURCES)

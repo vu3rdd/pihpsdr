@@ -20,6 +20,8 @@
 #ifndef _BAND_H
 #define _BAND_H
 
+#include <stdbool.h>
+
 #include "bandstack.h"
 
 enum {
