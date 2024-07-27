@@ -101,6 +101,7 @@ extern int enable_tx_equalizer;
 typedef struct {
     GMutex m;
 } GT_MUTEX;
+
 GT_MUTEX *mutex_a;
 GT_MUTEX *mutex_b;
 GT_MUTEX *mutex_c;
@@ -113,12 +114,13 @@ int output;
 FILTER *band_filter;
 
 #define MAX_CLIENTS 3
-static GThread *rigctl_server_thread_id = NULL;
-static GThread *rigctl_cw_thread_id = NULL;
+
 static int server_running;
+static gboolean serial_running = FALSE;
 
 static GThread *serial_server_thread_id = NULL;
-static gboolean serial_running = FALSE;
+static GThread *rigctl_server_thread_id = NULL;
+static GThread *rigctl_cw_thread_id = NULL;
 
 static int server_socket = -1;
 static struct sockaddr_in server_address;
@@ -135,7 +137,7 @@ typedef struct _command {
     char *command;
 } COMMAND;
 
-int fd; // Serial port file descriptor
+int fd = -1; // Serial port file descriptor
 
 static CLIENT client[MAX_CLIENTS];
 
@@ -4340,6 +4342,22 @@ void set_blocking (int fd, int should_block) {
   }
 }
 
+#define MAX_RECONNECT_ATTEMPTS 5
+#define RECONNECT_DELAY 5 // seconds
+
+static int open_serial_port(const char* port_name) {
+    int fd = open(port_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (fd == -1) {
+        log_error("RIGCTL: Failed to open serial port %s", port_name);
+        return -1;
+    }
+
+    set_interface_attribs(fd, serial_baud_rate, serial_parity);
+    set_blocking(fd, 0); // set no blocking
+
+    return fd;
+}
+
 static gpointer serial_server(gpointer data) {
     // We're going to Read the Serial port and
     // when we get data we'll send it to parse_cmd
@@ -4349,10 +4367,60 @@ static gpointer serial_server(gpointer data) {
     int command_index = 0;
     int numbytes;
     int i;
+    int reconnect_attempts = 0;
+    int fd = -1;
+
     cat_control++;
+
+
+    if (client != NULL) {
+	fd = client->fd;
+    }
 
     serial_running = TRUE;
     while (serial_running) {
+	if (fd == -1) {
+            if (reconnect_attempts >= MAX_RECONNECT_ATTEMPTS) {
+                log_error("RIGCTL: Max reconnection attempts reached. Exiting.");
+                break;
+            }
+
+	    log_info("RIGCTL: Attempting to reconnect (attempt %d/%d)...",
+                     reconnect_attempts + 1, MAX_RECONNECT_ATTEMPTS);
+            fd = open_serial_port(ser_port);
+
+	    if (fd == -1) {
+                reconnect_attempts++;
+                sleep(RECONNECT_DELAY);
+                continue;
+            } else {
+                log_info("RIGCTL: Successfully reconnected to the serial port.");
+                reconnect_attempts = 0;
+            }
+        }
+
+	fd_set readfds;
+	struct timeval tv;
+
+	FD_ZERO(&readfds);
+	FD_SET(fd, &readfds);
+
+	// Set timeout to 5 seconds
+        tv.tv_sec = 5;
+        tv.tv_usec = 0;
+
+	int select_result = select(fd + 1, &readfds, NULL, NULL, &tv);
+
+	if (select_result == -1) {
+            // Error occurred
+            perror("select");
+            break;
+        } else if (select_result == 0) {
+            // Timeout occurred
+            log_debug("RIGCTL: Read timeout");
+            continue;
+        }
+
         numbytes = read(fd, cmd_input, sizeof cmd_input);
         if (numbytes > 0) {
             for (i = 0; i < numbytes; i++) {
@@ -4375,21 +4443,30 @@ static gpointer serial_server(gpointer data) {
                 }
             }
         } else if (numbytes < 0) {
-	    perror("serial_server");
-            break;
+	    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+		// No data available, try again
+                continue;
+	    } else {
+		log_error("RIGCTL: Read error: %s", strerror(errno));
+		close(fd);
+		fd = -1;
+	    }
         } else if (numbytes == 0) {
-	    // don't continue in the loop, the other side has closed
-	    // the connection, so no point trying to read from it.
-	    perror("serial_server: connection closed by the client");
-	    break;
+	    log_info("RIGCTL: Connection closed by the client");
+	    close(fd);
+	    fd = -1;
 	}
     }
-    close(client->fd);
+
+    if (fd != -1) {
+        close(fd);
+    }
+
     cat_control--;
     return NULL;
 }
 
-int launch_serial() {
+int launch_serial(void) {
     if (mutex_b_exists == 0) {
         mutex_b = g_new(GT_MUTEX, 1);
         g_mutex_init(&mutex_b->m);
@@ -4402,14 +4479,11 @@ int launch_serial() {
         g_mutex_init(&mutex_busy->m);
     }
 
-    fd = open(ser_port, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
+    fd = open_serial_port(ser_port);
     if (fd < 0) {
         log_error("error opening %s: %s\n", ser_port, strerror(errno));
         return -1;
     }
-
-    set_interface_attribs(fd, serial_baud_rate, serial_parity);
-    set_blocking(fd, 1); // set no blocking
 
     CLIENT *serial_client = g_new(CLIENT, 1);
     serial_client->fd = fd;
