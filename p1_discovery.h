@@ -20,6 +20,6 @@
 #ifndef _OLD_DISCOVERY_H
 #define _OLD_DISCOVERY_H
 
-void old_discovery(void);
+void p1_discovery(void);
 
 #endif

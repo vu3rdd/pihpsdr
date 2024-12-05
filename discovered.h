@@ -69,17 +69,15 @@ struct _DISCOVERED {
     int dacs;
     double frequency_min;
     double frequency_max;
-    union {
-      struct network {
+    struct network {
         unsigned char mac_address[6];
-        int address_length;
+        // int address_length;
         struct sockaddr_in address;
         int interface_length;
         struct sockaddr_in interface_address;
         struct sockaddr_in interface_netmask;
         char interface_name[64];
-      } network;
-    } info;
+    } network;
 };
 
 typedef struct _DISCOVERED DISCOVERED;

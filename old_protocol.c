@@ -404,13 +404,13 @@ static void open_udp_socket() {
     }
 
     // bind to the interface
-    log_trace("binding UDP socket to %s:%d\n",inet_ntoa(radio->info.network.interface_address.sin_addr),ntohs(radio->info.network.interface_address.sin_port));
-    if(bind(tmp,(struct sockaddr*)&radio->info.network.interface_address,radio->info.network.interface_length)<0) {
+    log_trace("binding UDP socket to %s:%d\n",inet_ntoa(radio->network.interface_address.sin_addr),ntohs(radio->network.interface_address.sin_port));
+    if(bind(tmp,(struct sockaddr*)&radio->network.interface_address,radio->network.interface_length)<0) {
 	log_error("old_protocol: bind socket failed for data_socket: %s", strerror(errno));
 	exit(-1);
     }
 
-    memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
+    memcpy(&data_addr,&radio->network.address,radio->network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
     data_socket=tmp;
     log_trace("%s: UDP socket established: %d for %s:%d",__FUNCTION__,data_socket,inet_ntoa(data_addr.sin_addr),ntohs(data_addr.sin_port));
@@ -425,10 +425,10 @@ static void open_tcp_socket() {
       usleep(100000);
       close(tmp);
     }
-    memcpy(&data_addr,&radio->info.network.address,radio->info.network.address_length);
+    memcpy(&data_addr,&radio->network.address,radio->network.address_length);
     data_addr.sin_port=htons(DATA_PORT);
     data_addr.sin_family = AF_INET;
-    log_trace("Trying to open TCP connection to %s", inet_ntoa(radio->info.network.address.sin_addr));
+    log_trace("Trying to open TCP connection to %s", inet_ntoa(radio->network.address.sin_addr));
 
     tmp=socket(AF_INET, SOCK_STREAM, 0);
     if (tmp < 0) {

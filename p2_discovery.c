@@ -44,10 +44,10 @@ static struct sockaddr_in interface_netmask={0};
 #define DISCOVERY_PORT 1024
 static int discovery_socket;
 
-void new_discover(struct ifaddrs* iface);
+void p2_discover(struct ifaddrs* iface);
 
 static GThread *discover_thread_id;
-gpointer new_discover_receive_thread(gpointer data);
+gpointer p2_discover_receive_thread(gpointer data);
 
 void print_device(int i) {
     fprintf(stderr,"discovery: found protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
@@ -55,17 +55,17 @@ void print_device(int i) {
         discovered[i].device,
         discovered[i].software_version,
         discovered[i].status,
-        inet_ntoa(discovered[i].info.network.address.sin_addr),
-        discovered[i].info.network.mac_address[0],
-        discovered[i].info.network.mac_address[1],
-        discovered[i].info.network.mac_address[2],
-        discovered[i].info.network.mac_address[3],
-        discovered[i].info.network.mac_address[4],
-        discovered[i].info.network.mac_address[5],
-        discovered[i].info.network.interface_name);
+        inet_ntoa(discovered[i].network.address.sin_addr),
+        discovered[i].network.mac_address[0],
+        discovered[i].network.mac_address[1],
+        discovered[i].network.mac_address[2],
+        discovered[i].network.mac_address[3],
+        discovered[i].network.mac_address[4],
+        discovered[i].network.mac_address[5],
+        discovered[i].network.interface_name);
 }
 
-void new_discovery() {
+void p2_discovery() {
     struct ifaddrs *addrs,*ifa;
     getifaddrs(&addrs);
     ifa = addrs;
@@ -75,7 +75,7 @@ void new_discovery() {
           if(ifa->ifa_addr->sa_family == AF_INET &&
             (ifa->ifa_flags&IFF_UP)==IFF_UP &&
             (ifa->ifa_flags&IFF_RUNNING)==IFF_RUNNING) {
-		new_discover(ifa);
+		p2_discover(ifa);
           }
         }
         ifa = ifa->ifa_next;
@@ -83,7 +83,7 @@ void new_discovery() {
     freeifaddrs(addrs);
 
     
-    fprintf(stderr, "new_discovery found %d devices\n",devices);
+    fprintf(stderr, "p2_discovery found %d devices\n",devices);
     
     int i;
     for(i=0;i<devices;i++) {
@@ -91,7 +91,7 @@ void new_discovery() {
     }
 }
 
-void new_discover(struct ifaddrs* iface) {
+void p2_discover(struct ifaddrs* iface) {
     int rc;
     struct sockaddr_in *sa;
     struct sockaddr_in *mask;
@@ -99,12 +99,12 @@ void new_discover(struct ifaddrs* iface) {
     char net_mask[16];
 
     strcpy(interface_name,iface->ifa_name);
-    fprintf(stderr,"new_discover: looking for HPSDR devices on %s\n",interface_name);
+    fprintf(stderr,"p2_discover: looking for HPSDR devices on %s\n",interface_name);
 
     // send a broadcast to locate metis boards on the network
     discovery_socket=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
     if(discovery_socket<0) {
-        perror("new_discover: create socket failed for discovery_socket\n");
+        perror("p2_discover: create socket failed for discovery_socket\n");
         exit(-1);
     }
 
@@ -122,20 +122,20 @@ void new_discover(struct ifaddrs* iface) {
     interface_addr.sin_addr.s_addr = sa->sin_addr.s_addr;
     interface_addr.sin_port = htons(0);
     if(bind(discovery_socket,(struct sockaddr*)&interface_addr,sizeof(interface_addr))<0) {
-        perror("new_discover: bind socket failed for discovery_socket\n");
+        perror("p2_discover: bind socket failed for discovery_socket\n");
         exit(-1);
     }
 
     strcpy(addr,inet_ntoa(sa->sin_addr));
     strcpy(net_mask,inet_ntoa(mask->sin_addr));
 
-    fprintf(stderr,"new_discover: bound to %s %s %s\n",interface_name,addr,net_mask);
+    fprintf(stderr,"p2_discover: bound to %s %s %s\n",interface_name,addr,net_mask);
 
     // allow broadcast on the socket
     int on=1;
     rc=setsockopt(discovery_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
     if(rc != 0) {
-        fprintf(stderr,"new_discover: cannot set SO_BROADCAST: rc=%d\n", rc);
+        fprintf(stderr,"p2_discover: cannot set SO_BROADCAST: rc=%d\n", rc);
         exit(-1);
     }
 
@@ -146,10 +146,10 @@ void new_discover(struct ifaddrs* iface) {
     to_addr.sin_addr.s_addr=htonl(INADDR_BROADCAST);
 
     // start a receive thread to collect discovery response packets
-    discover_thread_id = g_thread_new( "new discover receive", new_discover_receive_thread, NULL);
+    discover_thread_id = g_thread_new( "new discover receive", p2_discover_receive_thread, NULL);
     if( ! discover_thread_id )
     {
-        fprintf(stderr,"g_thread_new failed on new_discover_receive_thread\n");
+        fprintf(stderr,"g_thread_new failed on p2_discover_receive_thread\n");
         exit( -1 );
     }
     fprintf(stderr,"new_disovery: thread_id=%p\n",discover_thread_id);
@@ -168,7 +168,7 @@ void new_discover(struct ifaddrs* iface) {
     }
 
     if(sendto(discovery_socket,buffer,60,0,(struct sockaddr*)&to_addr,sizeof(to_addr))<0) {
-        perror("new_discover: sendto socket failed for discovery_socket\n");
+        perror("p2_discover: sendto socket failed for discovery_socket\n");
         return;
     }
 
@@ -177,11 +177,11 @@ void new_discover(struct ifaddrs* iface) {
 
     close(discovery_socket);
 
-    fprintf(stderr,"new_discover: exiting discover for %s\n",iface->ifa_name);
+    fprintf(stderr,"p2_discover: exiting discover for %s\n",iface->ifa_name);
 }
 
-//void* new_discover_receive_thread(void* arg) {
-gpointer new_discover_receive_thread(gpointer data) {
+//void* p2_discover_receive_thread(void* arg) {
+gpointer p2_discover_receive_thread(gpointer data) {
     struct sockaddr_in addr;
     socklen_t len;
     unsigned char buffer[2048];
@@ -199,11 +199,11 @@ gpointer new_discover_receive_thread(gpointer data) {
     while(1) {
         bytes_read=recvfrom(discovery_socket,buffer,sizeof(buffer),0,(struct sockaddr*)&addr,&len);
         if(bytes_read<0) {
-            fprintf(stderr,"new_discover: bytes read %d\n", bytes_read);
-            perror("new_discover: recvfrom socket failed for discover_receive_thread");
+            fprintf(stderr,"p2_discover: bytes read %d\n", bytes_read);
+            perror("p2_discover: recvfrom socket failed for discover_receive_thread");
             break;
         }
-        fprintf(stderr,"new_discover: received %d bytes\n",bytes_read);
+        fprintf(stderr,"p2_discover: received %d bytes\n",bytes_read);
         if(bytes_read==1444) {
             if(devices>0) {
                 break;
@@ -265,29 +265,29 @@ gpointer new_discover_receive_thread(gpointer data) {
                             break;
                     }
                     for(i=0;i<6;i++) {
-                        discovered[devices].info.network.mac_address[i]=buffer[i+5];
+                        discovered[devices].network.mac_address[i]=buffer[i+5];
                     }
-                    memcpy((void*)&discovered[devices].info.network.address,(void*)&addr,sizeof(addr));
-                    discovered[devices].info.network.address_length=sizeof(addr);
-                    memcpy((void*)&discovered[devices].info.network.interface_address,(void*)&interface_addr,sizeof(interface_addr));
-                    memcpy((void*)&discovered[devices].info.network.interface_netmask,(void*)&interface_netmask,sizeof(interface_netmask));
-                    discovered[devices].info.network.interface_length=sizeof(interface_addr);
-                    strcpy(discovered[devices].info.network.interface_name,interface_name);
+                    memcpy((void*)&discovered[devices].network.address,(void*)&addr,sizeof(addr));
+                    discovered[devices].network.address_length=sizeof(addr);
+                    memcpy((void*)&discovered[devices].network.interface_address,(void*)&interface_addr,sizeof(interface_addr));
+                    memcpy((void*)&discovered[devices].network.interface_netmask,(void*)&interface_netmask,sizeof(interface_netmask));
+                    discovered[devices].network.interface_length=sizeof(interface_addr);
+                    strcpy(discovered[devices].network.interface_name,interface_name);
                     discovered[devices].supported_receivers=2;
-                    fprintf(stderr,"new_discover: found %d protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
+                    fprintf(stderr,"p2_discover: found %d protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 
                             devices,
                             discovered[devices].protocol,
                             discovered[devices].device,
                             discovered[devices].software_version,
                             discovered[devices].status,
-                            inet_ntoa(discovered[devices].info.network.address.sin_addr),
-                            discovered[devices].info.network.mac_address[0],
-                            discovered[devices].info.network.mac_address[1],
-                            discovered[devices].info.network.mac_address[2],
-                            discovered[devices].info.network.mac_address[3],
-                            discovered[devices].info.network.mac_address[4],
-                            discovered[devices].info.network.mac_address[5],
-                            discovered[devices].info.network.interface_name);
+                            inet_ntoa(discovered[devices].network.address.sin_addr),
+                            discovered[devices].network.mac_address[0],
+                            discovered[devices].network.mac_address[1],
+                            discovered[devices].network.mac_address[2],
+                            discovered[devices].network.mac_address[3],
+                            discovered[devices].network.mac_address[4],
+                            discovered[devices].network.mac_address[5],
+                            discovered[devices].network.interface_name);
                             discovered[devices].frequency_min=frequency_min;
                             discovered[devices].frequency_max=frequency_max;
                     devices++;
@@ -296,7 +296,7 @@ gpointer new_discover_receive_thread(gpointer data) {
         }
         }
     }
-    fprintf(stderr,"new_discover: exiting new_discover_receive_thread\n");
+    fprintf(stderr,"p2_discover: exiting p2_discover_receive_thread\n");
     g_thread_exit(NULL);
     return NULL;
 }

@@ -13,7 +13,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
 #
-GPIO_INCLUDE=GPIO
+# GPIO_INCLUDE=GPIO
 
 # uncomment if level control (power output) is software based
 # LEVEL_CTRL=SW_LEVEL_CTRL
@@ -183,7 +183,7 @@ COMPILE=$(CC) $(CFLAGS) $(OPTIONS) $(INCLUDES)
 
 PROGRAM=pihpsdr
 
-SRC = $(filter-out hpsdrsim.c mac_midi.c midi2.c midi_menu.c ps_menu.c server_menu.c soundio.c ozyio.c newhpsdrsim.c beep.c alsa_midi.c iambic.c  pulseaudio.c frequency.c audio.c client_server.c freqent_menu.c general_menu.c gpio_mraa.c, $(wildcard *.c))
+SRC = $(filter-out hpsdrsim.c mac_midi.c midi2.c midi_menu.c ps_menu.c server_menu.c soundio.c ozyio.c newhpsdrsim.c beep.c alsa_midi.c iambic.c  pulseaudio.c frequency.c audio.c client_server.c freqent_menu.c general_menu.c gpio_mraa.c hpsdr_discovery.c, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
 OBJS = $(SRC:.c=.o)
 

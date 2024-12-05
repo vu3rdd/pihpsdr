@@ -900,28 +900,28 @@ void start_radio() {
         sprintf(version, "v%d.%d)", radio->software_version / 10,
                 radio->software_version % 10);
         sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-                radio->info.network.mac_address[0],
-                radio->info.network.mac_address[1],
-                radio->info.network.mac_address[2],
-                radio->info.network.mac_address[3],
-                radio->info.network.mac_address[4],
-                radio->info.network.mac_address[5]);
-        sprintf(ip, "%s", inet_ntoa(radio->info.network.address.sin_addr));
-        sprintf(iface, "%s", radio->info.network.interface_name);
+                radio->network.mac_address[0],
+                radio->network.mac_address[1],
+                radio->network.mac_address[2],
+                radio->network.mac_address[3],
+                radio->network.mac_address[4],
+                radio->network.mac_address[5]);
+        sprintf(ip, "%s", inet_ntoa(radio->network.address.sin_addr));
+        sprintf(iface, "%s", radio->network.interface_name);
         break;
     case NEW_PROTOCOL:
         strcpy(p, "Protocol 2");
         sprintf(version, "v%d.%d)", radio->software_version / 10,
                 radio->software_version % 10);
         sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-                radio->info.network.mac_address[0],
-                radio->info.network.mac_address[1],
-                radio->info.network.mac_address[2],
-                radio->info.network.mac_address[3],
-                radio->info.network.mac_address[4],
-                radio->info.network.mac_address[5]);
-        sprintf(ip, "%s", inet_ntoa(radio->info.network.address.sin_addr));
-        sprintf(iface, "%s", radio->info.network.interface_name);
+                radio->network.mac_address[0],
+                radio->network.mac_address[1],
+                radio->network.mac_address[2],
+                radio->network.mac_address[3],
+                radio->network.mac_address[4],
+                radio->network.mac_address[5]);
+        sprintf(ip, "%s", inet_ntoa(radio->network.address.sin_addr));
+        sprintf(iface, "%s", radio->network.interface_name);
         break;
     }
 
@@ -961,12 +961,12 @@ void start_radio() {
 #endif
         default:
             sprintf(property_path, "%02X-%02X-%02X-%02X-%02X-%02X.props",
-                    radio->info.network.mac_address[0],
-                    radio->info.network.mac_address[1],
-                    radio->info.network.mac_address[2],
-                    radio->info.network.mac_address[3],
-                    radio->info.network.mac_address[4],
-                    radio->info.network.mac_address[5]);
+                    radio->network.mac_address[0],
+                    radio->network.mac_address[1],
+                    radio->network.mac_address[2],
+                    radio->network.mac_address[3],
+                    radio->network.mac_address[4],
+                    radio->network.mac_address[5]);
             break;
         }
         break;

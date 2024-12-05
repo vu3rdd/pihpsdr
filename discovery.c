@@ -19,7 +19,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <math.h>
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,8 +37,7 @@
 #endif
 
 #include "discovered.h"
-#include "old_discovery.h"
-#include "new_discovery.h"
+#include "p1_discovery.h"
 #include "main.h"
 #include "radio.h"
 #ifdef USBOZY
@@ -54,11 +53,11 @@
 #ifdef CLIENT_SERVER
 #include "client_server.h"
 #endif
-#include "property.h"
 #include "log.h"
 
 static GtkWidget *discovery_dialog;
 static DISCOVERED *d;
+
 
 GtkWidget *tcpaddr;
 #define IPADDR_LEN 20
@@ -260,58 +259,58 @@ static gboolean connect_cb (GtkWidget *widget, GdkEventButton *event, gpointer d
 }
 #endif
 
-void discovery() {
-//fprintf(stderr,"discovery\n");
+void discovery(void) {
+    //fprintf(stderr,"discovery\n");
+    protocols_restore_state();
 
-  protocols_restore_state();
+    selected_device=0;
+    devices=0;
 
-  selected_device=0;
-  devices=0;
-
-  // Try to locate IP addr
-  FILE *fp=fopen("ip.addr","r");
-  if (fp) {
-    fgets(ipaddr_tcp, IPADDR_LEN,fp);
-    fclose(fp);
-    ipaddr_tcp[IPADDR_LEN-1]=0;
-    // remove possible trailing newline char in ipaddr_tcp
-    int len=strnlen(ipaddr_tcp,IPADDR_LEN);
-    while (--len >= 0) {
-	if (ipaddr_tcp[len] != '\n')
-	    break;
-	ipaddr_tcp[len]=0;
+    // Try to locate IP addr
+    FILE *fp = fopen("ip.addr","r");
+    if (fp) {
+	fgets(ipaddr_tcp, IPADDR_LEN,fp);
+	fclose(fp);
+	ipaddr_tcp[IPADDR_LEN-1]=0;
+	// remove possible trailing newline char in ipaddr_tcp
+	int len = strnlen(ipaddr_tcp,IPADDR_LEN);
+	while (--len >= 0) {
+	    if (ipaddr_tcp[len] != '\n')
+		break;
+	    ipaddr_tcp[len]=0;
+	}
     }
-  }
+
 #ifdef USBOZY
 //
 // first: look on USB for an Ozy
 //
-  log_trace("looking for USB based OZY devices");
+    log_trace("looking for USB based OZY devices");
 
-  if (ozy_discover() != 0)
-  {
-    discovered[devices].protocol = ORIGINAL_PROTOCOL;
-    discovered[devices].device = DEVICE_OZY;
-    discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
-    discovered[devices].status = STATE_AVAILABLE;
-    strcpy(discovered[devices].name,"Ozy on USB");
+    if (ozy_discover() != 0)
+    {
+	discovered[devices].protocol = ORIGINAL_PROTOCOL;
+	discovered[devices].device = DEVICE_OZY;
+	discovered[devices].software_version = 10;              // we can't know yet so this isn't a real response
+	discovered[devices].status = STATE_AVAILABLE;
+	strcpy(discovered[devices].name,"Ozy on USB");
 
-    strcpy(discovered[devices].info.network.interface_name,"USB");
-    devices++;
-  }
+	strcpy(discovered[devices].info.network.interface_name,"USB");
+	devices++;
+    }
 #endif
 
-  if(enable_protocol_1) {
-    status_text("Protocol 1 ... Discovering Devices");
-    old_discovery();
-  }
+    if(enable_protocol_1) {
+	status_text("Protocol 1 ... Discovering Devices");
+	p1_discovery();
+    }
 
-  /* if(enable_protocol_2) { */
-  /*   status_text("Protocol 2 ... Discovering Devices"); */
-  /*   new_discovery(); */
-  /* } */
+    /* if(enable_protocol_2) { */
+    /*   status_text("Protocol 2 ... Discovering Devices"); */
+    /*   new_discovery(); */
+    /* } */
 
-  status_text("Discovery");
+    status_text("Discovery");
   
     log_info("discovery: found %d devices", devices);
     gdk_window_set_cursor(gtk_widget_get_window(top_window),gdk_cursor_new(GDK_ARROW));
@@ -366,14 +365,14 @@ void discovery() {
                             d->name,
                             d->protocol==ORIGINAL_PROTOCOL?"Protocol 1":"Protocol 2",
                             version,
-                            inet_ntoa(d->info.network.address.sin_addr),
-                            d->info.network.mac_address[0],
-                            d->info.network.mac_address[1],
-                            d->info.network.mac_address[2],
-                            d->info.network.mac_address[3],
-                            d->info.network.mac_address[4],
-                            d->info.network.mac_address[5],
-                            d->info.network.interface_name);
+                            inet_ntoa(d->network.address.sin_addr),
+                            d->network.mac_address[0],
+                            d->network.mac_address[1],
+                            d->network.mac_address[2],
+                            d->network.mac_address[3],
+                            d->network.mac_address[4],
+                            d->network.mac_address[5],
+                            d->network.interface_name);
 #ifdef USBOZY
             }
 #endif
@@ -399,7 +398,7 @@ void discovery() {
         }
 
           // if not on the same subnet then cannot start it
-          if((d->info.network.interface_address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr) != (d->info.network.address.sin_addr.s_addr&d->info.network.interface_netmask.sin_addr.s_addr)) {
+          if((d->network.interface_address.sin_addr.s_addr&d->network.interface_netmask.sin_addr.s_addr) != (d->network.address.sin_addr.s_addr&d->network.interface_netmask.sin_addr.s_addr)) {
             gtk_button_set_label(GTK_BUTTON(start_button),"Subnet!");
             gtk_widget_set_sensitive(start_button, FALSE);
           }

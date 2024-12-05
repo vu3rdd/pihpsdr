@@ -117,17 +117,17 @@ void about_menu(GtkWidget *parent) {
       } else {
 #endif
         
-        strcpy(addr,inet_ntoa(radio->info.network.address.sin_addr));
-        strcpy(interface_addr,inet_ntoa(radio->info.network.interface_address.sin_addr));
+        strcpy(addr,inet_ntoa(radio->network.address.sin_addr));
+        strcpy(interface_addr,inet_ntoa(radio->network.interface_address.sin_addr));
         sprintf(line,"\nDevice Mac Address: %02X:%02X:%02X:%02X:%02X:%02X",
-                radio->info.network.mac_address[0],
-                radio->info.network.mac_address[1],
-                radio->info.network.mac_address[2],
-                radio->info.network.mac_address[3],
-                radio->info.network.mac_address[4],
-                radio->info.network.mac_address[5]);
+                radio->network.mac_address[0],
+                radio->network.mac_address[1],
+                radio->network.mac_address[2],
+                radio->network.mac_address[3],
+                radio->network.mac_address[4],
+                radio->network.mac_address[5]);
         strcat(text,line);
-        sprintf(line,"\nDevice IP Address: %s on %s (%s)",addr,radio->info.network.interface_name,interface_addr);
+        sprintf(line,"\nDevice IP Address: %s on %s (%s)",addr,radio->network.interface_name,interface_addr);
         strcat(text,line);
 
 #ifdef USBOZY
