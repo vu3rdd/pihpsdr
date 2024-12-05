@@ -71,9 +71,7 @@ struct _DISCOVERED {
     double frequency_max;
     struct network {
         unsigned char mac_address[6];
-        // int address_length;
         struct sockaddr_in address;
-        int interface_length;
         struct sockaddr_in interface_address;
         struct sockaddr_in interface_netmask;
         char interface_name[64];

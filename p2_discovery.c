@@ -268,10 +268,8 @@ gpointer p2_discover_receive_thread(gpointer data) {
                         discovered[devices].network.mac_address[i]=buffer[i+5];
                     }
                     memcpy((void*)&discovered[devices].network.address,(void*)&addr,sizeof(addr));
-                    discovered[devices].network.address_length=sizeof(addr);
                     memcpy((void*)&discovered[devices].network.interface_address,(void*)&interface_addr,sizeof(interface_addr));
                     memcpy((void*)&discovered[devices].network.interface_netmask,(void*)&interface_netmask,sizeof(interface_netmask));
-                    discovered[devices].network.interface_length=sizeof(interface_addr);
                     strcpy(discovered[devices].network.interface_name,interface_name);
                     discovered[devices].supported_receivers=2;
                     fprintf(stderr,"p2_discover: found %d protocol=%d device=%d software_version=%d status=%d address=%s (%02X:%02X:%02X:%02X:%02X:%02X) on %s\n", 

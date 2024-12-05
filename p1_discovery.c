@@ -248,12 +248,10 @@ static void discover(struct ifaddrs *iface) {
             //
             memcpy((void *)&discovered[rc].network.address,
                    (void *)&to_addr, sizeof(to_addr));
-            // discovered[rc].network.address_length = sizeof(to_addr);
             memcpy((void *)&discovered[rc].network.interface_address,
                    (void *)&to_addr, sizeof(to_addr));
             memcpy((void *)&discovered[rc].network.interface_netmask,
                    (void *)&to_addr, sizeof(to_addr));
-            discovered[rc].network.interface_length = sizeof(to_addr);
             strcpy(discovered[rc].network.interface_name, "TCP");
             discovered[rc].use_tcp = 1;
         }
@@ -369,8 +367,6 @@ static gpointer discover_receive_thread(gpointer data) {
                     discovered[devices].status = status;
                     memcpy((void *)&discovered[devices].network.address,
                            (void *)&addr, sizeof(addr));
-                    //discovered[devices].network.address_length =
-                    //    sizeof(addr);
                     memcpy((void *)&discovered[devices]
                                .network.interface_address,
                            (void *)&interface_addr, sizeof(interface_addr));
@@ -378,8 +374,6 @@ static gpointer discover_receive_thread(gpointer data) {
                                .network.interface_netmask,
                            (void *)&interface_netmask,
                            sizeof(interface_netmask));
-                    discovered[devices].network.interface_length =
-                        sizeof(interface_addr);
                     strcpy(discovered[devices].network.interface_name,
                            interface_name);
                     discovered[devices].use_tcp = 0;
