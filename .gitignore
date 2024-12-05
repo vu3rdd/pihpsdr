@@ -2,3 +2,4 @@
 pihpsdr
 .vscode
 rust/*
+.cache/*
