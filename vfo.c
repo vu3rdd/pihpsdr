@@ -1201,11 +1201,13 @@ void vfo_update(void) {
         /*     cairo_show_text(cr, "."); */
         /* } */
         cairo_set_source_rgb(cr, GREEN_R, GREEN_G, GREEN_B);
+
+        // make the last 2 or 3 digits of vfo smaller
+	cairo_set_font_size(cr, 30);
         cairo_show_text(cr, vfo_texts[2]);
 
         cairo_select_font_face(cr, "Cantarell", CAIRO_FONT_SLANT_NORMAL,
                                CAIRO_FONT_WEIGHT_BOLD);
-
         // free the memory
         free(vfo_texts[0]);
         free(vfo_texts[1]);
