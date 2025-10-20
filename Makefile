@@ -13,7 +13,7 @@ GIT_VERSION := $(shell git describe --abbrev=0 --tags --always)
 #    CONTROLLER2_V1 single encoders with MCP23017 switches
 #    CONTROLLER2_V2 dual encoders with MCP23017 switches
 #
-GPIO_INCLUDE=GPIO
+# GPIO_INCLUDE=GPIO
 
 # uncomment if level control (power output) is software based
 # LEVEL_CTRL=SW_LEVEL_CTRL
